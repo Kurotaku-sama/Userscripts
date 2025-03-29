@@ -62,7 +62,7 @@ This repository serves as an index for all my public userscripts. The actual scr
 - **Please read the individual script READMEs first.**<br>
   Most common questions, features, and usage details are already explained there.
 - **For bug reports or issues**, contact me directly on **Discord (Kurotaku)**.<br>
-  Please describe the problem clearly and include steps to reproduce it.
+  Please describe the problem clearly and include steps to reproduce it.<br>
   *Do not send random friend requests — just send your message directly with all necessary information.*
 - **Feature requests and suggestions are welcome.**<br>
   If you have ideas for improvements, feel free to contact me.
