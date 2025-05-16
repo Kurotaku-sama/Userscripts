@@ -42,7 +42,7 @@ These are integrated directly into the site for quick access:
 ![Interface buttons](buttons_gicl.png)<br>
 *Buttons in give.club*
 
-![Interface buttons](gisu.png)<br>
+![Interface buttons](buttons_gisu.png)<br>
 *Buttons in giveaway.su*
 
 ---
