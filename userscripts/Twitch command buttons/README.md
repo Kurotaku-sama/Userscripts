@@ -92,8 +92,13 @@ Additional options to improve usability and automation:
 - **Hide Power-Ups in Store**
   Hides the Bit-based “Power-Ups” in the Twitch channel store interface.
 
+- **Twitch Store bulk purchase** *(only for HitSquadGodFather)*
+  Adds a quantity selector and a "Bulk Purchase"   button to the Twitch Channel Points reward store. Allows purchasing rewards multiple times automatically (useful for rewards where multiple entries increase your chances, for example in Gleam giveaways).<br>
+![Twitch Store Bulk Purchase](twitch_store_bulk_purchase.png)
+
 - **Show approx stream restart timer** *(only for HitSquadGodFather)*
-  Displays an estimated countdown until the next stream restart (based on typical voucher reset behavior).
+  Displays an estimated countdown until the next stream restart (based on typical voucher reset behavior).<br>
+![Restart Timer](restart_timer.png)
 
 - **Prevent Shadowban**
   Randomizes the casing of your commands (e.g., `!PoInTs`) to reduce the risk of Twitch auto-filtering your messages.
