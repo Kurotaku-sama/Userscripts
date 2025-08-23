@@ -2,7 +2,7 @@
 // @name            StreamElements improvements
 // @name:de         StreamElements Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.7.4
+// @version         1.7.5
 // @description     A script for some improvements for StreamElements
 // @description:de  Ein Skript für einige Verbesserungen für StreamElements
 // @author          Kurotaku
