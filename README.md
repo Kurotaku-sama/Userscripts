@@ -41,8 +41,8 @@ This repository serves as an index for all my public userscripts. The actual scr
 - **YouTube hitsquadgodfather command buttons**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/YouTube%20hitsquadgodfather%20command%20buttons/README.md)
   [![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://gist.github.com/Kurotaku-sama/2f22a38c553d5403a97271edaa601b8f/raw/YouTube%2520hitsquadgodfather%2520command%2520buttons.user.js)
-- **Streamlabs HitsquadGodfather improvements**<br>
-  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Streamlabs%20HitsquadGodfather%20improvements/README.md)
+- **Streamlabs HitSquadGodFather improvements**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Streamlabs_HitSquadGodFather_improvements/README.md)
   [![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://gist.github.com/Kurotaku-sama/8060c7ef62397e817761f400c74499c7/raw/Streamlabs%2520HitsquadGodfather%2520improvements.user.js)
 - **🇩🇪 fernsehserien.de episode names as textarea**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/fernsehserien.de%20episode%20names%20as%20textarea/README.md)
@@ -55,7 +55,7 @@ This repository serves as an index for all my public userscripts. The actual scr
 🟣 Maintained – Actively maintained and updated<br>
 🟠 Obsolete – No longer needed but still functional<br>
 🔴 Deprecated – Outdated, may not work, no further development<br>
-&nbsp;🇩🇪 German - The Script is made for a German site so the Readme is in German
+&nbsp;🇩🇪 German - Script is made for a German site so the Readme is in German
 ---
 
 ## Support & Feedback
