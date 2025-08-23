@@ -7,8 +7,8 @@
 // @license      CC BY-NC-SA 4.0
 // @match        https://www.twitch.tv/*
 // @icon         https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png
-// @updateURL    https://github.com/Kurotaku-sama/Userscripts/raw/main/Twitch%20Channel%20Points%20Bonus%20Collector/script.user.js
-// @downloadURL  https://github.com/Kurotaku-sama/Userscripts/raw/main/Twitch%20Channel%20Points%20Bonus%20Collector/script.user.js
+// @updateURL    https://github.com/Kurotaku-sama/Userscripts/raw/main/Twitch_Channel_Points_Bonus_Collector/script.user.js
+// @downloadURL  https://github.com/Kurotaku-sama/Userscripts/raw/main/Twitch_Channel_Points_Bonus_Collector/script.user.js
 // @require      https://gist.github.com/Kurotaku-sama/1a7dcb227ce3d7a1b596afe725c0052a/raw/kuros_library.js
 // @require      https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant        GM_registerMenuCommand
