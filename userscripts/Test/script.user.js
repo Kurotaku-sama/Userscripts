@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Testscript
 // @namespace    https://kurotaku.de
-// @version      1.1
+// @version      1.1.1
 // @description  Testscript
 // @author       Kurotaku
 // @license      CC BY-NC-SA 4.0
