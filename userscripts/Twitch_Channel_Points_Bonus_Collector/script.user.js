@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twitch Channel Points Bonus Collector
 // @namespace    https://kurotaku.de
-// @version      0.9.1
+// @version      1.0
 // @description  Automatically collects Twitch channel points bonuses
 // @author       Kurotaku
 // @license      CC BY-NC-SA 4.0
