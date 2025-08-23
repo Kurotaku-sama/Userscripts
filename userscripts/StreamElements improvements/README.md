@@ -31,12 +31,14 @@ This userscript improves the functionality of StreamElements store pages by addi
 ### Sorting
 
 - **StreamElements default Sorting**<br>
-  Set the store's default sorting to: Newest, Subscriber only, Cost, or leave it as-is.
+  ~~Set the store's default sorting to: Newest, Subscriber only, Cost, or leave it as-is.~~<br>
+  Removed due to changes on their frontend
+
 - **Sort by price (ascending/descending)**<br>
   Adds price-based sorting that can override the default.
 
 #### Note regarding the Sorting:
-- If *"StreamElements default Sorting"* is not "Default", it takes precedence over ascending/descending.
+- ~~If *"StreamElements default Sorting"* is not "Default", it takes precedence over ascending/descending.~~
 - "Ascending" dominates over "Descending".
 - If "Cost" and "Ascending" are selected, it will work.
 - If either checkbox is enabled, normal sorting may not work!
