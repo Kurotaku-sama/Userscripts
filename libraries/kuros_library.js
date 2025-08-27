@@ -1,3 +1,6 @@
+// Override print() so I can use print() instaed console.log() like in Python
+window.print = (...args) => console.log(...args)
+
 if (typeof GM_registerMenuCommand === "function") {
     GM_registerMenuCommand('About', () => {
         Swal.fire({
@@ -6,10 +9,9 @@ if (typeof GM_registerMenuCommand === "function") {
                 <strong>Version: ${GM_info.script.version}</strong><br>
                 <strong>Author: Kurotaku</strong><br>
                 <strong>Homepage:</strong> <a href="https://kurotaku.de" target="_blank">kurotaku.de</a><br><br>
-                <strong>Check out my other Userscripts:</strong><br>
-                <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank">GitHub Overview</a> |
-                <a href="https://gist.github.com/Kurotaku-sama" target="_blank">Gist Github</a><br><br>
-                If you encounter any issues, feel free to DM me on Discord: <b>Kurotaku</b>
+                <strong>Check out my other Userscripts and please leave a star if you like my work:</strong><br>
+                <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank">GitHub</a><br><br>
+                If you encounter any issues, feel free to DM me on Discord: <b>Kurotaku</b><br>
                 ${ko_fi}
                 `,
             theme: "dark",
@@ -22,31 +24,6 @@ function sort_alphabetically(text) {
     return text.split('\n').sort().join('\n');
 }
 
-function random_number(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function get_random_int() {
-    return Math.floor(Math.random() * (10000000 - 0) + 0);
-}
-
-function random_string(length, characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
-    let result = '';
-    const characters_length = characters.length;
-    let counter = 0;
-    while (counter < length) {
-        result += characters.charAt(Math.floor(Math.random() * characters_length));
-        counter += 1;
-    }
-    return result;
-}
-
-function randomize_case(text) {
-    return text.split('').map(function(letter) {
-        return Math.random() < 0.5 ? letter.toUpperCase() : letter.toLowerCase();
-    }).join('');
-}
-
 function trim_spaces(text) {
     let lines = text.split("\n");
     let temp = [];
@@ -54,18 +31,6 @@ function trim_spaces(text) {
         temp.push(item.trim());
     });
     return temp.join("\n");
-}
-
-function sleep(milliseconds) {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
-
-function sleep_s(seconds) {
-    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
-}
-
-function sleep_m(minutes) {
-    return new Promise(resolve => setTimeout(resolve, minutes * 1000 * 60));
 }
 
 function download_table_as_csv(id) {
@@ -126,6 +91,52 @@ function wait_for_gm_config() {
     });
 }
 
+// --------------------------
+// Randomizer
+// --------------------------
+function random_number(min = 0, max = Number.MAX_SAFE_INTEGER) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function random_string(length, characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
+    let result = '';
+    const characters_length = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * characters_length));
+        counter += 1;
+    }
+    return result;
+}
+
+function randomize_case(text) {
+    return text.split('').map(function(letter) {
+        return Math.random() < 0.5 ? letter.toUpperCase() : letter.toLowerCase();
+    }).join('');
+}
+
+// --------------------------
+// Sleep functions
+// --------------------------
+function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+function sleep_s(seconds) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
+
+function sleep_m(minutes) {
+    return new Promise(resolve => setTimeout(resolve, minutes * 1000 * 60));
+}
+
+function sleep_h(minutes) {
+    return new Promise(resolve => setTimeout(resolve, minutes * 1000 * 60 * 60));
+}
+
+// --------------------------
+// Element observer
+// --------------------------
 function wait_for_element(selector) {
     return new Promise(resolve => {
         const node = document.querySelector(selector);
@@ -260,3 +271,168 @@ const ko_fi = `
   }
 </style>
 `;
+
+// --------------------------
+// GM_config shadow container with styling
+// --------------------------
+function create_configuration_container() {
+    const style = `
+        :host {
+            /* Main colors */
+            --main-bg-color: #2e2e2e; /* dark gray background for container */
+            --main-border-color: magenta; /* border for container and inputs */
+            --main-accent-color: magenta; /* for checkboxes and buttons */
+            --text-color: #ffffff; /* general text color */
+            --section-bg-color: #1f1f1f; /* darker for section headers */
+            --gap-size: 10px; /* spacing between buttons and reset */
+
+            /* Input colors */
+            --input-text-color: #ffffff;
+            --input-bg-color: transparent;
+            --input-border-color: var(--main-border-color);
+
+            /* Textarea colors */
+            --textarea-text-color: #ffffff;
+            --textarea-bg-color: transparent;
+            --textarea-border-color: var(--main-border-color);
+
+            /* Checkbox colors */
+            --checkbox-bg-color: var(--main-bg-color);
+            --checkbox-border-color: var(--main-border-color);
+            --checkbox-accent-color: var(--main-accent-color);
+        }
+
+        :host > div {
+            padding: 20px !important;
+            height: auto !important;
+            max-height: 600px !important;
+            max-width: 500px !important;
+            background-color: var(--main-bg-color) !important;
+            border: 2px solid var(--main-border-color) !important;
+            color: var(--text-color) !important;
+            font-size: 15px;
+        }
+
+        /* Header */
+        div[id$="_header"] {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        /* Inputs and textareas */
+        textarea,
+        input[type="text"] {
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--input-border-color);
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+            color: var(--input-text-color);
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+            color: var(--textarea-text-color);
+            background-color: var(--textarea-bg-color);
+            border: 1px solid var(--textarea-border-color);
+        }
+
+        /* Checkboxes */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--checkbox-border-color);
+            background-color: var(--checkbox-bg-color);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            margin: 0 10px 0 0;
+            vertical-align: text-bottom;
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            width: 6px;
+            height: 10px;
+            border-bottom: solid var(--checkbox-accent-color);
+            border-right: solid var(--checkbox-accent-color);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            box-sizing: border-box;
+        }
+
+        /* Section headers */
+        .section_header {
+            background-color: var(--section-bg-color);
+            font-weight: bold;
+            text-align: center;
+            padding: 5px 0;
+            border-top: 3px solid var(--main-accent-color);
+            border-bottom: 3px solid var(--main-accent-color);
+            margin: 10px 0;
+            color: var(--text-color);
+        }
+
+        /* Config variables */
+        .config_var {
+            margin: 10px 0 5px;
+        }
+
+        /* Buttons holder */
+        div[id$="_buttons_holder"] {
+            display: flex;
+            justify-content: center;
+            gap: var(--gap-size);
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Save/Close buttons */
+        input[type="button"] {
+            display: block !important;
+            margin: auto !important;
+        }
+
+        .saveclose_buttons,
+        input[type="button"],
+        [id$="_resetLink"] {
+            display: inline-block;
+            background-color: var(--main-accent-color);
+            color: var(--text-color);
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-bottom: var(--gap-size);
+        }
+    `;
+    // Create host element for Shadow DOM
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+
+    // Attach shadow root in 'open' mode
+    const shadow_root = host.attachShadow({mode: "open"});
+
+    // Create container for GM_config inside the shadow root
+    const container = document.createElement("div");
+    container.style.display = "none";  // Display none bcs otherwise the container is at the bottom of the page displayed on page load
+    shadow_root.appendChild(container);
+
+    // Inject styles directly into the Shadow DOM
+    const style_tag = document.createElement("style");
+    style_tag.textContent = style;
+    shadow_root.appendChild(style_tag);
+
+    return container;
+}
