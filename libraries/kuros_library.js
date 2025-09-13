@@ -15,7 +15,7 @@ if (typeof GM_registerMenuCommand === "function") {
                 ${ko_fi}
                 `,
             theme: "dark",
-            backdrop: false
+            backdrop: true,
         });
     });
 }
@@ -137,45 +137,46 @@ function sleep_h(minutes) {
 // --------------------------
 // Element observer
 // --------------------------
-function wait_for_element(selector) {
+function wait_for_element(selector, container = document.documentElement) {
     return new Promise(resolve => {
-        const node = document.querySelector(selector);
-        if (node) return resolve(node);
+        const node = container.querySelector(selector)
+        if (node) return resolve(node)
 
         const observer = new MutationObserver(() => {
-            const el = document.querySelector(selector);
+            const el = container.querySelector(selector)
             if (el) {
-                observer.disconnect();
-                resolve(el);
+                observer.disconnect()
+                resolve(el)
             }
-        });
+        })
 
-        observer.observe(document.body, {
+        observer.observe(container, {
             childList: true,
             subtree: true
-        });
-    });
+        })
+    })
 }
 
-function wait_for_element_to_disappear(selector) {
+function wait_for_element_to_disappear(selector, container = document.documentElement) {
     return new Promise(resolve => {
-        const node = document.querySelector(selector);
-        if (!node) return resolve();
+        const node = container.querySelector(selector)
+        if (!node) return resolve()
 
         const observer = new MutationObserver(() => {
-            const el = document.querySelector(selector);
+            const el = container.querySelector(selector)
             if (!el) {
-                observer.disconnect();
-                resolve();
+                observer.disconnect()
+                resolve()
             }
-        });
+        })
 
-        observer.observe(document.body, {
+        observer.observe(container, {
             childList: true,
             subtree: true
-        });
-    });
+        })
+    })
 }
+
 
 const ko_fi = `
 <a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="kofi-button">
@@ -405,6 +406,7 @@ function create_configuration_container() {
         .saveclose_buttons,
         input[type="button"],
         [id$="_resetLink"] {
+            font-size: 15px;
             display: inline-block;
             background-color: var(--main-accent-color);
             color: var(--text-color);
