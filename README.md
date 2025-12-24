@@ -8,7 +8,7 @@ This repository serves as an index for all my public userscripts. The actual scr
 
 - **ChatGPT Bulk and Quick Delete**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/ChatGPT_Bulk_and_Quick_Delete/README.md)
-  [![ChatGPT Bulk and Quick Delete](https://img.shields.io/badge/hitsquadgodfather-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js)
+  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js)
 
 - **Twitch Command Buttons**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Twitch_Command_Buttons/README.md)
