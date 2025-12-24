@@ -9,9 +9,9 @@
 // @license         CC BY-NC-SA 4.0
 // @match           https://store.steampowered.com/curators/mycurators*
 // @icon            https://steamcommunity.com/favicon.ico
-// @updateURL       https://gist.github.com/Kurotaku-sama/017f6c568597eeace3a41b42174f0443/raw/Steam%2520unfollow%2520all%2520shown%2520curators.user.js
-// @downloadURL     https://gist.github.com/Kurotaku-sama/017f6c568597eeace3a41b42174f0443/raw/Steam%2520unfollow%2520all%2520shown%2520curators.user.js
-// @require         https://gist.github.com/Kurotaku-sama/1a7dcb227ce3d7a1b596afe725c0052a/raw/kuros_library.js
+// @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js
+// @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
