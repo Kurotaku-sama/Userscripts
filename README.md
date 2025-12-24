@@ -1,7 +1,5 @@
 [![Ko-fi](https://img.shields.io/badge/If%20you%20like%20my%20work%20feel%20free%20to%20support%20me%20on%20Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB&link=https://ko-fi.com/kurotaku1337)](https://ko-fi.com/kurotaku1337)
 
-This repository serves as an index for all my public userscripts. The actual scripts are hosted on [Gist GitHub](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js) rather than in this repository. Here, you will find an overview, documentations and links to each script.
-
 ---
 
 # Userscripts
