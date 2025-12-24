@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name            ChatGPT Bulk and Quick Delete
+// @name            ChatGPT Bulk & Quick Delete
 // @namespace       https://kurotaku.de
 // @version         1.0
 // @description     Easily delete multiple chats in bulk or quickly remove individual chats with Shift + Hover. You can also export a single chat as a TXT file.
