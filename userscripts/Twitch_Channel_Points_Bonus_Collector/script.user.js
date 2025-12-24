@@ -18,6 +18,7 @@
 
 (async function() {
     await init_gm_config();
+    await wait_for_gm_config();
 
     if(GM_config.get("script_enabled")) { // Check if the script is disabled in config
         if (!is_channel_allowed()) {
@@ -31,15 +32,16 @@
 
 async function collect_point_bonus() {
     while(true) {
+        const now = new Date().toLocaleTimeString()
+        print(`[Bonus Collector] Bonus claimed at ${now}!`)
         const bonus_icon = await wait_for_element(".claimable-bonus__icon")
         bonus_icon.click()
-        const now = new Date().toLocaleTimeString()
         print(`[Bonus Collector] Bonus claimed at ${now}!`)
         await sleep_s(10)
     }
 }
 
-async function init_gm_config() {
+function init_gm_config() {
     GM_registerMenuCommand('Settings', () => GM_config.open());
     GM_config.init({
         id: 'configuration_twitch_bonus_collector',
@@ -70,11 +72,10 @@ async function init_gm_config() {
             },
         },
         events: {
-            save: () => { location.reload() },
+            save: () => location.reload(),
         },
         frame: create_configuration_container(),
     });
-    await wait_for_gm_config();
 }
 
 function is_channel_allowed() {
