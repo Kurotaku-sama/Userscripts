@@ -5,15 +5,15 @@
 ### This script is available in three versions, tailored for each specific streamer:
 
 **[HitSquadGodFather](https://www.twitch.tv/hitsquadgodfather)**<br>
-[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
 
  **[Staggerrilla](https://www.twitch.tv/staggerrilla)**<br>
-[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
 
  **[LootNova](https://www.twitch.tv/lootnova)**<br>
 [![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
 
-> ⚠️ **Note:** The LootNova version is no longer maintained. The channel has been flagged as a scam and is no longer supported.
+> ⚠️ **Note:** I do not maintain these scripts anymore as HitSquadGodFather got banned sadly and LootNova became a scam channel.
 
 ---
 
