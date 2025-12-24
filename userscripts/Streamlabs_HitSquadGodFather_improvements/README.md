@@ -1,11 +1,13 @@
-# Streamlabs HitsquadGodfather improvements
+[![Ko-fi](https://img.shields.io/badge/If%20you%20like%20my%20work%20feel%20free%20to%20support%20me%20on%20Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB&link=https://ko-fi.com/kurotaku1337)](https://ko-fi.com/kurotaku1337)
+
+# Streamlabs HitSquadGodFather improvements
 
 ## Info
 
-This script is no longer required for its original purpose, as **HitsquadGodfather is no longer streaming on YouTube**.
+This script is no longer required for its original purpose, as **HitSquadGodFather is no longer streaming on YouTube**.
 However, it may still serve as a reference or toolkit for similar use cases.
 
-[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://gist.github.com/Kurotaku-sama/8060c7ef62397e817761f400c74499c7/raw/Streamlabs%2520HitsquadGodfather%2520improvements.user.js) [![Gist Github](https://img.shields.io/badge/gist-github-orange?style=for-the-badge&logo=github)](https://gist.github.com/Kurotaku-sama/8060c7ef62397e817761f400c74499c7)
+[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
 
 ---
 

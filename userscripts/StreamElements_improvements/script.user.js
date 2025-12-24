@@ -18,6 +18,7 @@
 // @grant           GM_setValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
+// @run-at          document-body
 // ==/UserScript==
 
 
@@ -25,7 +26,7 @@ let sold_out_items = [];
 let subscriber_only_items = [];
 
 (async function() {
-    await init_gm_config(); // Initialize the configuration
+    await init_gm_config();
 
     wait_for_element('.side-bar .usr-stats').then(async () => {
         insert_new_sidebar_container(); // Insert a new sidebar for the custom buttons
@@ -74,42 +75,93 @@ let subscriber_only_items = [];
     });
 })();
 
-function init_gm_config() {
+async function init_gm_config() {
     GM_registerMenuCommand('Settings', () => GM_config.open());
-    GM_config.init(
-        {
-            'id': 'configuration',
-            'title': 'StreamElements improvements',
-            'fields':
-            {
-                'script_enabled': { 'type': 'checkbox', 'default': true, 'label': 'Enable/Disable all improvements' },
-                'items_to_hide': { 'section': ['Hide Items'], 'label': 'Hide items by name<br>(each item name must be written in a new line)', 'type': 'textarea'},
-                'hide_items_from_list_by_default': { 'type': 'checkbox', 'default': true, 'label': 'Hide items by default' },
-                'hide_sold_out_items_by_default': { 'type': 'checkbox', 'default': false, 'label': 'Hide sold out items by default' },
-                'hide_subscriber_items_by_default': { 'type': 'checkbox', 'default': false, 'label': 'Hide subscriber only items by default' },
-                'gray_out_hidden_items': { 'type': 'checkbox', 'default': true, 'section': ['Gray out'], 'label': 'Gray out hidden items' },
-                'gray_out_sold_out_items': { 'type': 'checkbox', 'default': true, 'label': 'Gray out sold out items' },
-                // 'default_sorting': { 'type': 'select', 'default': 'Default', 'options': ['Default', 'Newest first', 'Subscribers only', 'Cost'], 'section': ['Sorting'], 'label': 'StreamElements default Sorting' },  [BROKEN DUE TO STREAMELEMENTS UPDATE]
-                'sort_by_price_ascending': { 'section': ['Sorting'], 'type': 'checkbox', 'default': true, 'label': 'Sort items by price (ascending)' },
-                'sort_by_price_descending': { 'type': 'checkbox', 'default': false, 'label': `Sort items by price (descending)<br>
-                                                                                               <details style="margin-top:10px">
-                                                                                                 <summary>Info: (click me)</summary>
-                                                                                                 <ul>
-                                                                                                     <li>- "Ascending" dominates over "Descending".</li>
-                                                                                                     <li>- If "Cost" and "Ascending" are selected, it will work.</li>
-                                                                                                     <li>- If either checkbox is enabled, normal sorting may not work!</li>
-                                                                                                     <li>- I recommend using the checkboxes for faster sorting!</li>
-                                                                                                 </ul>
-                                                                                              </details>` },
-                'magnifying_glass_buttons': { 'type': 'checkbox', 'default': true, 'section': ['Miscellaneous'], 'label': 'Button in top left corner to search on Steam for this item!' },
-                'hide_item_buttons': { 'type': 'checkbox', 'default': true, 'label': 'Button in top right corner for quick hide<br>(Warning: you still must save in this popup, to keep the changes saved!)' },
+    GM_config.init({
+        id: 'configuration',
+        title: 'StreamElements improvements',
+        fields: {
+            script_enabled: {
+                type: 'checkbox',
+                default: true,
+                label: 'Enable/Disable all improvements',
             },
-            'events': {
-                'init': () => {GM_config.set("items_to_hide", get_prepared_items_to_hide())},
-                'save': () => {location.reload()},
+            items_to_hide: {
+                section: ['Hide Items'],
+                label: 'Hide items by name<br>(each item name must be written in a new line)',
+                type: 'textarea',
             },
-            'frame': document.body.appendChild(document.createElement('div')),
-        });
+            hide_items_from_list_by_default: {
+                type: 'checkbox',
+                default: true,
+                label: 'Hide items by default',
+            },
+            hide_sold_out_items_by_default: {
+                type: 'checkbox',
+                default: false,
+                label: 'Hide sold out items by default',
+            },
+            hide_subscriber_items_by_default: {
+                type: 'checkbox',
+                default: false,
+                label: 'Hide subscriber only items by default',
+            },
+            gray_out_hidden_items: {
+                section: ['Gray out'],
+                type: 'checkbox',
+                default: true,
+                label: 'Gray out hidden items',
+            },
+            gray_out_sold_out_items: {
+                type: 'checkbox',
+                default: true,
+                label: 'Gray out sold out items',
+            },
+            // default_sorting: {
+            //     section: ['Sorting'],
+            //     type: 'select',
+            //     default: 'Default',
+            //     label: 'StreamElements default Sorting',
+            //     options: ['Default', 'Newest first', 'Subscribers only', 'Cost']
+            // },
+            sort_by_price_ascending: {
+                section: ['Sorting'],
+                type: 'checkbox',
+                default: true,
+                label: 'Sort items by price (ascending)',
+            },
+            sort_by_price_descending: {
+                type: 'checkbox',
+                default: false,
+                label: `Sort items by price (descending)<br>
+                    <details style="margin-top:10px">
+                        <summary>Info: (click me)</summary>
+                        <ul>
+                            <li>- "Ascending" dominates over "Descending".</li>
+                            <li>- If "Cost" and "Ascending" are selected, it will work.</li>
+                            <li>- If either checkbox is enabled, normal sorting may not work!</li>
+                        </ul>
+                    </details>`,
+            },
+            magnifying_glass_buttons: {
+                section: ['Miscellaneous'],
+                type: 'checkbox',
+                default: true,
+                label: 'Button in top left corner to search on Steam for this item!',
+            },
+            hide_item_buttons: {
+                type: 'checkbox',
+                default: true,
+                label: 'Button in top right corner for quick hide<br><br>(Warning: you still must save in this popup, to keep the changes saved!)',
+            },
+        },
+        events: {
+            init: () => { GM_config.set("items_to_hide", get_prepared_items_to_hide()) },
+            save: () => { location.reload() },
+        },
+        frame: create_configuration_container(),
+    });
+    await wait_for_gm_config();
 }
 
 function insert_new_sidebar_container() {
@@ -310,7 +362,8 @@ function gray_out_sold_out_items() {
 
 function magnifying_glass_buttons() {
     let items = document.querySelectorAll("user-public-store > :nth-child(3) > div");
-    let magnifying_glass_button = `<div class="magnifying-glass-container"><div class="ico ico-mglass"></div></div>`;
+    let magnifying_glass_button = `<md-icon class="material-icons magnifying-glass-container">search</md-icon>`;
+
     items.forEach((item) => {
         item.insertAdjacentHTML('beforeend', magnifying_glass_button);
         item.querySelector(".magnifying-glass-container").addEventListener("click", search_on_steam, false);
@@ -319,10 +372,6 @@ function magnifying_glass_buttons() {
 
 function search_on_steam(event) {
     let el = event.target;
-
-    // Go up until we hit the magnifying-glass-container
-    while (el && !el.classList.contains("magnifying-glass-container"))
-        el = el.parentNode;
 
     // One more up to reach the full item container
     let item = el?.parentNode;
@@ -346,20 +395,20 @@ function search_on_steam(event) {
         // Fallback: search by title from <h6>
         let title_el = content_block.querySelector("h6");
         let title = title_el?.textContent.trim() || "";
-        window.open(`https://store.steampowered.com/search/?term=${title}`, "_blank");
+        window.open(`https://store.steampowered.com/search/?term=${encodeURIComponent(title)}`, "_blank");
     }
 }
 
 function hide_item_buttons() {
     let items = document.querySelectorAll("user-public-store > :nth-child(3) > div");
-    let eye_button = `<div class="eye-slash-container"><div class="eye slash"><div></div><div></div></div></div>`;
+    let eye_button = `<md-icon class="material-icons eye-container">visibility_off</md-icon>`;
 
     items.forEach((item) => {
         let hidden_items = get_hidden_items_array();
         let title = get_item_title(item);
         if(!hidden_items.includes(title)) {
             item.insertAdjacentHTML('beforeend', eye_button);
-            item.querySelector(".eye-slash-container").addEventListener("click", add_to_hidden, false);
+            item.querySelector(".eye-container").addEventListener("click", add_to_hidden, false);
         }
     });
 }
@@ -367,16 +416,12 @@ function hide_item_buttons() {
 function add_to_hidden(event) {
     let el = event.target;
 
-    // Go up until we hit the magnifying-glass-container
-    while (el && !el.classList.contains("eye-slash-container"))
-        el = el.parentNode;
-
     // One more up to reach the full item container
     let item = el?.parentNode;
     if (!item) return;
 
-    // Remove the eye-slash button if it exists
-    let add_to_hidden_button = item.querySelector(".eye-slash-container");
+    // Remove the eye button if it exists
+    let add_to_hidden_button = item.querySelector(".eye-container");
     if (add_to_hidden_button)
         add_to_hidden_button.remove();
 
@@ -483,57 +528,6 @@ function get_hidden_items_array() {
 }
 
 GM_addStyle(`
-#configuration {
-    padding: 20px !important;
-    max-height: 600px !important;
-    max-width: 500px !important;
-    background: inherit !important;
-    background-color: #020923 !important;
-    color:#fff !important;
-}
-
-#configuration .section_header {
-    margin-bottom: 10px !important;
-}
-
-#configuration input {
-    margin: unset;
-    margin-right: 10px;
-}
-
-#configuration input[type="text"] {
-    display: block;
-}
-
-#configuration textarea {
-    width: 100%;
-    min-height: 100px;
-    resize: vertical;
-    background: inherit;
-    color: inherit;
-}
-
-#configuration select {
-    background: inherit;
-    color: inherit;
-    width: 145px;
-    margin-right: 10px;
-    appearance: none;
-}
-
-#configuration option {
-    background-color: #020923 !important;
-    color:#fff !important;
-}
-
-#configuration_saveBtn,
-#configuration_closeBtn,
-#configuration_resetLink {
-    background: inherit;
-    color: #fff !important;
-}
-
-
 /* Switch */
 .switch {
   position: relative;
@@ -596,118 +590,40 @@ input:checked + .slider:before {
 }
 
 
-/* Eye Slash fixed positioning after update */
+/* Eye fixed positioning after update */
 user-public-store > :nth-child(3) > div {
   position: relative;
 }
 
-/** Eye Slash **/
-.eye-slash-container {
-  position: absolute;
-  right: 0;
-  padding: 10px;
-  height: 40px;
-  width: 40px;
-}
-.eye-slash-container:hover {
-  cursor: pointer;
-}
-.eye{
-  z-index: 0;
-  width:1.25em;
-  height:0.75em;
-  position:absolute;
-  display:inline-block;
-  --background:#aaa;
-  --color:currentColor;
-}
-.eye div{
-  overflow:hidden;
-  height:50%;
-  position:relative;
-  margin-bottom:-1px;
-}
-.eye div:before{
-  content:'';
-  background:currentColor;
-  position:absolute;
-  left:0;
-  right:0;
-  height:300%;
-  border-radius:100%;
-}
-.eye div:last-child:before{
-  bottom:0;
-}
-.eye:before{
-  content:'';
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  width:0.35em;
-  height:0.35em;
-  background:var(--color);
-  border:0.1em solid var(--background);
-  border-radius:100%;
-  z-index:1;
-}
-.eye:after{
-  content:'';
-  position:absolute;
-  top:-0.15em;
-  left:calc(33.333% - 0.15em);
-  transform:rotate(45deg) scaleX(0);
-  transform-origin:left center;
-  width:90%;
-  height:0.1em;
-  background:var(--color);
-  border-top:0.1em solid var(--background);
-  z-index:2;
-  transition:transform 0.25s;
-}
-.eye.slash:after{
-  transform:rotate(45deg) scaleX(1);
-}
-
-
-/**Magnifying glass**/
+.eye-container,
 .magnifying-glass-container {
   position: absolute;
-  padding: 10px;
-  height: 40px;
-  width: 40px;
-}
-.magnifying-glass-container:hover {
+  height: 30px;
+  width: 30px;
+  background-color: rgba(20, 20, 20, 0.3);
+  border-radius: 50%;
+  color: white;
   cursor: pointer;
+  padding: 3px;
+  margin: unset;
 }
-.ico-mglass {
-  position: absolute;
-  display:inline-block;
-  background: transparent;
-  border-radius: 30px;
-  height: 12px;
-  width: 12px;
-  border: 2px solid #fff;
+
+/* Eye */
+.eye-container {
+  right: 5px;
+  top: 5px;
 }
-.ico-mglass:after {
-  content: "";
-  height: 2px;
-  width: 8px;
-  background: #fff;
-  position: absolute;
-  top: 9px;
-  left: 6px;
-  -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
+
+/* Magnifying Glass */
+.magnifying-glass-container {
+  left: 5px;
+  top: 5px;
 }
 
 
-.userpages-wrap {max-width: unset;}
+.userpages-wrap {max-width: unset !important;}
 
-.hide-item,.sold-out-item,.hide-subscriber-item {display: none;}
+.hide-item,.sold-out-item,.hide-subscriber-item {display: none !important;}
 
 .gray-out-item {filter: saturate(0%);}
 
