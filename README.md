@@ -2,7 +2,7 @@
 
 ---
 
-# Userscripts
+# Kurotaku's Userscripts
 
 - **ChatGPT Bulk and Quick Delete**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/ChatGPT_Bulk_and_Quick_Delete)
