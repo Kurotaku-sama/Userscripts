@@ -15,7 +15,7 @@ if (typeof GM_registerMenuCommand === "function") {
                 ${ko_fi}
                 `,
             theme: "dark",
-            backdrop: false
+            backdrop: true,
         });
     });
 }
@@ -137,51 +137,52 @@ function sleep_h(minutes) {
 // --------------------------
 // Element observer
 // --------------------------
-function wait_for_element(selector) {
+function wait_for_element(selector, container = document.documentElement) {
     return new Promise(resolve => {
-        const node = document.querySelector(selector);
-        if (node) return resolve(node);
+        const node = container.querySelector(selector)
+        if (node) return resolve(node)
 
         const observer = new MutationObserver(() => {
-            const el = document.querySelector(selector);
+            const el = container.querySelector(selector)
             if (el) {
-                observer.disconnect();
-                resolve(el);
+                observer.disconnect()
+                resolve(el)
             }
-        });
+        })
 
-        observer.observe(document.body, {
+        observer.observe(container, {
             childList: true,
             subtree: true
-        });
-    });
+        })
+    })
 }
 
-function wait_for_element_to_disappear(selector) {
+function wait_for_element_to_disappear(selector, container = document.documentElement) {
     return new Promise(resolve => {
-        const node = document.querySelector(selector);
-        if (!node) return resolve();
+        const node = container.querySelector(selector)
+        if (!node) return resolve()
 
         const observer = new MutationObserver(() => {
-            const el = document.querySelector(selector);
+            const el = container.querySelector(selector)
             if (!el) {
-                observer.disconnect();
-                resolve();
+                observer.disconnect()
+                resolve()
             }
-        });
+        })
 
-        observer.observe(document.body, {
+        observer.observe(container, {
             childList: true,
             subtree: true
-        });
-    });
+        })
+    })
 }
+
 
 const ko_fi = `
 <a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="kofi-button">
-  <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi cup" class="kofi-icon" />
-  <span class="kofi-text">If you like my work feel free<br>to support me on Ko-fi</span>
-  <div class="kofi-shine"></div>
+    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi cup" class="kofi-icon" />
+    <span class="kofi-text">If you like my work feel free<br>to support me on Ko-fi</span>
+    <div class="kofi-shine"></div>
 </a>
 
 <style>
@@ -278,6 +279,9 @@ const ko_fi = `
 function create_configuration_container() {
     const style = `
         :host {
+            all: initial;
+            font-family: Arial, Roboto, sans-serif;
+
             /* Main colors */
             --main-bg-color: #2e2e2e; /* dark gray background for container */
             --main-border-color: magenta; /* border for container and inputs */
@@ -370,6 +374,16 @@ function create_configuration_container() {
             box-sizing: border-box;
         }
 
+        /* Checkboxes Labels multi-line alignment*/
+        .config_var input[type="checkbox"] {
+            vertical-align: top;
+        }
+
+        .config_var input[type="checkbox"] + label {
+            display: inline-block;
+            max-width: calc(100% - 30px);
+        }
+
         /* Section headers */
         .section_header {
             background-color: var(--section-bg-color);
@@ -405,6 +419,7 @@ function create_configuration_container() {
         .saveclose_buttons,
         input[type="button"],
         [id$="_resetLink"] {
+            font-size: 15px;
             display: inline-block;
             background-color: var(--main-accent-color);
             color: var(--text-color);
@@ -426,7 +441,7 @@ function create_configuration_container() {
 
     // Create container for GM_config inside the shadow root
     const container = document.createElement("div");
-    container.style.display = "none";  // Display none bcs otherwise the container is at the bottom of the page displayed on page load
+    container.style.display = "none";  // Display none because otherwise the container is at the bottom of the page displayed on page load
     shadow_root.appendChild(container);
 
     // Inject styles directly into the Shadow DOM
