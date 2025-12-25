@@ -7,7 +7,7 @@
 This script is no longer required for its original purpose, as **HitSquadGodFather is no longer streaming on YouTube**.
 However, it may still serve as a reference or toolkit for similar use cases.
 
-[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/YouTube_HitSquadGodFather_Command_Buttons/script.user.js)
 
 ---
 

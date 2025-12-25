@@ -4,7 +4,7 @@
 
 > This is a userscript for the German website **[fernsehserien.de](https://www.fernsehserien.de)**, therefore the following text is written in German.
 
-[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/fernsehserien.de_episode_names_as_textarea/script.user.js)
 
 ---
 

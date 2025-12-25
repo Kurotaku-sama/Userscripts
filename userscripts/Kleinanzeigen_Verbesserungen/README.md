@@ -4,7 +4,7 @@
 
 > This is a userscript for the German website **[kleinanzeigen.de](https://www.kleinanzeigen.de)**, therefore the following text is written in German.
 
-[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kleinanzeigen_Verbesserungen/script.user.js)
 
 ---
 
