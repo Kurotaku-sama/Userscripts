@@ -6,7 +6,7 @@
 
 > Some features may no longer work correctly due to changes on the ItzaGud.net website.
 
-[![Install](https://img.shields.io/badge/install-userscript-darkred?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-userscript-darkred?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ItzaGud_improvements/script.user.js)
 
 ---
 

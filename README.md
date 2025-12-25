@@ -10,7 +10,7 @@
 
 - **Twitch Command Buttons**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Twitch_Command_Buttons)
-  [![HitSquadGodFather](https://img.shields.io/badge/hitsquadgodfather-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.user.js)
+  [![HitSquadGodFather](https://img.shields.io/badge/hitsquadgodfather-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js)
   [![Staggerilla](https://img.shields.io/badge/staggerilla-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js)
   [![LootNova](https://img.shields.io/badge/lootnova-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js)
 

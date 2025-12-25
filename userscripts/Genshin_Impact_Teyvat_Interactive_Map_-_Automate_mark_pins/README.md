@@ -2,7 +2,7 @@
 
 # Genshin Impact Teyvat Interactive Map - Automate Mark Pins
 
-[![Install](https://img.shields.io/badge/install-Userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/FOLDER/script.user.js)
+[![Install](https://img.shields.io/badge/install-Userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins/script.user.js)
 
 ---
 

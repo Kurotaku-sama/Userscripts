@@ -2,7 +2,7 @@
 
 # Highlight and Filter Searchengine Results
 
-[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_results/script.user.js) [![GitHub](https://img.shields.io/badge/github-purple?style=for-the-badge&logo=github)](https://github.com/Kurotaku-sama/Userscripts/tree/main/userscripts/Highlight_and_Filter_Searchengine_results)
+[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_results/script.user.js)
 
 ---
 
