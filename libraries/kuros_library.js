@@ -79,15 +79,15 @@ async function animate_number_counter(element, start, end, duration = 1000) {
     await sleep(duration);
 }
 
-// This function is to wait for the GM Config to avoid Chromium based error
+// Waits for GM_config to be defined before proceeding, preventing errors if GM_config isn't ready yet
 function wait_for_gm_config() {
     return new Promise(resolve => {
-        const checkInterval = setInterval(() => {
-            if (typeof GM_config !== "undefined" && GM_config.get) {
-                clearInterval(checkInterval);
+        const check_interval = setInterval(() => {
+            if (typeof GM_config !== "undefined") {
+                clearInterval(check_interval);
                 resolve();
             }
-        }, 100);
+        }, 50);
     });
 }
 
