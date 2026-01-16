@@ -4,7 +4,7 @@
 
 ### This script is no longer maintained and considered deprecated
 
-> Some features may no longer work correctly due to changes on the ItzaGud.net website.
+> Website got replaced with the Itzagud.com site, this script no long works!
 
 [![Install](https://img.shields.io/badge/install-userscript-darkred?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ItzaGud_improvements/script.user.js)
 
