@@ -109,23 +109,7 @@ staggerrilla; true; 30
 somekickstreamer; true; 20; kick
 sometrovostreamer; true; 25; trovo
 multistreamer; true; 15; twitch|trovo`,
-                label: `
-                <details style="margin-top:10px">
-                    <summary>How to use: (click me)</summary>
-                    <ul>
-                        <li>Format: <code>streamername; true/false; time_in_minutes; [optional: sites]</code></li>
-                        <li>Example: <code>hitsquadgodfather; true; 30</code></li>
-                        <li>Example with site restriction: <code>somekickstreamer; true; 20; kick</code></li>
-                        <li>Multiple sites: <code>multistreamer; true; 15; twitch|trovo</code></li>
-                        <li>Supported sites: <b>twitch</b>, <b>kick</b>, <b>trovo</b></li>
-                        <li>If you don't use the site value, the setting applies to <b>all</b> supported sites.</li>
-                        <li>One streamer per line</li>
-                        <li>"true" = autoreload enabled, "false" = disabled</li>
-                        <li>Time is given in minutes before reload</li>
-                        <li>Site restriction: use <code>|</code> to separate multiple sites (e.g. <code>kick|trovo</code>)</li>
-                    </ul>
-                </details>
-                `,
+                label: get_summary_html(),
             },
         },
         events: {
@@ -134,6 +118,25 @@ multistreamer; true; 15; twitch|trovo`,
         frame: create_configuration_container(),
     });
     await wait_for_gm_config();
+}
+
+function get_summary_html() {
+    return `
+<details style="margin-top:10px">
+    <summary>How to use: (click me)</summary>
+    <ul>
+        <li>Format: <code>streamername; true/false; time_in_minutes; [optional: sites]</code></li>
+        <li>Example: <code>hitsquadgodfather; true; 30</code></li>
+        <li>Example with site restriction: <code>somekickstreamer; true; 20; kick</code></li>
+        <li>Multiple sites: <code>multistreamer; true; 15; twitch|trovo</code></li>
+        <li>Supported sites: <b>twitch</b>, <b>kick</b>, <b>trovo</b></li>
+        <li>If you don't use the site value, the setting applies to <b>all</b> supported sites.</li>
+        <li>One streamer per line</li>
+        <li>"true" = autoreload enabled, "false" = disabled</li>
+        <li>Time is given in minutes before reload</li>
+        <li>Site restriction: use <code>|</code> to separate multiple sites (e.g. <code>kick|trovo</code>)</li>
+    </ul>
+</details>`;
 }
 
 async function check_and_reload() {
