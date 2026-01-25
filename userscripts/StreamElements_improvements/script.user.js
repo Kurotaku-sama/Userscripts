@@ -154,7 +154,12 @@ async function init_gm_config() {
             hide_item_buttons: {
                 type: 'checkbox',
                 default: true,
-                label: 'Button in top right corner for quick hide<br><br>(Warning: you still must save in this popup, to keep the changes saved!)',
+                label: 'Button in top right corner for quick hide',
+            },
+            save_warning: {
+                type: 'hidden',
+                label: 'Warning: you still must save in this popup to keep changes saved!',
+                save: false,
             },
         },
         events: {
