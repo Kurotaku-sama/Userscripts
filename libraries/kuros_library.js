@@ -278,9 +278,7 @@ const ko_fi = `
 // --------------------------
 
 // Moves data from 'configuration' to new_id and wipes the old entry
-async function migrate_config_id(new_id) {
-    const old_id = 'configuration';
-
+async function migrate_config_id(new_id, old_id = "configuration") {
     // If new config already exists, we don't need to migrate
     const new_exists = await GM.getValue(new_id, null);
     if (new_exists) return;
