@@ -2,7 +2,7 @@
 window.print = (...args) => console.log(...args)
 
 if (typeof GM_registerMenuCommand === "function") {
-    GM_registerMenuCommand('About', () => {
+    GM_registerMenuCommand("About", () => {
         Swal.fire({
             title: GM_info.script.name,
             html: `
@@ -274,6 +274,68 @@ const ko_fi = `
 `;
 
 // --------------------------
+// GM_config Functions
+// --------------------------
+
+// Moves data from 'configuration' to new_id and wipes the old entry
+async function migrate_config_id(new_id) {
+    const old_id = 'configuration';
+
+    // If new config already exists, we don't need to migrate
+    const new_exists = await GM.getValue(new_id, null);
+    if (new_exists) return;
+
+    const old_raw = await GM.getValue(old_id, null);
+    if (!old_raw) return;
+
+    try {
+        // Move data and wipe old id immediately
+        await GM.setValue(new_id, old_raw);
+        await GM.deleteValue(old_id);
+        print(`[GM_config Migration] Data successfully moved from ${old_id} to ${new_id}.`);
+    } catch (e) {
+        print(`[GM_config Migration] Error during move: ${e}`);
+    }
+}
+
+// Removes keys from storage that are not defined in the current GM_config.init
+// Not required but in some cases it could be needed
+// To call this method correctly put it underneath: await wait_for_gm_config();
+// await cleanup_gm_config(config_id);
+async function cleanup_gm_config(config_id, config_obj) {
+    // Safety check for GM_config instance
+    if (!config_obj || !config_obj.fields) {
+        print(`[Cleanup] Aborted: GM_config fields not found.`);
+        return;
+    }
+
+    const stored_raw = await GM.getValue(config_id, null);
+    if (!stored_raw) return;
+
+    try {
+        const stored_data = JSON.parse(stored_raw);
+        const active_keys = Object.keys(config_obj.fields);
+        let cleaned_data = {};
+        let has_changed = false;
+
+        for (const key in stored_data) {
+            // Only keep if the key is actually defined in the current script version
+            if (active_keys.includes(key))
+                cleaned_data[key] = stored_data[key];
+            else {
+                has_changed = true;
+                print(`[Cleanup] Removing obsolete field: ${key}`);
+            }
+        }
+
+        if (has_changed)
+            await GM.setValue(config_id, JSON.stringify(cleaned_data));
+    } catch (e) {
+        print(`[Cleanup] Error during cleanup: ${e}`);
+    }
+}
+
+// --------------------------
 // GM_config shadow container with styling
 // --------------------------
 function create_configuration_container() {
@@ -284,8 +346,8 @@ function create_configuration_container() {
 
             /* Main colors */
             --main-bg-color: #2e2e2e; /* dark gray background for container */
-            --main-border-color: magenta; /* border for container and inputs */
-            --main-accent-color: magenta; /* for checkboxes and buttons */
+            --main-border-color: gray; /* border for container and inputs */
+            --main-accent-color: #ffffff; /* for checkboxes and buttons */
             --text-color: #ffffff; /* general text color */
             --section-bg-color: #1f1f1f; /* darker for section headers */
             --gap-size: 10px; /* spacing between buttons and reset */
@@ -304,6 +366,11 @@ function create_configuration_container() {
             --checkbox-bg-color: var(--main-bg-color);
             --checkbox-border-color: var(--main-border-color);
             --checkbox-accent-color: var(--main-accent-color);
+
+            /* Button colors */
+            --button-text-color: #ffffff;
+            --button-bg-color: #1f1f1f;;
+            --button-border-color: #ffffff;
         }
 
         :host > div {
@@ -421,9 +488,9 @@ function create_configuration_container() {
         [id$="_resetLink"] {
             font-size: 15px;
             display: inline-block;
-            background-color: var(--main-accent-color);
-            color: var(--text-color);
-            border: none;
+            color: var(--button-text-color);
+            background-color: var(--button-bg-color);
+            border: solid var(--button-border-color) 1px;
             padding: 5px 12px;
             border-radius: 4px;
             cursor: pointer;

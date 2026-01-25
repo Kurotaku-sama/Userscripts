@@ -22,7 +22,6 @@ let last_active_channel = "";
 
 (async function() {
     await init_gm_config();
-    await wait_for_gm_config();
 
     // Small delay to ensure the DOM is ready for initial check
     await sleep_s(3);
@@ -38,10 +37,12 @@ let last_active_channel = "";
     }
 })();
 
-function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+async function init_gm_config() {
+    const config_id = "configuration_twitch_bonus_collector";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration_twitch_bonus_collector',
+        id: config_id,
         title: 'Twitch Bonus Collector Config',
         fields: {
             script_enabled: {
@@ -73,6 +74,7 @@ function init_gm_config() {
         },
         frame: create_configuration_container(),
     });
+    await wait_for_gm_config();
 }
 
 /**

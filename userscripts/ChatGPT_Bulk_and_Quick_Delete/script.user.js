@@ -42,9 +42,11 @@ let quick_delete_locks = new Set();
 })();
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+    const config_id = "configuration_chatgptbaqd";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'ChatGPT Bulk and Quick Delete',
         fields: {
             script_enabled: {

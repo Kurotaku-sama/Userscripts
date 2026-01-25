@@ -108,9 +108,11 @@
 })();
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+    const config_id = "configuration_yt_hsgf_cmd_btn";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'YouTube HitSquadGodFather Command Buttons',
         fields: {
             script_enabled: {

@@ -31,9 +31,11 @@ let streamelements_store = "staggerrilla";
 })();
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+    const config_id = "configuration_ttv_stagger_cmd_btn";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'Twitch Staggerrilla Command Buttons',
         fields: {
             script_enabled: {

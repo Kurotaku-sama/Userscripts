@@ -122,10 +122,12 @@ switch(true) {
 // --------------------------
 // GM_config initialization
 // --------------------------
-function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+async function init_gm_config() {
+    const config_id = "configuration_hiafisere";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'Highlight and Filter Searchengine Results',
         fields: {
             script_enabled: {

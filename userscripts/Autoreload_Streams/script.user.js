@@ -39,9 +39,11 @@ const STREAM_INDICATORS = {
 })();
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+    const config_id = "configuration_autoreload_streams";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'Autoreload Streams',
         fields: {
             script_enabled: {
