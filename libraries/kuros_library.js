@@ -387,7 +387,7 @@ function create_configuration_container() {
             --main-border-color: gray; /* border for container and inputs */
             --main-accent-color: #ffffff; /* for checkboxes and buttons */
             --text-color: #ffffff; /* general text color */
-            --link-text-color: #ffff00 /* color for links */
+            --link-text-color: #ffff00; /* color for links */
             --section-bg-color: #1f1f1f; /* darker for section headers */
             --gap-size: 10px; /* spacing between buttons and reset */
 
