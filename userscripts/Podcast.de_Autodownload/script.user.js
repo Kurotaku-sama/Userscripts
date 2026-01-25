@@ -387,7 +387,7 @@ GM_addStyle(`
     right: 20px;
     background: #2e2e2e;
     color: #fff;
-    border: 2px solid magenta;
+    border: 2px solid darkgray;
     padding: 10px 15px;
     border-radius: 8px;
     z-index: 9999;
