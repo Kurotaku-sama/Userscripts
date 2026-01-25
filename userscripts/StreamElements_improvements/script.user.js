@@ -135,15 +135,20 @@ async function init_gm_config() {
             sort_by_price_descending: {
                 type: 'checkbox',
                 default: false,
-                label: `Sort items by price (descending)<br>
-                    <details style="margin-top:10px">
-                        <summary>Info: (click me)</summary>
-                        <ul>
-                            <li>- "Ascending" dominates over "Descending".</li>
-                            <li>- If "Cost" and "Ascending" are selected, it will work.</li>
-                            <li>- If either checkbox is enabled, normal sorting may not work!</li>
+                label: 'Sort items by price (descending)',
+            },
+            hint_sorting_info: {
+                type: 'hidden',
+                label: `
+                    <details style="margin-bottom:10px; margin-left: 25px;">
+                        <summary style="cursor:pointer;">Info: Sorting logic (click me)</summary>
+                        <ul style="margin-top:5px;">
+                            <li>"Ascending" dominates over "Descending".</li>
+                            <li>If "Cost" and "Ascending" are selected, it will work.</li>
+                            <li>If either checkbox is enabled, normal sorting may not work!</li>
                         </ul>
                     </details>`,
+                save: false,
             },
             magnifying_glass_buttons: {
                 section: ['Miscellaneous'],
@@ -156,9 +161,9 @@ async function init_gm_config() {
                 default: true,
                 label: 'Button in top right corner for quick hide',
             },
-            save_warning: {
+            hint_save_warning: {
                 type: 'hidden',
-                label: 'Warning: you still must save in this popup to keep changes saved!',
+                label: '<b>Warning: you still must save in this popup to keep changes saved!</b>',
                 save: false,
             },
         },
