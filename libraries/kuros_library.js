@@ -333,6 +333,32 @@ async function cleanup_gm_config(config_id, config_obj) {
     }
 }
 
+async function debug_list_all_configs() {
+    print("--- [DEBUG] Listing all GM Storage Keys ---");
+
+    // Get all keys from the GreaseMonkey/Tampermonkey storage
+    const keys = await GM.listValues();
+
+    if (keys.length === 0) {
+        print("No configurations found in storage.");
+        return;
+    }
+
+    for (const key of keys) {
+        const val = await GM.getValue(key);
+        try {
+            // Try to parse as JSON for better readability in console
+            const parsed = JSON.parse(val);
+            console.log(`Key: %c${key}`, "color: #00ff00; font-weight: bold;", parsed);
+        } catch (e) {
+            // If it's not JSON (like a simple boolean or string), just print it
+            console.log(`Key: %c${key}`, "color: #aaa;", val);
+        }
+    }
+
+    print("--- [DEBUG] End of list ---");
+}
+
 // --------------------------
 // GM_config shadow container with styling
 // --------------------------
