@@ -113,16 +113,16 @@ multistreamer; true; 15; twitch|trovo`,
                 <details style="margin-top:10px">
                     <summary>How to use: (click me)</summary>
                     <ul>
-                        <li>- Format: <code>streamername; true/false; time_in_minutes; [optional: sites]</code></li>
-                        <li>- Example: <code>hitsquadgodfather; true; 30</code></li>
-                        <li>- Example with site restriction: <code>somekickstreamer; true; 20; kick</code></li>
-                        <li>- Multiple sites: <code>multistreamer; true; 15; twitch|trovo</code></li>
-                        <li>- Supported sites: <b>twitch</b>, <b>kick</b>, <b>trovo</b></li>
-                        <li>- If you don't use the site value, the setting applies to <b>all</b> supported sites.</li>
-                        <li>- One streamer per line</li>
-                        <li>- "true" = autoreload enabled, "false" = disabled</li>
-                        <li>- Time is given in minutes before reload</li>
-                        <li>- Site restriction: use <code>|</code> to separate multiple sites (e.g. <code>kick|trovo</code>)</li>
+                        <li>Format: <code>streamername; true/false; time_in_minutes; [optional: sites]</code></li>
+                        <li>Example: <code>hitsquadgodfather; true; 30</code></li>
+                        <li>Example with site restriction: <code>somekickstreamer; true; 20; kick</code></li>
+                        <li>Multiple sites: <code>multistreamer; true; 15; twitch|trovo</code></li>
+                        <li>Supported sites: <b>twitch</b>, <b>kick</b>, <b>trovo</b></li>
+                        <li>If you don't use the site value, the setting applies to <b>all</b> supported sites.</li>
+                        <li>One streamer per line</li>
+                        <li>"true" = autoreload enabled, "false" = disabled</li>
+                        <li>Time is given in minutes before reload</li>
+                        <li>Site restriction: use <code>|</code> to separate multiple sites (e.g. <code>kick|trovo</code>)</li>
                     </ul>
                 </details>
                 `,
