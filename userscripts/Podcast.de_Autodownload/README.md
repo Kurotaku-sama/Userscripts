@@ -43,10 +43,10 @@
 - **Download-Verzögerung**: Legen Sie eine Verzögerung vor dem Start des Downloads fest (in Sekunden).
 - **Dateinamen-Template**: Definieren Sie, wie die Dateinamen für die heruntergeladenen Episoden generiert werden.
 
-![Screenshot](config.png)<br>
+![Screenshot](settings.png)<br>
 *Einstellungen*
 
-![Screenshot](config_info.png)<br>
+![Screenshot](settings_info.png)<br>
 *Einstellungen mit geöffneter Infobox*
 
 ![Screenshot](template_tester.png)<br>
