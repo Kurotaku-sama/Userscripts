@@ -84,8 +84,11 @@ let gicl, gisu;
 })();
 
 async function init_gm_config() {
+    const config_id_gicl = "configuration_gicl";
+    const config_id_gisu = "configuration_gisu";
+
     gicl = new GM_config({
-        id: "configuration_gicl",
+        id: config_id_gicl,
         title: "givee.club improvements",
         fields: {
             companion: {
@@ -128,7 +131,7 @@ async function init_gm_config() {
     })
 
     gisu = new GM_config({
-        id: "configuration_gisu",
+        id: config_id_gisu,
         title: "giveaway.su improvements",
         fields: {
             companion: {

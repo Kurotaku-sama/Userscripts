@@ -65,9 +65,11 @@ async function main(second_call = false) {
 }
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Einstellungen', () => GM_config.open());
+    const config_id = "configuration_klever";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Einstellungen", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'Kleinanzeigen Verbesserungen',
         fields: {
             script_enabled: {

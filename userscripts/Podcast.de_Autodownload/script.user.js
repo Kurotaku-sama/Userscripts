@@ -41,9 +41,11 @@
 })();
 
 async function init_gm_config() {
+    const config_id = "configuration_podcastde_autodownload";
+    await migrate_config_id(config_id);
     GM_registerMenuCommand("Einstellungen", () => GM_config.open());
     GM_config.init({
-        id: "configuration",
+        id: config_id,
         title: "Podcast.de Autodownload",
         fields: {
             auto_download_enabled: {

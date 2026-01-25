@@ -75,9 +75,11 @@
 })();
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+    const config_id = "configuration_slabs_hsgf_imp";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'Streamlabs HitSquadGodFather improvements',
         fields: {
             script_enabled: {

@@ -28,7 +28,6 @@ let one_time_missions = []; // List with one time missions
     await init_gm_config();
     insert_gm_config_button(); // Add the button to the filter container to open the configuration menu
 
-
     if(GM_config.get("script_enabled")) {
 
         // Shows instead GudCoinz the $ Value
@@ -50,9 +49,11 @@ let one_time_missions = []; // List with one time missions
 })();
 
 async function init_gm_config() {
-    GM_registerMenuCommand('Settings', () => GM_config.open());
+    const config_id = "configuration_ignetimp";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
-        id: 'configuration',
+        id: config_id,
         title: 'ItzaGud.net improvements config',
         fields: {
             script_enabled: {
