@@ -89,8 +89,8 @@ function get_summary_html() {
 <details>
     <summary>Info: (klick mich)</summary>
     <ul>
-        <li>- Verfügbare Tags: Alle Tags aus den Metadaten, z. B. {album}, {track}, {title}, {artist}, etc.</li>
-        <li>- Separatoren:
+        <li>Verfügbare Tags: Alle Tags aus den Metadaten, z. B. {album}, {track}, {title}, {artist}, etc.</li>
+        <li>Separatoren:
             <ul>
                 <li>{sep_v:"-"} fügt eine beliebige Zeichenkette ein, wenn das <b>vorherige</b> Tag existiert und nicht leer ist.</li>
                 <li>{sep_n:"-"} fügt eine beliebige Zeichenkette ein, wenn das <b>nächste</b> Tag existiert und nicht leer ist.</li>
@@ -98,10 +98,10 @@ function get_summary_html() {
                 <li>{sep_mn:"-"} fügt eine beliebige Zeichenkette ein, wenn <b>irgendein nachfolgendes Tag</b> (bis zum Ende oder nächsten Separator) existiert und nicht leer ist.</li>
             </ul>
         </li>
-        <li>- Beispiel: "{album} {sep_v:'-'} {title} {sep_n:'['}{track}{sep_n:']'}"</li>
-        <li>- Bei Separatoren können " oder ' verwendet werden</li>
-        <li>- Doppelte Leerzeichen werden automatisch entfernt.</li>
-        <li>- Sonderzeichen in Windows werden durch ähnliche ersetzt.</li>
+        <li>Beispiel: "{album} {sep_v:'-'} {title} {sep_n:'['}{track}{sep_n:']'}"</li>
+        <li>Bei Separatoren können " oder ' verwendet werden</li>
+        <li>Doppelte Leerzeichen werden automatisch entfernt.</li>
+        <li>Sonderzeichen in Windows werden durch ähnliche ersetzt.</li>
     </ul>
 </details>`;
 }
