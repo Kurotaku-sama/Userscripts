@@ -42,7 +42,7 @@ let quick_delete_locks = new Set();
 })();
 
 async function init_gm_config() {
-    const config_id = "configuration_chatgptbaqd";
+    const config_id = "configuration_chatgpt_baqd";
     await migrate_config_id(config_id);
     GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
