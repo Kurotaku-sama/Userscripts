@@ -277,20 +277,34 @@ const ko_fi = `
 // GM_config Functions
 // --------------------------
 
-// Moves data from 'configuration' to new_id and wipes the old entry
+/**
+ * Smart migration: If only one key exists in the storage, it migrates that key regardless of its name.
+ * If multiple keys exist, it defaults to the provided old_id (usually 'configuration').
+ * @param {string} new_id - The target configuration ID.
+ * @param {string} old_id - The fallback source ID (defaults to 'configuration').
+ */
 async function migrate_config_id(new_id, old_id = "configuration") {
-    // If new config already exists, we don't need to migrate
+    // If new config already exists, migration is considered done
     const new_exists = await GM.getValue(new_id, null);
     if (new_exists) return;
 
-    const old_raw = await GM.getValue(old_id, null);
+    const all_keys = await GM.listValues();
+    let source_id = old_id;
+
+    // Smart logic: If exactly one key exists and it's not our target, use that one
+    if (all_keys.length === 1 && all_keys[0] !== new_id) {
+        source_id = all_keys[0];
+        print(`[GM_config Migration] Only one key found (${source_id}). Using it as source.`);
+    }
+
+    const old_raw = await GM.getValue(source_id, null);
     if (!old_raw) return;
 
     try {
-        // Move data and wipe old id immediately
+        // Move data and wipe source immediately
         await GM.setValue(new_id, old_raw);
-        await GM.deleteValue(old_id);
-        print(`[GM_config Migration] Data successfully moved from ${old_id} to ${new_id}.`);
+        await GM.deleteValue(source_id);
+        print(`[GM_config Migration] Data successfully moved from ${source_id} to ${new_id}.`);
     } catch (e) {
         print(`[GM_config Migration] Error during move: ${e}`);
     }
@@ -373,6 +387,7 @@ function create_configuration_container() {
             --main-border-color: gray; /* border for container and inputs */
             --main-accent-color: #ffffff; /* for checkboxes and buttons */
             --text-color: #ffffff; /* general text color */
+            --link-text-color: #ffff00 /* color for links */
             --section-bg-color: #1f1f1f; /* darker for section headers */
             --gap-size: 10px; /* spacing between buttons and reset */
 
@@ -393,11 +408,23 @@ function create_configuration_container() {
 
             /* Button colors */
             --button-text-color: #ffffff;
-            --button-bg-color: #1f1f1f;;
+            --button-bg-color: #1f1f1f;
             --button-border-color: #ffffff;
         }
 
-        :host > div {
+        /* Backdrop styling */
+        #custom_backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9998;
+            display: none;
+        }
+
+        :host > div:not(#custom_backdrop) {
             padding: 20px !important;
             height: auto !important;
             max-height: 600px !important;
@@ -406,6 +433,12 @@ function create_configuration_container() {
             border: 2px solid var(--main-border-color) !important;
             color: var(--text-color) !important;
             font-size: 15px;
+            /* Center the panel */
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 9999 !important;
         }
 
         /* Header */
@@ -414,6 +447,12 @@ function create_configuration_container() {
             font-weight: bold;
             text-align: center;
             color: var(--text-color);
+        }
+
+        /* Yellow links inside section holders */
+        .section_header_holder a {
+            color: var(--link-text-color);
+            text-decoration: none;
         }
 
         /* Inputs and textareas */
@@ -523,6 +562,7 @@ function create_configuration_container() {
             margin-bottom: var(--gap-size);
         }
     `;
+
     // Create host element for Shadow DOM
     const host = document.createElement("div");
     document.body.appendChild(host);
@@ -530,15 +570,49 @@ function create_configuration_container() {
     // Attach shadow root in 'open' mode
     const shadow_root = host.attachShadow({mode: "open"});
 
+    // Create backdrop element inside shadow root
+    const backdrop = document.createElement("div");
+    backdrop.id = "custom_backdrop";
+    shadow_root.appendChild(backdrop);
+
     // Create container for GM_config inside the shadow root
     const container = document.createElement("div");
-    container.style.display = "none";  // Display none because otherwise the container is at the bottom of the page displayed on page load
+    container.id = "config_wrapper";
+    container.style.display = "none"; // Hidden by default
     shadow_root.appendChild(container);
 
     // Inject styles directly into the Shadow DOM
     const style_tag = document.createElement("style");
     style_tag.textContent = style;
     shadow_root.appendChild(style_tag);
+
+    // Block page hotkeys while panel is open
+    const block_hotkeys = (e) => e.stopPropagation();
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === "style") {
+                const is_visible = container.style.display !== "none";
+
+                // Toggle backdrop visibility based on container state
+                backdrop.style.display = is_visible ? "block" : "none";
+
+                if (is_visible) {
+                    // Start blocking keyboard events when menu is open
+                    window.addEventListener("keydown", block_hotkeys, true);
+                    window.addEventListener("keyup", block_hotkeys, true);
+                    window.addEventListener("keypress", block_hotkeys, true);
+                } else {
+                    // Stop blocking when menu is closed
+                    window.removeEventListener("keydown", block_hotkeys, true);
+                    window.removeEventListener("keyup", block_hotkeys, true);
+                    window.removeEventListener("keypress", block_hotkeys, true);
+                }
+            }
+        });
+    });
+
+    observer.observe(container, { attributes: true, attributeFilter: ["style"] });
 
     return container;
 }
