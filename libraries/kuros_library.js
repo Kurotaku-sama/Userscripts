@@ -285,10 +285,10 @@ const ko_fi = `
  */
 async function migrate_config_id(new_id, old_id = "configuration") {
     // If new config already exists, migration is considered done
-    const new_exists = await GM.getValue(new_id, null);
+    const new_exists = GM_getValue(new_id, null);
     if (new_exists) return;
 
-    const all_keys = await GM.listValues();
+    const all_keys = GM_listValues();
     let source_id = old_id;
 
     // Smart logic: If exactly one key exists and it's not our target, use that one
@@ -297,13 +297,13 @@ async function migrate_config_id(new_id, old_id = "configuration") {
         print(`[GM_config Migration] Only one key found (${source_id}). Using it as source.`);
     }
 
-    const old_raw = await GM.getValue(source_id, null);
+    const old_raw = GM_getValue(source_id, null);
     if (!old_raw) return;
 
     try {
         // Move data and wipe source immediately
-        await GM.setValue(new_id, old_raw);
-        await GM.deleteValue(source_id);
+        GM_setValue(new_id, old_raw);
+        GM_deleteValue(source_id);
         print(`[GM_config Migration] Data successfully moved from ${source_id} to ${new_id}.`);
     } catch (e) {
         print(`[GM_config Migration] Error during move: ${e}`);
@@ -321,7 +321,7 @@ async function cleanup_gm_config(config_id, config_obj) {
         return;
     }
 
-    const stored_raw = await GM.getValue(config_id, null);
+    const stored_raw = GM_getValue(config_id, null);
     if (!stored_raw) return;
 
     try {
@@ -341,7 +341,7 @@ async function cleanup_gm_config(config_id, config_obj) {
         }
 
         if (has_changed)
-            await GM.setValue(config_id, JSON.stringify(cleaned_data));
+            GM_setValue(config_id, JSON.stringify(cleaned_data));
     } catch (e) {
         print(`[Cleanup] Error during cleanup: ${e}`);
     }
@@ -351,7 +351,7 @@ async function debug_list_all_configs() {
     print("--- [DEBUG] Listing all GM Storage Keys ---");
 
     // Get all keys from the GreaseMonkey/Tampermonkey storage
-    const keys = await GM.listValues();
+    const keys = GM_listValues();
 
     if (keys.length === 0) {
         print("No configurations found in storage.");
@@ -359,7 +359,7 @@ async function debug_list_all_configs() {
     }
 
     for (const key of keys) {
-        const val = await GM.getValue(key);
+        const val = GM_getValue(key);
         try {
             // Try to parse as JSON for better readability in console
             const parsed = JSON.parse(val);
