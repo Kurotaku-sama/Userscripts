@@ -2,7 +2,7 @@
 // @name            Genshin Impact Teyvat Interactive Map - Automate Mark Pins
 // @name:de         Genshin Impact Teyvat Interactive Map - Automatisches setzen der Markierung
 // @namespace       https://kurotaku.de
-// @version         1.3.1
+// @version         1.3.2
 // @description     Adds an switch, if the switch is enabled and you click on a map marker, the script automatic clicks on the mark pin button
 // @description:de  Fügt einen Schalter hinzu, wenn der Schalter aktiviert ist und Sie auf eine Kartenmarkierung klicken, klickt das Skript automatisch auf den Markierungsknopf
 // @author          Kurotaku
@@ -15,6 +15,8 @@
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // @grant           GM_unregisterMenuCommand

@@ -2,7 +2,7 @@
 // @name            Kleinanzeigen improvements
 // @name:de         Kleinanzeigen Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         2.7.2
+// @version         2.7.3
 // @description     Some improvements for kleinanzeigen.de
 // @description:de  Einige Verbesserungen für kleinanzeigen.de
 // @author          Kurotaku
@@ -16,6 +16,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // @run-at          document-body

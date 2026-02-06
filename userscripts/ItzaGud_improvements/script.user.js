@@ -2,7 +2,7 @@
 // @name            ItzaGud.net improvements
 // @name:de         ItzaGud.net Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         0.7.1
+// @version         0.7.2
 // @description     Some improvements for ItzaGud.net, all of them can be disabled in the config (Topbar | Bottom of mobile navbar)
 // @description:de  Einige Verbesserungen für ItzaGud.net, die alle in der Konfiguration deaktiviert werden können (Topbar | Unten in der Mobilen Navigationsleiste)
 // @author          Kurotaku
@@ -16,6 +16,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // ==/UserScript==

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Podcast.de Autodownload
 // @namespace       https://kurotaku.de
-// @version         1.0.1
+// @version         1.0.2
 // @description     Enables automatic downloading of Podcast.de episodes with user-defined file name templates.
 // @description:de  Ermöglicht das automatische Herunterladen von Podcast.de-Episoden mit benutzerdefinierten Dateinamen-Templates
 // @author          Kurotaku
@@ -16,6 +16,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // @run-at          document-body

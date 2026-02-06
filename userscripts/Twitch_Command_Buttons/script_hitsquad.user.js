@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch hitsquadgodfather command buttons
 // @namespace       https://kurotaku.de
-// @version         2.1.6
+// @version         2.1.7
 // @description     Adds buttons to send commands in the Twitch chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -16,6 +16,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_notification
 // @grant           GM_registerMenuCommand

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube HitSquadGodFather Command Buttons
 // @namespace       https://kurotaku.de
-// @version         1.2.9
+// @version         1.2.10
 // @description     Adds buttons to send commands for the onstream games in the YouTube chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -14,6 +14,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // ==/UserScript==
