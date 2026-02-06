@@ -2,7 +2,7 @@
 // @name            givee.club & giveaway.su improvements
 // @name:de         givee.club & giveaway.su Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.0.2
+// @version         1.0.3
 // @description     A script for some improvements for givee.club & giveaway.su
 // @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
 // @author          Kurotaku
@@ -17,6 +17,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // @run-at          document-body

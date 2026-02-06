@@ -2,7 +2,7 @@
 // @name            Highlight and Filter Searchengine Results
 // @name:de         Hervorheben und Filtern Suchmaschinen Ergebnisse
 // @namespace       https://kurotaku.de
-// @version         1.0
+// @version         1.0.1
 // @description     Highlight certain search results and remove blacklisted domains
 // @description:de  Bestimmte Suchergebnisse hervorheben und Domains aus der Blacklist entfernen
 // @author          Kurotaku
@@ -19,6 +19,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // ==/UserScript==

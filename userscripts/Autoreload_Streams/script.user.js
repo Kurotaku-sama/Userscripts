@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Autoreload Streams
 // @namespace       https://kurotaku.de
-// @version         1.0
+// @version         1.0.1
 // @description     Auto reloads the page after a certain amount of time has passed to prevent stream freezing/crashing
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -17,6 +17,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_registerMenuCommand
 // @run-at          document-body
 // ==/UserScript==

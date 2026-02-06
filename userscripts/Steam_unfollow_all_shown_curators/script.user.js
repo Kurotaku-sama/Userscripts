@@ -2,7 +2,7 @@
 // @name            Steam unfollow all shown curators
 // @name:de         Steam entfolge allen geladenen Kuratoren
 // @namespace       https://kurotaku.de
-// @version         1.1.1
+// @version         1.1.2
 // @description     This script adds two buttons: one scrolls down and loads all curators, the other unfollows all currently shown curators.
 // @description:de  Dieses Skript fügt zwei Buttons hinzu: Einer scrollt nach unten und lädt alle Kuratoren, der andere entfolgt allen derzeit angezeigten Kuratoren.
 // @author          Kurotaku
@@ -16,6 +16,8 @@
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_notification
 // @grant           GM_registerMenuCommand

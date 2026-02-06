@@ -13,6 +13,8 @@
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
 // @grant           GM_unregisterMenuCommand
