@@ -21,7 +21,7 @@ This userscript allows you to download images for items from MyFigureCollection 
 - **Naming (Item ID)**: Includes the MFC Item ID in the filename (e.g., `12345_01.jpg`).
 - **Padding**: Adds leading zeros to filenames (e.g., `01`, `001`) to ensure correct sorting in your local file system.
 
-![Settings](settings.png)
+![Settings](settings.jpg)
 
 ---
 
