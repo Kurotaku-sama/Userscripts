@@ -2,7 +2,7 @@
 // @name            givee.club & giveaway.su improvements
 // @name:de         givee.club & giveaway.su Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.0.1
+// @version         1.0.2
 // @description     A script for some improvements for givee.club & giveaway.su
 // @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
 // @author          Kurotaku
@@ -356,6 +356,10 @@ function format_date_time(time) {
 }
 
 GM_addStyle(`
+#button_toggle_visibility {
+  width: 95px;
+}
+
 .event_countdown {
   text-align: center;
   font-size: 18px;
