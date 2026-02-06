@@ -2,7 +2,7 @@
 // @name            StreamElements improvements
 // @name:de         StreamElements Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.7.5
+// @version         1.7.6
 // @description     A script for some improvements for StreamElements
 // @description:de  Ein Skript für einige Verbesserungen für StreamElements
 // @author          Kurotaku
@@ -59,10 +59,6 @@ let subscriber_only_items = [];
             if(GM_config.get("gray_out_sold_out_items")) // If items should be grayed out that are out of stock
                 gray_out_sold_out_items();
 
-            // if(GM_config.get("default_sorting") !== "Default") // Change the default sorting if its not "Default"
-            //     change_default_sorting();
-
-            // if(GM_config.get("default_sorting") === "Default" && (GM_config.get("sort_by_price_ascending") || GM_config.get("sort_by_price_descending"))) // Sort by price if Default is selected
             if(GM_config.get("sort_by_price_ascending") || GM_config.get("sort_by_price_descending")) // Sort by price if Default is selected
                 sort_by_price();
 
@@ -119,13 +115,6 @@ async function init_gm_config() {
                 default: true,
                 label: 'Gray out sold out items',
             },
-            // default_sorting: {
-            //     section: ['Sorting'],
-            //     type: 'select',
-            //     default: 'Default',
-            //     label: 'StreamElements default Sorting',
-            //     options: ['Default', 'Newest first', 'Subscribers only', 'Cost']
-            // },
             sort_by_price_ascending: {
                 section: ['Sorting'],
                 type: 'checkbox',
@@ -217,50 +206,6 @@ function insert_controls() {
     sidebar.insertAdjacentHTML('beforeend', button_open_redemption_history);
     document.getElementById("redemption_history").addEventListener ("click", show_redemption_history, false);
 }
-
-// function change_default_sorting() {
-//     const sort_method = GM_config.get("default_sorting");
-//     let selector = null;
-//     switch(sort_method) {
-//         case "Default":
-//             break;
-//         case "Newest first":
-//             selector = "#select_option_7";
-//             break;
-//         case "Subscribers only":
-//             selector = "#select_option_8";
-//             break;
-//         case "Cost":
-//             selector = "#select_option_9";
-//             break;
-//         default:
-//             break;
-//     };
-//     if(selector)
-//         wait_for_element(`#select_container_11 ${selector}`).then(async () => {
-//             const dropdown_container = document.querySelector("#select_container_11");
-//             if (!dropdown_container) return;
-
-//             dropdown_container.style.visibility = "hidden"; // Hide the dropdown menu
-//             // Click the selected option
-//             document.querySelector(`#select_container_11 ${selector}`)?.click();
-
-//             // Wait until .md-click-catcher exists and click it until it disappears
-//             await wait_for_element(".md-click-catcher");
-//             let click_catcher;
-//             while ((click_catcher = document.querySelector(".md-click-catcher"))) {
-//                 click_catcher.click();
-//                 await sleep(50);
-//             }
-
-//             await sleep(100); // Short delay for the popup to disappear
-//             // Restore the visibility of the dropdown menu
-//             dropdown_container.style.visibility = "";
-
-//             if(GM_config.get("sort_by_price_ascending") && sort_method === "Cost")
-//                 reverse_store_items();
-//         });
-// }
 
 function reverse_store_items() {
     const list = document.querySelector("user-public-store > :nth-child(3)");
