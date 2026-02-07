@@ -464,6 +464,7 @@ function create_configuration_container() {
             width: 100%;
             box-sizing: border-box;
             margin-top: 5px;
+            outline: none;
             color: var(--input-text-color);
         }
 
@@ -513,6 +514,44 @@ function create_configuration_container() {
             display: inline-block;
             max-width: calc(100% - 30px);
         }
+
+
+        /* Select / Dropdown styling */
+        select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important; /* Das hier ist der Schlüssel! */
+
+            background-color: var(--main-bg-color) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--main-border-color) !important;
+            border-radius: 4px !important;
+            padding: 5px 30px 5px 10px !important;
+            outline: none !important;
+            box-shadow: none !important;
+            width: 100%;
+            margin-top: 5px;
+
+            /* Optional: Prevents the ugly standard arrow design in some browsers */
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg%20xmlns="http://www.w3.org/2000/svg"%20width="12"%20height="12"%20viewBox="0%200%2024%2024" fill="white"><path%20d="M7%2010l5%205%205-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        select:focus {
+            border-color: var(--main-accent-color);
+        }
+
+        select::-moz-focus-inner {
+            border: 0 !important;
+        }
+
+        select option {
+            color: white !important;
+            border: none !important;
+            outline: none !important;
+        }
+
 
         /* Section headers */
         .section_header {
