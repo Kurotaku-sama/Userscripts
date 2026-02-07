@@ -19,7 +19,6 @@
 // @grant           GM_listValues
 // @grant           GM_deleteValue
 // @grant           GM_addStyle
-// @grant           GM_notification
 // @grant           GM_registerMenuCommand
 // @run-at          document-body
 // ==/UserScript==
