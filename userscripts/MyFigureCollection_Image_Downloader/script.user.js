@@ -10,7 +10,7 @@
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/MyFigureCollection_Image_Downloader/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/MyFigureCollection_Image_Downloader/script.user.js
 // @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
-// @require         cdn.jsdelivr.net/npm/sweetalert2@11
+// @require         https://cdn.jsdelivr.net/npm/sweetalert2@11
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_listValues
