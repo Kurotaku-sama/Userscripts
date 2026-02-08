@@ -2,7 +2,11 @@
 
 # StreamElements improvements
 
-[![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js)
+## Info
+
+This script is no longer maintained because the site changed its layout again, and I'm not willing to deal with it anymore as I no longer use the site.
+
+[![Install](https://img.shields.io/badge/install-userscript-darkred?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js)
 
 ---
 

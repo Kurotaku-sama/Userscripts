@@ -24,10 +24,6 @@
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Autoreload_Streams)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js)
 
-- **StreamElements improvements**<br>
-  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/StreamElements_improvements)
-  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js)
-
 - **Highlight and Filter Searchengine Results**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Highlight_and_Filter_Searchengine_Results)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js)
@@ -73,6 +69,10 @@
 - **🇩🇪 fernsehserien.de episode names as textarea**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/fernsehserien.de_episode_names_as_textarea)
   [![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/fernsehserien.de_episode_names_as_textarea/script.user.js)
+
+- **StreamElements improvements**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/StreamElements_improvements)
+  [![Install](https://img.shields.io/badge/install-userscript-darkred?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js)
 
 - **ItzaGud.net improvements**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/ItzaGud_improvements)
