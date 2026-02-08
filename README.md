@@ -8,39 +8,37 @@
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/ChatGPT_Bulk_and_Quick_Delete)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js)
 
-- **Twitch Command Buttons**<br>
-  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Twitch_Command_Buttons)
-  [![HitSquadGodFather](https://img.shields.io/badge/hitsquadgodfather-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js)
-  [![Staggerilla](https://img.shields.io/badge/staggerilla-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js)
-  [![LootNova](https://img.shields.io/badge/lootnova-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js)
+- **Steam Inventory Enhancer**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Steam_Inventory_Enhancer)
+  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js)
+
+- **Steam unfollow all shown curators**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Steam_unfollow_all_shown_curators)
+  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js)
 
 - **Twitch Channel Points Bonus Collector**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Twitch_Channel_Points_Bonus_Collector)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Channel_Points_Bonus_Collector/script.user.js)
 
-- **StreamElements improvements**<br>
-  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/StreamElements_improvements)
-  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js)
-
-- **givee.club & giveaway.su improvements**<br>
-  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/givee.club_&_giveaway.su_improvements)
-  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/givee.club_&_giveaway.su_improvements/script.user.js)
-
 - **Autoreload Streams**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Autoreload_Streams)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js)
+
+- **StreamElements improvements**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/StreamElements_improvements)
+  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js)
 
 - **Highlight and Filter Searchengine Results**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Highlight_and_Filter_Searchengine_Results)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js)
 
+- **givee.club & giveaway.su improvements**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/givee.club_&_giveaway.su_improvements)
+  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/givee.club_&_giveaway.su_improvements/script.user.js)
+
 - **MyFigureCollection Image Downloader**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/MyFigureCollection_Image_Downloader)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/MyFigureCollection_Image_Downloader/script.user.js)
-
-- **Steam unfollow all shown curators**<br>
-  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Steam_unfollow_all_shown_curators)
-  [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js)
 
 - **Genshin Impact Teyvat Interactive Map - Automate Mark Pins**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins)
@@ -57,6 +55,12 @@
 - **z0r Controls**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/z0r_Controls)
   [![Install](https://img.shields.io/badge/install-userscript-purple?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/z0r_Controls/script.user.js)
+
+- **Twitch Command Buttons**<br>
+  [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/Twitch_Command_Buttons)
+  [![HitSquadGodFather](https://img.shields.io/badge/hitsquadgodfather-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js)
+  [![Staggerilla](https://img.shields.io/badge/staggerilla-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js)
+  [![LootNova](https://img.shields.io/badge/lootnova-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js)
 
 - **YouTube HitSquadGodFather Command Buttons**<br>
   [![Readme](https://img.shields.io/badge/view-readme-blue?style=for-the-badge&logo=readme&logoColor=white)](userscripts/YouTube_HitSquadGodFather_Command_Buttons)
