@@ -9,10 +9,10 @@
 // @icon            https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/twitch_command_buttons.js
+// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
+// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/twitch_command_buttons.js.js
 // @require         https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js
-// @require         https://cdn.jsdelivr.net/npm/sweetalert2
+// @require         cdn.jsdelivr.net/npm/sweetalert2@11
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
