@@ -103,10 +103,10 @@ async function init_gm_config() {
                 default: false,
                 label: 'Enable ASF Integration<br>' +
                 '<small style="color: red; display: block; line-height: 1.3; margin-top: 5px;">' +
-                '<b>WARNING:</b> This feature connects to your local ASF IPC interface.<br>' +
-                'Ensure your IPC is secured with a password. Use at your own risk.<br>' +
-                'The author is not responsible for accidental confirmations or account issues.' +
-                '</small>',
+                '<b>WARNING:</b> This feature connects to your ASF IPC interface.<br>' +
+                'Ensure your IPC is secured with a password and you use SSL.<br>' +
+                'The author is not responsible for accidental confirmations or account issues.<br>' +
+                'Use at your own risk!</small>',
             },
             asf_ip: {
                 label: 'IP/Hostname',
@@ -136,7 +136,7 @@ async function init_gm_config() {
                 click: () => window.open("https://raw.githubusercontent.com/Nuklon/Steam-Economy-Enhancer/master/code.user.js", "_blank"),
             },
             install_augmented_steam: {
-                label: "Install Aumented Steam",
+                label: "Install Augmented Steam",
                 type: "button",
                 size: 100,
                 click: () => window.open("https://augmentedsteam.com/", "_blank"),
