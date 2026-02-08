@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Autoreload Streams
 // @namespace       https://kurotaku.de
-// @version         1.0.1
+// @version         1.0.2
 // @description     Auto reloads the page after a certain amount of time has passed to prevent stream freezing/crashing
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -34,10 +34,8 @@ const STREAM_INDICATORS = {
 (async function() {
     await init_gm_config();
 
-    if (GM_config.get("script_enabled")) {
-        await sleep_s(5);  // Delay to make sure page is loaded
-        await check_and_reload();
-    }
+    await sleep_s(5);  // Delay to make sure page is loaded
+    await check_and_reload();
 })();
 
 async function init_gm_config() {
@@ -48,11 +46,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'Autoreload Streams',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             autoreload_twitch_enabled: {
                 section: ['Autoreload Site Configuration'],
                 type: 'checkbox',

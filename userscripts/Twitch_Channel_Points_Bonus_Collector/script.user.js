@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch Channel Points Bonus Collector
 // @namespace       https://kurotaku.de
-// @version         1.1.2
+// @version         1.1.3
 // @description     Automatically collects Twitch channel points bonuses with whitelist and blacklist support
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -43,13 +43,8 @@ async function init_gm_config() {
     GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
         id: config_id,
-        title: 'Twitch Bonus Collector Config',
+        title: 'Twitch Bonus Collector',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             enable_whitelist: {
                 type: 'checkbox',
                 default: false,
@@ -101,25 +96,23 @@ function handle_navigation_change() {
     if (!is_twitch_page || !is_channel_view) return;
 
     // Check script state and filter permissions
-    if (GM_config.get("script_enabled")) {
-        const check = is_channel_allowed();
+    const check = is_channel_allowed();
 
-        // If not allowed, log the specific reason (Whitelist vs Blacklist)
-        if (!check.allowed) {
-            const reason_msg = check.reason === "blacklist" ? "Blacklist" : "Whitelist";
-            print(`[Bonus Collector] Skipped due to ${reason_msg} settings.`);
-            return;
-        }
-
-        // Extract channel name from the title string (e.g., "ChannelName - Twitch")
-        const channel_name = current_title.split(" - ")[0];
-        last_active_channel = channel_name;
-        print(`[Bonus Collector] Started for channel: ${channel_name}`);
-
-        // Create a new AbortController to manage the lifecycle of the async collection loop
-        global_abort_controller = new AbortController();
-        collect_point_bonus(global_abort_controller.signal);
+    // If not allowed, log the specific reason (Whitelist vs Blacklist)
+    if (!check.allowed) {
+        const reason_msg = check.reason === "blacklist" ? "Blacklist" : "Whitelist";
+        print(`[Bonus Collector] Skipped due to ${reason_msg} settings.`);
+        return;
     }
+
+    // Extract channel name from the title string (e.g., "ChannelName - Twitch")
+    const channel_name = current_title.split(" - ")[0];
+    last_active_channel = channel_name;
+    print(`[Bonus Collector] Started for channel: ${channel_name}`);
+
+    // Create a new AbortController to manage the lifecycle of the async collection loop
+    global_abort_controller = new AbortController();
+    collect_point_bonus(global_abort_controller.signal);
 }
 
 function stop_active_collector() {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch LootNova command buttons
 // @namespace       https://kurotaku.de
-// @version         1.1.3
+// @version         1.1.4
 // @description     Adds buttons to send commands in the Twitch chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -40,11 +40,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'Twitch LootNova Command Buttons',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             buttons_general: {
                 section: ['Buttons'],
                 type: 'checkbox',

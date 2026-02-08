@@ -2,7 +2,7 @@
 // @name            Kleinanzeigen improvements
 // @name:de         Kleinanzeigen Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         2.7.3
+// @version         2.7.4
 // @description     Some improvements for kleinanzeigen.de
 // @description:de  Einige Verbesserungen für kleinanzeigen.de
 // @author          Kurotaku
@@ -27,12 +27,10 @@
 (async function () {
     await init_gm_config();
 
-    if (GM_config.get("script_enabled")) {
-        if (window.location.href.includes("p-anzeige-aufgeben"))
-            setup_html_observer();
+    if (window.location.href.includes("p-anzeige-aufgeben"))
+        setup_html_observer();
 
-        main();
-    }
+    main();
 })();
 
 async function main(second_call = false) {
@@ -74,13 +72,8 @@ async function init_gm_config() {
         id: config_id,
         title: 'Kleinanzeigen Verbesserungen',
         fields: {
-            script_enabled: {
-                section: ['Allgemeine Einstellungen'],
-                type: 'checkbox',
-                default: true,
-                label: 'Aktiviere/Deaktiviere alle Verbesserungen',
-            },
             remove_ads: {
+                section: ['Allgemeine Einstellungen'],
                 type: 'checkbox',
                 default: true,
                 label: 'Werbungen verbergen<br>Ersetzt keinen richtigen Adblocker! Benutze zusätzlich: uBlock Origin',

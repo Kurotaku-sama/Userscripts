@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube HitSquadGodFather Command Buttons
 // @namespace       https://kurotaku.de
-// @version         1.2.10
+// @version         1.2.11
 // @description     Adds buttons to send commands for the onstream games in the YouTube chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -117,11 +117,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'YouTube HitSquadGodFather Command Buttons',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             buttons_general: {
                 section: ['Buttons'],
                 type: 'checkbox',

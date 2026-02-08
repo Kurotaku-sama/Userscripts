@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch hitsquadgodfather command buttons
 // @namespace       https://kurotaku.de
-// @version         2.1.7
+// @version         2.1.8
 // @description     Adds buttons to send commands in the Twitch chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -35,13 +35,11 @@ let streamelements_store = "hitsquadgodfather";
     await main();
 
     // Additional functionality for TheGodFather's version of the script
-    if (GM_config.get("script_enabled")) {
-        if (GM_config.get("bulk_purchase_panel") || GM_config.get("clickable_links_in_description"))
-            twitch_store_observer();
+    if (GM_config.get("bulk_purchase_panel") || GM_config.get("clickable_links_in_description"))
+        twitch_store_observer();
 
-        if (GM_config.get("restart_timer"))
-            restart_timer(172800);
-    }
+    if (GM_config.get("restart_timer"))
+        restart_timer(172800);
 })();
 
 async function init_gm_config() {
@@ -52,11 +50,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'Twitch HitSquadGodFather Command Buttons',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             buttons_general: {
                 type: 'checkbox',
                 default: true,

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch staggerrilla command buttons
 // @namespace       https://kurotaku.de
-// @version         2.0.9
+// @version         2.0.10
 // @description     Adds buttons to send commands in the Twitch chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -40,11 +40,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'Twitch Staggerrilla Command Buttons',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             buttons_general: {
                 section: ['Buttons'],
                 type: 'checkbox',
@@ -117,10 +112,7 @@ function generate_button_groups() {
                 <div class="k-buttongroup">
                 ${btngrp_button("bleep", "Bleep")}
                 ${btngrp_button("bloop", "Bloop")}
-                ${btngrp_button("bleep !bloop", "Bleep & Bloop")}
-                ${btngrp_button("champ", "Champ")}
-                ${btngrp_button("heal", "Heal")}
-                ${btngrp_button("join", "Join")}
+                ${btngrp_button("fish", "Fish")}
                 </div>`;
 
     return(buttongroups);
@@ -128,8 +120,8 @@ function generate_button_groups() {
 
 async function generate_voucher_buttons() {
     insert_voucher_buttons(
+        generate_voucher_button("20k Bubbers", "+20k") +
         generate_voucher_button("50k Bubbers", "+50k") +
-        generate_voucher_button("100k Bubbers", "+100k") +
-        generate_voucher_button("500k Bubbers", "+500k")
+        generate_voucher_button("100k Bubbers!", "+100k")
     );
 }

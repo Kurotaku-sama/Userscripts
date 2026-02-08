@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            ChatGPT Bulk & Quick Delete
 // @namespace       https://kurotaku.de
-// @version         1.0.1
+// @version         1.0.2
 // @description     Easily delete multiple chats in bulk or quickly remove individual chats with Shift + Hover. You can also export a single chat as a TXT file.
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -34,13 +34,11 @@ let quick_delete_locks = new Set();
 
     GM_registerMenuCommand("Export current Chat as TXT", export_current_chat_as_txt);
 
-    if (GM_config.get("script_enabled")) {
-        if (GM_config.get("enable_bulk_deletion"))
-            ensure_bulk_delete_panel();
+    if (GM_config.get("enable_bulk_deletion"))
+        ensure_bulk_delete_panel();
 
-        if (GM_config.get("enable_quick_deletion"))
-            init_quick_delete_listeners();
-    }
+    if (GM_config.get("enable_quick_deletion"))
+        init_quick_delete_listeners();
 })();
 
 async function init_gm_config() {
@@ -51,11 +49,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'ChatGPT Bulk and Quick Delete',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the Script',
-            },
             enable_bulk_deletion: {
                 section: ['Deletion Options'],
                 type: 'checkbox',
