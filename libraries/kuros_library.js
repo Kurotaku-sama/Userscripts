@@ -130,8 +130,8 @@ function sleep_m(minutes) {
     return new Promise(resolve => setTimeout(resolve, minutes * 1000 * 60));
 }
 
-function sleep_h(minutes) {
-    return new Promise(resolve => setTimeout(resolve, minutes * 1000 * 60 * 60));
+function sleep_h(hours) {
+    return new Promise(resolve => setTimeout(resolve, hours * 1000 * 60 * 60));
 }
 
 // --------------------------
