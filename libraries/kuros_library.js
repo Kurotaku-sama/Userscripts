@@ -10,7 +10,8 @@ if (typeof GM_registerMenuCommand === "function") {
                 <strong>Author: Kurotaku</strong><br>
                 <strong>Homepage:</strong> <a href="https://kurotaku.de" target="_blank" style="color: #7066e0">kurotaku.de</a><br><br>
                 <strong>Check out my other Userscripts and please leave a star if you like my work:</strong><br>
-                <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank" style="color: #7066e0">GitHub</a><br><br>
+                <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank" style="color: #7066e0">GitHub Repo</a> |
+                <a href="https://kurotaku-sama.github.io/Userscripts/" target="_blank" style="color: #7066e0">GitHub.io</a><br><br>
                 If you encounter any issues, feel free to DM me on Discord: <b>Kurotaku</b><br>
                 ${ko_fi}
                 `,
