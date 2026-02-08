@@ -10,7 +10,7 @@
 
 This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It allows you to manage large quantities of items easily through stacking and unstacking tools, provides a customizable favorites system for faster game navigation, and integrates with ArchiSteamFarm (ASF) for seamless 2FA management.
 
-![Inventory Preview](inventory.png)
+![Inventory Preview](inventory.jpg)
 
 ---
 
@@ -35,7 +35,7 @@ This userscript enhances the Steam inventory experience by adding essential qual
 
 ## Settings
 
-![Settings](settings.png)
+![Settings](settings.jpg)
 
 ---
 
