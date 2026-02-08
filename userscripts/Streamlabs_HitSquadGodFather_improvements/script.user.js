@@ -11,8 +11,8 @@
 // @icon            https://yt3.ggpht.com/0G-q6XBRPcEzUBn9OipycFN53PGuvoIwkmC-VwXYxQVClnU2jjbvcTdJuL87ZDukecU2812l=s88-c-k-c0x00ffffff-no-rj
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Streamlabs_HitSquadGodFather_improvements/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Streamlabs_HitSquadGodFather_improvements/script.user.js
-// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
-// @require         cdn.jsdelivr.net/npm/sweetalert2@11
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
+// @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
