@@ -2,7 +2,7 @@
 // @name            Streamlabs HitSquadGodFather improvements
 // @name:de         Streamlabs HitSquadGodFather verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.1.5
+// @version         1.1.6
 // @description     A script for some improvements for Streamlabs for HitSquadGodFather
 // @description:de  Ein Skript für einige Verbesserungen für Streamlabs für HitSquadGodFather
 // @author          Kurotaku
@@ -30,49 +30,47 @@
         insert_new_sidebar_container(); // Insert a new sidebar for the custom buttons
         insert_gm_config_button(); // Add the button to the filter container to open the configuration menu
 
-        if(GM_config.get("script_enabled")) { // Check if the script is disabled in config
-            // Layout
-            if(GM_config.get("streamelements_store_layout"))
-                streamelements_store_layout();
-            else {
-                if(GM_config.get("hide_twitch_stream"))
-                    hide_twitch_stream();
+        // Layout
+        if(GM_config.get("streamelements_store_layout"))
+            streamelements_store_layout();
+        else {
+            if(GM_config.get("hide_twitch_stream"))
+                hide_twitch_stream();
 
-                if(GM_config.get("hide_social_panels"))
-                    hide_social_panels();
+            if(GM_config.get("hide_social_panels"))
+                hide_social_panels();
 
-                if(GM_config.get("hide_footer"))
-                    hide_footer();
+            if(GM_config.get("hide_footer"))
+                hide_footer();
 
-                if(GM_config.get("use_full_side_width"))
-                    use_full_side_width();
-            }
-
-            for(let i = 0; i < 120; i++) // While the page items are still loading (2 minute limit than abort the functions)
-                if(document.querySelector(".cloudbot-store-item") === null || document.querySelector(".cloudbot-store-item") === 0)
-                    if(i === 120)
-                        return; // Abort
-                    else
-                        await sleep_s(1); // Wait and try again
-
-            insert_controls();
-
-            // Functional
-            if(GM_config.get("hide_items_from_list_by_default"))
-                toggle_hidden_itemlist();
-
-            if(GM_config.get("gray_out_hidden_items")) // If items should be grayed out that are in hidden list
-                gray_out_hidden_items();
-
-            if(GM_config.get("sort_by_price") || GM_config.get("sort_by_price_descending"))
-                sort_by_price();
-
-            if(GM_config.get("magnifying_glass_buttons"))
-                magnifying_glass_buttons();
-
-            if(GM_config.get("hide_item_buttons"))
-                hide_item_buttons();
+            if(GM_config.get("use_full_side_width"))
+                use_full_side_width();
         }
+
+        for(let i = 0; i < 120; i++) // While the page items are still loading (2 minute limit than abort the functions)
+            if(document.querySelector(".cloudbot-store-item") === null || document.querySelector(".cloudbot-store-item") === 0)
+                if(i === 120)
+                    return; // Abort
+                else
+                    await sleep_s(1); // Wait and try again
+
+        insert_controls();
+
+        // Functional
+        if(GM_config.get("hide_items_from_list_by_default"))
+            toggle_hidden_itemlist();
+
+        if(GM_config.get("gray_out_hidden_items")) // If items should be grayed out that are in hidden list
+            gray_out_hidden_items();
+
+        if(GM_config.get("sort_by_price") || GM_config.get("sort_by_price_descending"))
+            sort_by_price();
+
+        if(GM_config.get("magnifying_glass_buttons"))
+            magnifying_glass_buttons();
+
+        if(GM_config.get("hide_item_buttons"))
+            hide_item_buttons();
     });
 })();
 
@@ -84,11 +82,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'Streamlabs HitSquadGodFather improvements',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable all improvements',
-            },
             items_to_hide: {
                 label: 'Hide items by name<br>(each item name must be written in a new line)',
                 type: 'textarea',

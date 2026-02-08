@@ -2,7 +2,7 @@
 // @name            givee.club & giveaway.su improvements
 // @name:de         givee.club & giveaway.su Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.0.3
+// @version         1.0.4
 // @description     A script for some improvements for givee.club & giveaway.su
 // @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
 // @author          Kurotaku
@@ -64,25 +64,23 @@ let gicl, gisu;
 (async function() {
     await init_gm_config();
 
-    if(get_field("script_enabled")) {
-        insert_buttons();
+    insert_buttons();
 
-        if(gicl.get("hide_ads"))
-            hide_ads();
+    if(gicl.get("hide_ads"))
+        hide_ads();
 
-        wait_for_element(DATA.sele_giveaways_container).then(async () => {
-            hide_items();
+    wait_for_element(DATA.sele_giveaways_container).then(async () => {
+        hide_items();
 
-            if(get_field("hide_item_buttons"))
-                hide_item_buttons();
-        });
+        if(get_field("hide_item_buttons"))
+            hide_item_buttons();
+    });
 
-        if(LOC.includes("/event/"))
-            insert_giveaway_draw_time();
+    if(LOC.includes("/event/"))
+        insert_giveaway_draw_time();
 
-        if(LOC.includes("/event/") || LOC.includes("/giveaway/view/"))
-            insert_task_button();
-    }
+    if(LOC.includes("/event/") || LOC.includes("/giveaway/view/"))
+        insert_task_button();
 })();
 
 async function init_gm_config() {
@@ -98,11 +96,6 @@ async function init_gm_config() {
                 size: 100,
                 label: "Install Giveaway Companion (Recommended)",
                 click: () => window.open("https://raw.githubusercontent.com/longnull/GiveawayCompanion/master/GiveawayCompanion.user.js", "_blank"),
-            },
-            script_enabled: {
-                type: "checkbox",
-                default: true,
-                label: "Enable/Disable all improvements",
             },
             hide_ads: {
                 type: "checkbox",
@@ -141,11 +134,6 @@ async function init_gm_config() {
                 size: 100,
                 label: "Install Giveaway Companion (Recommended)",
                 click: () => window.open("https://raw.githubusercontent.com/longnull/GiveawayCompanion/master/GiveawayCompanion.user.js", "_blank"),
-            },
-            script_enabled: {
-                type: "checkbox",
-                default: true,
-                label: "Enable/Disable all improvements",
             },
             hide_item_buttons: {
                 type: "checkbox",

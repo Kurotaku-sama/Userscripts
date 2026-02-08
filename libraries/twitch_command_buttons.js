@@ -1,44 +1,42 @@
 async function main() {
     await init_gm_config();
 
-    if(GM_config.get("script_enabled")) {
-        const custom_css = GM_config.get("custom_css_styles")?.trim();
-        if (custom_css)
-            GM_addStyle(custom_css);
+    const custom_css = GM_config.get("custom_css_styles")?.trim();
+    if (custom_css)
+        GM_addStyle(custom_css);
 
-        if(GM_config.get("hide_powerups"))
-            hide_powerups();
+    if(GM_config.get("hide_powerups"))
+        hide_powerups();
 
-        if(GM_config.get("collect_point_bonus"))
-            collect_point_bonus();
+    if(GM_config.get("collect_point_bonus"))
+        collect_point_bonus();
 
-        wait_for_element(".chat-input").then(async () => {
-            if(GM_config.get("irc"))
-                if(GM_config.get("auth_username") != "" && GM_config.get("auth_oauth") != "")
-                    connect_to_twitch();
-                else
-                    Swal.fire({
-                        title: "Missing IRC Credentials!",
-                        text: "IRC is selected, but your username or OAuth token is missing or invalid. Please update your settings or disable \"Use IRC\".",
-                        icon: "error",
-                        theme: "dark",
-                        backdrop: true,
-                    });
+    wait_for_element(".chat-input").then(async () => {
+        if(GM_config.get("irc"))
+            if(GM_config.get("auth_username") != "" && GM_config.get("auth_oauth") != "")
+                connect_to_twitch();
+            else
+                Swal.fire({
+                    title: "Missing IRC Credentials!",
+                    text: "IRC is selected, but your username or OAuth token is missing or invalid. Please update your settings or disable \"Use IRC\".",
+                    icon: "error",
+                    theme: "dark",
+                    backdrop: true,
+                });
 
-            if(GM_config.get("notifications"))
-                observe_chat_for_username_mentions();
+        if(GM_config.get("notifications"))
+            observe_chat_for_username_mentions();
 
-            wait_for_element(".community-points-summary").then(async () => {
-                if(GM_config.get("voucher_buttons"))
-                    generate_voucher_buttons();
-            });
-
-            if(GM_config.get("show_streamelements_points"))
-                show_streamelements_points();
-
-            insert_command_buttons(generate_button_groups());
+        wait_for_element(".community-points-summary").then(async () => {
+            if(GM_config.get("voucher_buttons"))
+                generate_voucher_buttons();
         });
-    }
+
+        if(GM_config.get("show_streamelements_points"))
+            show_streamelements_points();
+
+        insert_command_buttons(generate_button_groups());
+    });
 }
 
 // ========================

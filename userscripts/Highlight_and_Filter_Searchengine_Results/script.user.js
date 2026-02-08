@@ -2,7 +2,7 @@
 // @name            Highlight and Filter Searchengine Results
 // @name:de         Hervorheben und Filtern Suchmaschinen Ergebnisse
 // @namespace       https://kurotaku.de
-// @version         1.0.1
+// @version         1.0.2
 // @description     Highlight certain search results and remove blacklisted domains
 // @description:de  Bestimmte Suchergebnisse hervorheben und Domains aus der Blacklist entfernen
 // @author          Kurotaku
@@ -81,43 +81,41 @@ switch(true) {
 (async function() {
     await init_gm_config();
 
-    if(GM_config.get("script_enabled")) {
-        // If page is google and searchtype is images, then abort
-        if(DATA.site_key === "google") {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('udm') === '2')
-                return;
-        }
+    // If page is google and searchtype is images, then abort
+    if(DATA.site_key === "google") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('udm') === '2')
+            return;
+    }
 
-        await create_containers();
+    await create_containers();
 
-        if(DATA.site_key === "startpage" && GM_config.get("startpage_sponsorblock"))
-            GM_addStyle(`
-                ${DATA.insertion_container} > .result,
-                #main > .result,
-                #main iframe {
-                    display: none !important;
-                }
-            `);
+    if(DATA.site_key === "startpage" && GM_config.get("startpage_sponsorblock"))
+        GM_addStyle(`
+            ${DATA.insertion_container} > .result,
+            #main > .result,
+            #main iframe {
+                display: none !important;
+            }
+        `);
 
-        // Only grab results if at least one feature is enabled
-        if(GM_config.get("highlight_enabled") || GM_config.get("blacklist_filter_enabled") || GM_config.get("special_sections_filter_enabled")) {
-            add_dynamic_styles();
+    // Only grab results if at least one feature is enabled
+    if(GM_config.get("highlight_enabled") || GM_config.get("blacklist_filter_enabled") || GM_config.get("special_sections_filter_enabled")) {
+        add_dynamic_styles();
 
-            const all_results = await get_resultlist();
+        const all_results = await get_resultlist();
 
-            if(GM_config.get("highlight_enabled"))
-                highlight_results(all_results);
+        if(GM_config.get("highlight_enabled"))
+            highlight_results(all_results);
 
-            if(GM_config.get("blacklist_filter_enabled"))
-                filter_blacklisted(all_results);
+        if(GM_config.get("blacklist_filter_enabled"))
+            filter_blacklisted(all_results);
 
-            if(GM_config.get("special_sections_filter_enabled"))
-                remove_special_sections(all_results);
+        if(GM_config.get("special_sections_filter_enabled"))
+            remove_special_sections(all_results);
 
-            if(GM_config.get("search_tabs_enabled"))
-                filter_search_tabs();
-        }
+        if(GM_config.get("search_tabs_enabled"))
+            filter_search_tabs();
     }
 })();
 
@@ -132,11 +130,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'Highlight and Filter Searchengine Results',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the Script',
-            },
             highlight_enabled: {
                 section: ['Highlight'],
                 type: 'checkbox',

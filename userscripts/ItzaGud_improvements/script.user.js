@@ -2,7 +2,7 @@
 // @name            ItzaGud.net improvements
 // @name:de         ItzaGud.net Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         0.7.2
+// @version         0.7.3
 // @description     Some improvements for ItzaGud.net, all of them can be disabled in the config (Topbar | Bottom of mobile navbar)
 // @description:de  Einige Verbesserungen für ItzaGud.net, die alle in der Konfiguration deaktiviert werden können (Topbar | Unten in der Mobilen Navigationsleiste)
 // @author          Kurotaku
@@ -30,24 +30,21 @@ let one_time_missions = []; // List with one time missions
     await init_gm_config();
     insert_gm_config_button(); // Add the button to the filter container to open the configuration menu
 
-    if(GM_config.get("script_enabled")) {
+    // Shows instead GudCoinz the $ Value
+    if(GM_config.get("enabled_convert_gudcoinz"))
+        convert_gudcoinz();
 
-        // Shows instead GudCoinz the $ Value
-        if(GM_config.get("enabled_convert_gudcoinz"))
-            convert_gudcoinz();
+    // Comments are collapsed by default with a button
+    if(GM_config.get("enabled_collapsible_comments"))
+        collapsible_comments();
 
-        // Comments are collapsed by default with a button
-        if(GM_config.get("enabled_collapsible_comments"))
-            collapsible_comments();
+    // 3 Buttons to do dailys, weekly and one time missions at once
+    if(GM_config.get("enabled_open_all_missions"))
+        open_all_missions();
 
-        // 3 Buttons to do dailys, weekly and one time missions at once
-        if(GM_config.get("enabled_open_all_missions"))
-            open_all_missions();
-
-        // Daily video rewards enable controlls and autoplay
-        if(GM_config.get("enabled_daily_videos_controls_autoplay"))
-            daily_videos_controls_autoplay();
-    }
+    // Daily video rewards enable controlls and autoplay
+    if(GM_config.get("enabled_daily_videos_controls_autoplay"))
+        daily_videos_controls_autoplay();
 })();
 
 async function init_gm_config() {
@@ -56,13 +53,8 @@ async function init_gm_config() {
     GM_registerMenuCommand("Settings", () => GM_config.open());
     GM_config.init({
         id: config_id,
-        title: 'ItzaGud.net improvements config',
+        title: 'ItzaGud.net improvements',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable the script',
-            },
             enabled_convert_gudcoinz: {
                 type: 'checkbox',
                 default: true,

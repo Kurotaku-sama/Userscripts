@@ -2,7 +2,7 @@
 // @name            StreamElements improvements
 // @name:de         StreamElements Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.7.7
+// @version         1.7.8
 // @description     A script for some improvements for StreamElements
 // @description:de  Ein Skript für einige Verbesserungen für StreamElements
 // @author          Kurotaku
@@ -34,42 +34,40 @@ let subscriber_only_items = [];
         insert_new_sidebar_container(); // Insert a new sidebar for the custom buttons
         insert_gm_config_button(); // Add the button to the filter container to open the configuration menu
 
-        if(GM_config.get("script_enabled")) { // Check if the script is disabled in config
-            insert_controls();
+        insert_controls();
 
-            for(let i = 0; i < 120; i++) // While the page items are still loading (2 minute limit than abort the functions)
-                if(document.querySelectorAll("user-public-store > :nth-child(3) > div").length === 0)
-                    if(i === 120)
-                        return; // Abort
-                    else
-                        await sleep_s(1); // Wait and try again
+        for(let i = 0; i < 120; i++) // While the page items are still loading (2 minute limit than abort the functions)
+            if(document.querySelectorAll("user-public-store > :nth-child(3) > div").length === 0)
+                if(i === 120)
+                    return; // Abort
+                else
+                    await sleep_s(1); // Wait and try again
 
-            if(GM_config.get("hide_items_from_list_by_default"))
-                toggle_hidden_itemlist();
+        if(GM_config.get("hide_items_from_list_by_default"))
+            toggle_hidden_itemlist();
 
-            if(GM_config.get("gray_out_hidden_items")) // If items should be grayed out that are in hidden list
-                gray_out_hidden_items();
+        if(GM_config.get("gray_out_hidden_items")) // If items should be grayed out that are in hidden list
+            gray_out_hidden_items();
 
-            check_sold_out_items();
-            if(GM_config.get("hide_sold_out_items_by_default")) // Hide items when out of stock
-                toggle_sold_out_items();
+        check_sold_out_items();
+        if(GM_config.get("hide_sold_out_items_by_default")) // Hide items when out of stock
+            toggle_sold_out_items();
 
-            check_subscriber_only_items();
-            if(GM_config.get("hide_subscriber_items_by_default")) // Hide items when out of stock
-                toggle_subscriber_only_items();
+        check_subscriber_only_items();
+        if(GM_config.get("hide_subscriber_items_by_default")) // Hide items when out of stock
+            toggle_subscriber_only_items();
 
-            if(GM_config.get("gray_out_sold_out_items")) // If items should be grayed out that are out of stock
-                gray_out_sold_out_items();
+        if(GM_config.get("gray_out_sold_out_items")) // If items should be grayed out that are out of stock
+            gray_out_sold_out_items();
 
-            if(GM_config.get("sort_by_price_ascending") || GM_config.get("sort_by_price_descending")) // Sort by price if Default is selected
-                sort_by_price();
+        if(GM_config.get("sort_by_price_ascending") || GM_config.get("sort_by_price_descending")) // Sort by price if Default is selected
+            sort_by_price();
 
-            if(GM_config.get("magnifying_glass_buttons"))
-                magnifying_glass_buttons();
+        if(GM_config.get("magnifying_glass_buttons"))
+            magnifying_glass_buttons();
 
-            if(GM_config.get("hide_item_buttons"))
-                hide_item_buttons();
-        }
+        if(GM_config.get("hide_item_buttons"))
+            hide_item_buttons();
     });
 })();
 
@@ -81,11 +79,6 @@ async function init_gm_config() {
         id: config_id,
         title: 'StreamElements improvements',
         fields: {
-            script_enabled: {
-                type: 'checkbox',
-                default: true,
-                label: 'Enable/Disable all improvements',
-            },
             items_to_hide: {
                 section: ['Hide Items'],
                 label: 'Hide items by name<br>(each item name must be written in a new line)',
