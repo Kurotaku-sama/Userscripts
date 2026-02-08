@@ -8,9 +8,9 @@ if (typeof GM_registerMenuCommand === "function") {
             html: `
                 <strong>Version: ${GM_info.script.version}</strong><br>
                 <strong>Author: Kurotaku</strong><br>
-                <strong>Homepage:</strong> <a href="https://kurotaku.de" target="_blank">kurotaku.de</a><br><br>
+                <strong>Homepage:</strong> <a href="https://kurotaku.de" target="_blank" style="color: #7066e0">kurotaku.de</a><br><br>
                 <strong>Check out my other Userscripts and please leave a star if you like my work:</strong><br>
-                <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank">GitHub</a><br><br>
+                <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank" style="color: #7066e0">GitHub</a><br><br>
                 If you encounter any issues, feel free to DM me on Discord: <b>Kurotaku</b><br>
                 ${ko_fi}
                 `,
