@@ -11,8 +11,8 @@
 // @icon            https://act.hoyolab.com/ys/app/interactive-map/mapicon.png
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins/script.user.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://cdn.jsdelivr.net/npm/sweetalert2
+// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
+// @require         cdn.jsdelivr.net/npm/sweetalert2@11
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_listValues

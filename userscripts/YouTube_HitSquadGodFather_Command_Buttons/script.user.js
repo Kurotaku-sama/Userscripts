@@ -9,8 +9,8 @@
 // @icon            https://www.youtube.com/s/desktop/6ee70b2c/img/favicon_32x32.png
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/YouTube_HitSquadGodFather_Command_Buttons/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/YouTube_HitSquadGodFather_Command_Buttons/script.user.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://cdn.jsdelivr.net/npm/sweetalert2
+// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
+// @require         cdn.jsdelivr.net/npm/sweetalert2@11
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
