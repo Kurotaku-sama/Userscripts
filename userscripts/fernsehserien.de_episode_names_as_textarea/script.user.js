@@ -11,8 +11,8 @@
 // @icon            https://bilder.fernsehserien.de/fernsehserien.de/fs-2021/img/favicon-32x32.png
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/fernsehserien.de_episode_names_as_textarea/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/fernsehserien.de_episode_names_as_textarea/script.user.js
-// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
-// @require         cdn.jsdelivr.net/npm/sweetalert2@11
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
+// @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant           GM_registerMenuCommand
 // @run-at          document-body
 // ==/UserScript==

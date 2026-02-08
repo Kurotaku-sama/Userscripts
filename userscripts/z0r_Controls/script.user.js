@@ -10,8 +10,8 @@
 // @icon            https://www.google.com/s2/favicons?domain=z0r.de
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/z0r_Controls/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/z0r_Controls/script.user.js
-// @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
-// @require         cdn.jsdelivr.net/npm/sweetalert2@11
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
+// @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant           GM_registerMenuCommand
 // @run-at          document-body
 // ==/UserScript==
