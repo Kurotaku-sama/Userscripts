@@ -8,7 +8,7 @@
 
 ## Description
 
-This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It allows you to manage large quantities of items easily through stacking and unstacking tools, provides a customizable favorites system for faster game navigation, and integrates with ArchiSteamFarm (ASF) for seamless 2FA management.
+This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It provides a customizable sidebar for better navigation, powerful mass stacking/unstacking tools, a favorites system, and ASF integration for seamless 2FA management.
 
 ![Inventory Preview](inventory.png)
 
@@ -16,16 +16,20 @@ This userscript enhances the Steam inventory experience by adding essential qual
 
 ## Features
 
+### Customizable Sidebar
+- **Dynamic Layout:** Transform the standard inventory navigation into a flexible sidebar.
+- **Adjustable Rows:** Manually choose between **1 to 4 rows** in the settings to perfectly fit your screen resolution and number of inventories.
+
 ### Item Stacker & Unstacker
 - **Mass Stacking:** Merge all identical items in your inventory with a single click.
 - **Smart Stacking:** Set a maximum stack size limit to organize items into specific quantities.
 - **Unstacking:** Split large stacks of items back into individual units automatically.
 - **Progress Tracking:** Real-time dual progress bar showing current item status and overall completion.
 
-### Inventory Favorites
-- **Pin your Games:** Add a star to your most-used inventories to keep them at the top.
-- **Custom Sorting:** Sort your favorites by Name, Item Amount, or the date they were added.
-- **Clean UI:** Clones the original Steam look for a native feel while providing faster access.
+### Favorites System
+- **Pin your Games:** Add or remove games from your favorites with a single click on the star icon.
+- **Dedicated Section:** Favorited inventories are cloned into a separate, easy-to-access section at the top.
+- **Custom Sorting:** Sort your pinned inventories by Name, Item Amount, or the date they were added.
 
 ### ASF Integration (IPC)
 - **Remote 2FA:** Accept or deny all mobile confirmations directly from the Steam inventory "More" menu.
@@ -41,23 +45,23 @@ This userscript enhances the Steam inventory experience by adding essential qual
 
 ## How it works
 
-1. **Stacking:** The script uses the Steam WebAPI to combine items. It calculates the necessary "Combine" operations and executes them with a delay to prevent rate limits.
-2. **Favorites:** Clicking the star icon saves the AppID to your local storage. The script then clones the original navigation tabs into a new "Favorites" section.
-3. **ASF:** Commands are sent via `GM_xmlhttpRequest` to your ASF IPC address. Ensure IPC is enabled in your ASF global config.
+1. **Sidebar:** The script restructures the inventory navigation tabs into a grid layout based on your row selection.
+2. **Stacking:** Uses the Steam WebAPI to calculate and execute "Combine" operations with built-in delays to prevent rate limits.
+3. **Favorites:** Saves selected AppIDs to local storage and highlights them with a custom star icon.
+4. **ASF:** Sends commands via `GM_xmlhttpRequest` to your ASF IPC interface.
 
 ---
 
 ## Important Security Warnings (ASF)
 
-- **2FA Risk:** Using the ASF option is always a risk, as it theoretically allows skipping 2-Factor Authentication steps. By using this feature, you accept this security trade-off.
-- **Credential Storage:** Your ASF IPC password will be stored in the userscript's local storage. This is a potential security risk if unauthorized persons gain access to your browser data.
-- **Connection Security:** If you use this feature, you should use **HTTPS** for your ASF IPC connection whenever possible to prevent "Man-in-the-Middle" attacks.
-- **ASF Requirements:** For ASF to perform 2-Factor confirmations, you must have imported your Steam mobile credentials (e.g., from a Steam Desktop Authenticator `.mafile`) into ASF.<br>
-*Please note: I do not provide instructions or guides for this import process.*
+- **2FA Risk:** Using the ASF option is always a risk, as it theoretically allows skipping 2nd Factor steps.
+- **Credential Storage:** Your ASF IPC password is stored in the userscript's local storage.
+- **Connection Security:** Use **HTTPS** for your ASF IPC connection to prevent "Man-in-the-Middle" attacks.
 
 ---
 
 ## Notes
 
-- **Inspiration:** The functionality of this script was inspired by the works of **Chr_** and **SteamDB**.
-- **SteamDB Extension Conflict:** If you are using the SteamDB browser extension with its sidebar enabled, you must **disable the SteamDB sidebar** in the extension settings to prevent layout conflicts with this script.
+- **Manual Adjustment:** You must manually set the number of rows (1-4) in the settings to match your display size.
+- **Inspiration:** Inspired by the works of **Chr_** and **SteamDB**.
+- **SteamDB Conflict:** Disable the **SteamDB sidebar** in their extension settings to prevent layout issues.
