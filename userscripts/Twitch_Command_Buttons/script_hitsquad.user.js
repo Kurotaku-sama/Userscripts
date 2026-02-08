@@ -12,7 +12,7 @@
 // @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/kuros_library.js
 // @require         https://cdn.jsdelivr.net/gh/Kurotaku-sama/Userscripts@main/libraries/twitch_command_buttons.js.js
 // @require         https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js
-// @require         cdn.jsdelivr.net/npm/sweetalert2@11
+// @require         https://cdn.jsdelivr.net/npm/sweetalert2@11
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @grant           GM_getValue
 // @grant           GM_setValue
