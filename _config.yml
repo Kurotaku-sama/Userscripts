@@ -5,3 +5,6 @@ theme: jekyll-theme-cayman
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
+
+exclude:
+- google3cd44068f1e29935.html
