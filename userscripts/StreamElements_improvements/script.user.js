@@ -2,7 +2,7 @@
 // @name            StreamElements improvements
 // @name:de         StreamElements Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.7.8
+// @version         1.7.9
 // @description     A script for some improvements for StreamElements
 // @description:de  Ein Skript für einige Verbesserungen für StreamElements
 // @author          Kurotaku
@@ -20,24 +20,43 @@
 // @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
-// @run-at          document-body
 // ==/UserScript==
 
 
 let sold_out_items = [];
 let subscriber_only_items = [];
 
+// Selectors for nearly any SE element
+const SELECTOR = {
+    SIDEBAR: "aside",
+    STORE: "main .grid",
+    FILTER_BAR: "main > div > div:first-of-type",
+    ITEMS: "main .grid .bg-bg-card",
+    ITEM: {
+        TITLE: ":scope h3",
+        DESC: ":scope > :nth-child(2) > :nth-child(1) > p",
+        QUANTITY: ":scope > :nth-child(2) .lucide-shopping-cart",
+        COST: ":scope > :nth-child(2) .lucide-coins",
+        SUB_ONLY : ":scope > :nth-child(1) > span",
+    }
+};
+
+// Copy of the classes the Buttons on SE are using
+const BUTTON_CLASSES = "class='w-full py-2 rounded-lg border border-[#5684fd] text-[#5684fd] text-sm font-semibold uppercase tracking-wide hover:bg-[#5684fd]/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'";
+
 (async function() {
     await init_gm_config();
 
-    wait_for_element('.side-bar .usr-stats').then(async () => {
+    wait_for_element(SELECTOR.SIDEBAR).then(async () => {
+        await sleep(500); // Load after 500 MS to prevent the page from removing my panel again
+
         insert_new_sidebar_container(); // Insert a new sidebar for the custom buttons
         insert_gm_config_button(); // Add the button to the filter container to open the configuration menu
 
         insert_controls();
 
-        for(let i = 0; i < 120; i++) // While the page items are still loading (2 minute limit than abort the functions)
-            if(document.querySelectorAll("user-public-store > :nth-child(3) > div").length === 0)
+        for(let i = 0; i <= 120; i++) // While the page items are still loading (2 minute limit than abort the functions)
+            if(document.querySelectorAll(SELECTOR.ITEMS).length === 0)
                 if(i === 120)
                     return; // Abort
                 else
@@ -161,14 +180,14 @@ async function init_gm_config() {
 }
 
 function insert_new_sidebar_container() {
-    let sidebar = document.querySelector(".side-bar .usr-stats");
-    let custom_container = "<div id='custom_container' class='usr-stats'></div>";
-    sidebar.insertAdjacentHTML('afterend', custom_container);
+    let sidebar = document.querySelector(SELECTOR.SIDEBAR);
+    let custom_container = "<div id='custom_container'></div>";
+    sidebar.insertAdjacentHTML('beforeend', custom_container);
 }
 
 function insert_gm_config_button() {
     let sidebar = document.querySelector("#custom_container");
-    let button = "<a id='gm_config_button' class='md-stroked md-button'>StreamElements improvements config</a>";
+    let button = `<a id='gm_config_button' ${BUTTON_CLASSES}>StreamElements improvements config</a>`;
     sidebar.insertAdjacentHTML('beforeend', button);
     document.querySelector("#gm_config_button").addEventListener("click",() => GM_config.open());
 }
@@ -189,32 +208,33 @@ function insert_controls() {
     sidebar.insertAdjacentHTML('beforeend', subscriber_only_slider);
     document.getElementById("toggle-subscriber-only").addEventListener ("click", toggle_subscriber_only_items, false);
 
-    let button_itemlist = "<a id='get-itemlist' class='md-stroked md-button md-dark-theme'>Get itemlist</a>";
+    let button_itemlist = `<a id='get-itemlist' ${BUTTON_CLASSES}>Get itemlist</a>`;
     sidebar.insertAdjacentHTML('beforeend', button_itemlist);
     document.getElementById("get-itemlist").addEventListener ("click", get_itemlist, false);
 
-    let button_export_as_table = "<a id='get-item-table' class='md-stroked md-button md-dark-theme'>Show items as table</a>";
+    let button_export_as_table = `<a id='get-item-table' ${BUTTON_CLASSES}>Show items as table</a>`;
     sidebar.insertAdjacentHTML('beforeend', button_export_as_table);
     document.getElementById("get-item-table").addEventListener ("click", get_item_table, false);
 
-    let button_open_redemption_history = "<a id='redemption_history' class='md-stroked md-button md-dark-theme'>Show redemption history</a>";
+    let button_open_redemption_history = `<a id='redemption_history' ${BUTTON_CLASSES}>Show redemption history</a>`;
     sidebar.insertAdjacentHTML('beforeend', button_open_redemption_history);
     document.getElementById("redemption_history").addEventListener ("click", show_redemption_history, false);
 }
 
-function reverse_store_items() {
-    const list = document.querySelector("user-public-store > :nth-child(3)");
-    const items = Array.from(list.querySelectorAll(":scope > div"));
-    items.reverse();
-    items.forEach((item) => {
-        list.appendChild(item);
-    });
-}
+// UNUSED
+// function reverse_store_items() {
+//     const list = document.querySelector(SELECTOR.STORE);
+//     const items = Array.from(list.querySelectorAll(SELECTOR.ITEMS));
+//     items.reverse();
+//     items.forEach((item) => {
+//         list.appendChild(item);
+//     });
+// }
 
 function sort_by_price() {
     let ascending = GM_config.get("sort_by_price_ascending");
-    let list = document.querySelector("user-public-store > :nth-child(3)");
-    let nodes_to_sort = list.querySelectorAll(":scope > div");
+    let list = document.querySelector(SELECTOR.STORE);
+    let nodes_to_sort = list.querySelectorAll(SELECTOR.ITEMS);
 
     Array.prototype.map.call(nodes_to_sort, function(node) {
         return {
@@ -230,7 +250,11 @@ function sort_by_price() {
 
 function get_itemlist() { // Get list with all items in store
     let item_list = "";
-    document.querySelectorAll("user-public-store > :nth-child(3) h6").forEach(function(el){item_list += `${el.innerHTML.trim()}\n`});
+    document.querySelectorAll(SELECTOR.ITEMS).forEach(function(item) {
+        let title_el = item.querySelector(SELECTOR.ITEM.TITLE);
+        if(title_el)
+            item_list += `${title_el.textContent.trim()}\n`;
+    });
     console.clear();
     if(item_list !== "") {
         console.log(item_list);
@@ -242,16 +266,16 @@ function get_itemlist() { // Get list with all items in store
 
 function get_item_table() {
     document.getElementById("get-item-table").remove(); // Remove the Button to prevent users from clicking it again
-    let store_items_container = document.querySelector("user-public-store > :nth-child(3)");
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div"); // Get all items in store
+    let store_items_container = document.querySelector(SELECTOR.STORE);
+    let items = document.querySelectorAll(SELECTOR.ITEMS); // Get all items in store
     let table = "<table id='item-table' class='item-table'>";
     table += "<tr><th>Name</th><th>Description</th><th>Price</th><th>Stock</th></tr>"; // Cell headlines
     items.forEach(function(item) {
-		// Get all informations from cards
-		let title = get_item_title(item);
-		let description = get_item_description(item);
-		let stock = get_item_quantity(item);
-		let cost = get_item_cost(item);
+        // Get all informations from cards
+        let title = get_item_title(item);
+        let description = get_item_description(item);
+        let stock = get_item_quantity(item);
+        let cost = get_item_cost(item);
 
 
         // Add line to table
@@ -260,8 +284,8 @@ function get_item_table() {
     })
     table += "</table>";
 
-    // Remove Filters
-    document.querySelectorAll(".filter-items-input").forEach((filter) => {filter.remove()});
+    // Remove Filter Barf
+    document.querySelector(SELECTOR.FILTER_BAR)?.remove();
 
     // Download table button
     let button_download_as_csv = "<a id='download-item-table' class='md-stroked md-button md-dark-theme'>Download table as CSV</a>";
@@ -276,7 +300,7 @@ function show_redemption_history() {
 
 function toggle_hidden_itemlist() {
     let hidden_items = get_hidden_items_array();
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div"); // Get all items in store
+    let items = document.querySelectorAll(SELECTOR.ITEMS); // Get all items in store
     items.forEach(function(item) {
         let title = get_item_title(item);
         if(hidden_items.includes(title))
@@ -298,7 +322,7 @@ function toggle_subscriber_only_items() {
 
 function gray_out_hidden_items() {
     let hidden_items = get_hidden_items_array();
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div"); // Get all items in store
+    let items = document.querySelectorAll(SELECTOR.ITEMS); // Get all items in store
     items.forEach(function(item) {
         let title = get_item_title(item);
         if(hidden_items.includes(title))
@@ -313,8 +337,8 @@ function gray_out_sold_out_items() {
 }
 
 function magnifying_glass_buttons() {
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div");
-    let magnifying_glass_button = `<md-icon class="material-icons magnifying-glass-container">search</md-icon>`;
+    let items = document.querySelectorAll(SELECTOR.ITEMS);
+    let magnifying_glass_button = `<div class="magnifying-glass-container">🔎</div>`;
 
     items.forEach((item) => {
         item.insertAdjacentHTML('beforeend', magnifying_glass_button);
@@ -333,7 +357,7 @@ function search_on_steam(event) {
     let content_block = item.children[1];
 
     // Extract description text from <p><span> inside content block
-    let desc_span = content_block.querySelector("p > span");
+    let desc_span = content_block.querySelector("p:first-of-type");
     let desc = desc_span?.textContent || "";
 
     // Try to match a Steam URL
@@ -345,15 +369,15 @@ function search_on_steam(event) {
         window.open(match[0], "_blank");
     } else {
         // Fallback: search by title from <h6>
-        let title_el = content_block.querySelector("h6");
+        let title_el = content_block.querySelector(SELECTOR.ITEM.TITLE);
         let title = title_el?.textContent.trim() || "";
         window.open(`https://store.steampowered.com/search/?term=${encodeURIComponent(title)}`, "_blank");
     }
 }
 
 function hide_item_buttons() {
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div");
-    let eye_button = `<md-icon class="material-icons eye-container">visibility_off</md-icon>`;
+    let items = document.querySelectorAll(SELECTOR.ITEMS);
+    let eye_button = `<div class="eye-container">👁️</div>`;
 
     items.forEach((item) => {
         let hidden_items = get_hidden_items_array();
@@ -395,21 +419,22 @@ function add_to_hidden(event) {
 
 function get_item_title(item) {
     // Use textContent instead of innerHTML to avoid &amp; vs & mismatches
-    let title_el = item.querySelector("h6")
+    let title_el = item.querySelector(SELECTOR.ITEM.TITLE);
     if(!title_el) return ""
-    return title_el.textContent.trim()
+    return title_el.textContent.trim();
 }
 
 function get_item_description(item) {
-    return item.querySelector(":scope > :nth-child(2) > p > span")?.innerText.trim() || "";
+    return item.querySelector(SELECTOR.ITEM.DESC)?.innerText.trim() || "";
 }
 
 function get_item_quantity(item) {
     // Find all <p> tags in the details area
-    let paragraphs = item.querySelectorAll(":scope > :nth-child(2) > div > p");
+    let paragraphs = item.querySelectorAll(SELECTOR.ITEM.QUANTITY);
 
     for (let p of paragraphs) {
-        if (p.innerText.includes("shopping_basket")) {
+        p = p.parentNode.querySelector("span");
+        if (p) {
             return p.innerText
                 .replace("shopping_basket", "")
                 .replace("items left", "")
@@ -424,14 +449,15 @@ function get_item_quantity(item) {
 
 function get_item_cost(item) {
     // Find all <p> tags in the details area
-    let paragraphs = item.querySelectorAll(":scope > :nth-child(2) > div > p");
+    let paragraphs = item.querySelectorAll(SELECTOR.ITEM.COST);
 
     for (let p of paragraphs) {
-        if (p.innerText.includes("monetization_on")) {
+        p = p.parentNode.querySelector("span");
+        if (p) {
             let number = p.innerText
-                .replace("monetization_on", "")
-                .replace(/\D/g, "") // Remove all non-digits
-                .trim();
+            .replace("monetization_on", "")
+            .replace(/\D/g, "") // Remove all non-digits
+            .trim();
 
             return parseInt(number, 10) || 0; // Return as integer
         }
@@ -453,21 +479,21 @@ function get_prepared_items_to_hide(new_title = null) {
 }
 
 function check_sold_out_items() {
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div");
+    let items = document.querySelectorAll(SELECTOR.ITEMS);
     items.forEach(function(item) {
         let quantity_text = get_item_quantity(item);
-		if (quantity_text.toLowerCase().includes("sold out"))
-			sold_out_items.push(item);
+        if (quantity_text.toLowerCase().includes("sold out"))
+            sold_out_items.push(item);
     })
 }
 
 function check_subscriber_only_items() {
-    let items = document.querySelectorAll("user-public-store > :nth-child(3) > div");
+    let items = document.querySelectorAll(SELECTOR.ITEMS);
 
     items.forEach(function(item) {
-        let icons = item.querySelectorAll("span.material-icons");
-        for (let icon of icons)
-            if (icon.textContent.trim() === "star")
+        let elements = item.querySelectorAll(SELECTOR.ITEM.SUB_ONLY);
+        for (let element of elements)
+            if (element.textContent.trim() === "Sub only")
                 subscriber_only_items.push(item);
     });
 }
@@ -480,112 +506,167 @@ function get_hidden_items_array() {
 }
 
 GM_addStyle(`
+body > div > div {
+    margin: unset !important;
+}
+
+aside {
+    width: 20vw;
+}
+
+main {
+    min-width: 75vw;
+}
+
+/* Center "Sub only" */
+main .grid .bg-bg-card div:nth-child(1) > span {
+    left: 50%;
+    right: unset !important;
+    transform: translateX(-50%);
+}
+
+/* ----- CUSTOM ELEMENTS ----- */
+#custom_container > a {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 /* Switch */
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
 }
 
 .switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+    background-color: #2196F3;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px #2196F3;
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+    border-radius: 34px;
 }
 
 .slider.round:before {
-  border-radius: 50%;
+    border-radius: 50%;
 }
 
-
 /* Eye fixed positioning after update */
-user-public-store > :nth-child(3) > div {
-  position: relative;
+${SELECTOR.ITEMS} {
+    position: relative;
 }
 
 .eye-container,
 .magnifying-glass-container {
-  position: absolute;
-  height: 30px;
-  width: 30px;
-  background-color: rgba(20, 20, 20, 0.3);
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  padding: 3px;
-  margin: unset;
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    background-color: rgba(20, 20, 20, 0.3);
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    padding: 3px;
+    margin: unset;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* Eye */
 .eye-container {
-  right: 5px;
-  top: 5px;
+    right: 5px;
+    top: 5px;
 }
 
 /* Magnifying Glass */
 .magnifying-glass-container {
-  left: 5px;
-  top: 5px;
+    left: 5px;
+    top: 5px;
 }
 
+.hide-item,
+.sold-out-item,
+.hide-subscriber-item {
+    display: none !important;
+}
 
-.userpages-wrap {max-width: unset !important;}
+.gray-out-item {
+    filter: saturate(0%);
+}
 
-.hide-item,.sold-out-item,.hide-subscriber-item {display: none !important;}
+.sort-buttons-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
 
-.gray-out-item {filter: saturate(0%);}
+.slidercontainer {
+    letter-spacing: 1.2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 11px;
+    line-height: 35px;
+    user-select: none;
+    -webkit-user-select: none;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 15px;
+}
 
-.sort-buttons-container {display: grid;  grid-template-columns: 50% 50%;}
+.slidercontainer > .switch {
+    margin-right: 10px;
+}
 
-.slidercontainer {letter-spacing: 1.2px;padding-left: 16px;padding-right: 16px;font-size: 12px;line-height: 36px;user-select: none;text-transform: uppercase;font-weight: 600; margin-top: 15px;}
+.item-table td,
+.item-table th {
+    border: 2px solid #fff;
+    padding: 10px;
+}
 
-.slidercontainer > .switch {margin-right: 10px;}
-
-.item-table td, .item-table th {border: 2px solid #fff;padding: 10px;}
-
-.table-item-cost,.table-item-stock {text-align:center;}
+.table-item-cost,
+.table-item-stock {
+    text-align: center;
+}
 `);
