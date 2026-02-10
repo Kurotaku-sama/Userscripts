@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch Channel Points Bonus Collector
 // @namespace       https://kurotaku.de
-// @version         1.1.3
+// @version         1.1.4
 // @description     Automatically collects Twitch channel points bonuses with whitelist and blacklist support
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -12,6 +12,10 @@
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @grant           GM_getValue
+// @grant           GM_setValue
+// @grant           GM_listValues
+// @grant           GM_deleteValue
 // @grant           GM_registerMenuCommand
 // @run-at          document-body
 // ==/UserScript==
