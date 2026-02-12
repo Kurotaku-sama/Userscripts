@@ -34,6 +34,20 @@ function trim_spaces(text) {
     return temp.join("\n");
 }
 
+// Restricts an input element to only accept numbers and control keys.
+function restrict_input_to_numbers(input) {
+    input.onkeydown = (e) => {
+        // Allow: backspace, delete, tab, escape, enter, ctrl/meta key, and navigation keys (arrows, home, end)
+        if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+            (e.ctrlKey === true || e.metaKey === true) ||
+            (e.keyCode >= 35 && e.keyCode <= 40)) return;
+
+        // Ensure that it is a number and stop the keypress if it's not
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105))
+            e.preventDefault();
+    };
+}
+
 function download_table_as_csv(id) {
     let table_id = id, separator = ';'
 
