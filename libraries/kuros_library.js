@@ -36,7 +36,9 @@ function trim_spaces(text) {
 
 // Restricts an input element to only accept numbers and control keys.
 function restrict_input_to_numbers(input) {
-    input?.onkeydown = (e) => {
+    if (!input) return;
+
+    input.onkeydown = (e) => {
         // Allow: backspace, delete, tab, escape, enter, ctrl/meta key, and navigation keys (arrows, home, end)
         if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
             (e.ctrlKey === true || e.metaKey === true) ||
