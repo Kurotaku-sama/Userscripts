@@ -8,7 +8,7 @@
 
 ## Description
 
-This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It provides a customizable sidebar for better navigation, powerful mass stacking/unstacking tools, a favorites system, and ASF integration for seamless 2FA management.
+This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It provides a customizable sidebar for better navigation, powerful mass stacking/unstacking tools, a favorites system, a comprehensive filtering and sorting menu, and ASF integration for seamless 2FA management.
 
 ![Inventory Preview](inventory.png)
 
@@ -31,6 +31,12 @@ This userscript enhances the Steam inventory experience by adding essential qual
 - **Dedicated Section:** Favorited inventories are cloned into a separate, easy-to-access section at the top.
 - **Custom Sorting:** Sort your pinned inventories by Name, Item Amount, or the date they were added.
 
+### Inventory Filtering
+- **Advanced Search:** Find specific game inventories instantly with a real-time search field.
+- **Amount Range:** Filter inventories by item count using Min and Max fields.
+- **Multi-Sort:** Toggle between Name and Amount sorting (Ascending ▴ / Descending ▾).
+- **Quick Reset:** Clear individual filters or reset everything with a single click.
+
 ### ASF Integration (IPC)
 - **Remote 2FA:** Accept or deny all mobile confirmations directly from the Steam inventory "More" menu.
 - **Configurable:** Works with your local or remote ArchiSteamFarm instance via IPC.
@@ -48,7 +54,8 @@ This userscript enhances the Steam inventory experience by adding essential qual
 1. **Sidebar:** The script restructures the inventory navigation tabs into a grid layout based on your row selection.
 2. **Stacking:** Uses the Steam WebAPI to calculate and execute "Combine" operations with built-in delays to prevent rate limits.
 3. **Favorites:** Saves selected AppIDs to local storage and highlights them with a custom star icon.
-4. **ASF:** Sends commands via `GM_xmlhttpRequest` to your ASF IPC interface.
+4. **Filtering:** Caches inventory nodes and applies real-time CSS filtering and DOM reordering based on user input.
+5. **ASF:** Sends commands via `GM_xmlhttpRequest` to your ASF IPC interface.
 
 ---
 

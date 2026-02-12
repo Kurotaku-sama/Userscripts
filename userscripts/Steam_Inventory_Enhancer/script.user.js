@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.0
-// @description     Adds mass stacking/unstacking tools, a customizable favorites sidebar for faster game inventory navigation, and ASF IPC integration for seamless 2FA confirmations directly from your Steam inventory.
-// @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Favoriten-Seitenleiste für eine schnellere Navigation durch Spielinventare und eine ASF-IPC-Integration für mobile 2FA-Bestätigungen direkt im Steam-Inventar hinzu.
+// @version         1.1
+// @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
+// @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
 // @match           https://steamcommunity.com/profiles/*/inventory*
@@ -40,6 +40,9 @@
 
     if (GM_config.get("inv_favorites_enabled"))
         Favorites.init();
+
+    if (GM_config.get("filter_search__enabled"))
+        Filter.init();
 
     if (GM_config.get("asf_enabled"))
         ASF.init();
@@ -96,6 +99,12 @@ async function init_gm_config() {
                 type: 'select',
                 options: ['Name', 'Amount', 'Added to Favorites', 'Added to Favorites Reversed'],
                 default: 'Amount',
+            },
+            filter_search__enabled: {
+                section: ['Filter & Search'],
+                type: 'checkbox',
+                default: true,
+                label: 'Enable Filter & Search'
             },
             asf_enabled: {
                 section: ['ArchiSteamFarm (ASF) Integration'],
@@ -184,68 +193,12 @@ class Sidebar {
                     margin-top: unset;
                 }
 
-                .games_list_separator {
-                    margin: unset;
-                    border: 1px solid #2c3235;
-                    padding: 5px 10px;
-                }
-
-                .games_list_tabs_ctn {
-                    border: 1px solid #2c3235;
-                    padding: 0;
-                }
-
                 .games_list_tabs {
                     display: grid !important;
                     grid-template-columns: repeat(${rows}, 1fr);
                     overflow-y: auto;
                     overflow-x: hidden;
                     max-height: min(100vh, 600px);
-                }
-
-                a.games_list_tab {
-                    width: 100%;
-                    display: flex;
-                    gap: 10px;
-                    align-items: center;
-                    background: unset;
-                    border: unset !important;
-                }
-
-                .games_list_tab > span {
-                    padding: 0;
-                    line-height: 1;
-                }
-
-                .games_list_tab_icon {
-                    margin: 8px 0;
-                }
-
-                .games_list_tab_number {
-                    margin-left: auto;
-                }
-
-                .games_list_tab_separator,
-                .games_list_tab_row_separator {
-                    display: none;
-                }
-
-                .games_list_tab:hover,
-                a.games_list_tab:hover {
-                    background: #4e7297;
-                }
-
-                .games_list_tab:hover .games_list_tab_name {
-                    text-decoration: none;
-                }
-
-                .games_list_tab.active {
-                    box-shadow: unset;
-                    border-radius: 10px;
-                    background: #2c4056 !important;
-                    position: sticky;
-                    top: 0;
-                    z-index: 10;
                 }
             }
         `);
@@ -301,13 +254,7 @@ class Stacker {
         input_max.value = GM_getValue("sie_item_stacker_limit", "0");
 
         // Input validation: Allow navigation keys and numbers, block everything else
-        input_max.onkeydown = (e) => {
-            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
-                (e.ctrlKey === true || e.metaKey === true) ||
-                (e.keyCode >= 35 && e.keyCode <= 40)) return;
-            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105))
-                e.preventDefault();
-        };
+        restrict_input_to_numbers(input_max);
 
         document.getElementById("sie_item_stacker_btn_stack").onclick = () => this.execute_action("stack");
         document.getElementById("sie_item_stacker_btn_unstack").onclick = () => this.execute_action("unstack");
@@ -676,6 +623,34 @@ class Stacker {
     }
 }
 
+GM_addStyle(`
+    .sie_item_stacker_container {
+        gap: 5px;
+        display: inline-flex;
+    }
+
+    .sie_item_stacker_container.sie_item_stacker_multi_row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sie_item_stacker_container.sie_item_stacker_single_row {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .sie_item_stacker_row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .sie_item_stacker_inputbox {
+        width: 50px;
+        color: #fff;
+        padding: 2px 4px;
+    }
+`);
+
 // ==========================================================
 // Favorites
 // ==========================================================
@@ -846,7 +821,7 @@ class Favorites {
         else if(order_type === 'Amount')
             sorted_ids.sort((a, b) => (app_map.get(b)?.item_count || 0) - (app_map.get(a)?.item_count || 0));
         else if(order_type === 'Added to Favorites')
-            {} // Default order is the order in which they were added to the array
+        {} // Default order is the order in which they were added to the array
         else if(order_type === 'Added to Favorites Reversed')
             sorted_ids.reverse();
 
@@ -890,6 +865,244 @@ class Favorites {
         }
     }
 }
+
+// ==========================================================
+// Filter
+// ==========================================================
+class Filter {
+    static app_data_cache = [];
+
+    static async init() {
+        const container = await wait_for_element("#games_list_public");
+        this.inject_controls(container);
+        this.cache_elements();
+
+        // Load initial sort state or default to amount_desc
+        const current_sort = GM_getValue("sie_filter_sort", "amount_desc");
+        this.sort_list(current_sort);
+    }
+
+    static inject_controls(container) {
+        const active_sort = GM_getValue("sie_filter_sort", "amount_desc");
+
+        const filter_html = `
+            <div id="sie_filter_controls">
+                <div class="sie_filter_top_row">
+                    <div class="sie_filter_buttons">
+                        <button id="sie_sort_amount_desc" class="btn_grey_black btn_small ${active_sort === 'amount_desc' ? 'active' : ''}" title="Amount: High to Low"><span>Amount ▾</span></button>
+                        <button id="sie_sort_amount_asc" class="btn_grey_black btn_small ${active_sort === 'amount_asc' ? 'active' : ''}" title="Amount: Low to High"><span>Amount ▴</span></button>
+                        <button id="sie_sort_name_asc" class="btn_grey_black btn_small ${active_sort === 'name_asc' ? 'active' : ''}" title="Name: A to Z"><span>Name ▴</span></button>
+                        <button id="sie_sort_name_desc" class="btn_grey_black btn_small ${active_sort === 'name_desc' ? 'active' : ''}" title="Name: Z to A"><span>Name ▾</span></button>
+                    </div>
+                    <button id="sie_filter_reset_all" class="btn_grey_black" title="Reset all filters"><span>✕</span></button>
+                </div>
+
+                <div class="sie_input_wrapper">
+                    <input type="text" id="sie_filter_search" placeholder="Search inventories..." autocomplete="off">
+                    <span class="sie_clear_input" data-target="sie_filter_search">✕</span>
+                </div>
+
+                <div class="sie_filter_range">
+                    <div class="sie_input_wrapper">
+                        <input type="text" id="sie_filter_min" placeholder="Min" autocomplete="off">
+                        <span class="sie_clear_input" data-target="sie_filter_min">✕</span>
+                    </div>
+                    <div class="sie_input_wrapper">
+                        <input type="text" id="sie_filter_max" placeholder="Max" autocomplete="off">
+                        <span class="sie_clear_input" data-target="sie_filter_max">✕</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('afterbegin', filter_html);
+
+        // Sorting Event Listeners
+        document.getElementById("sie_sort_amount_desc").onclick = () => this.sort_list("amount_desc");
+        document.getElementById("sie_sort_amount_asc").onclick = () => this.sort_list("amount_asc");
+        document.getElementById("sie_sort_name_asc").onclick = () => this.sort_list("name_asc");
+        document.getElementById("sie_sort_name_desc").onclick = () => this.sort_list("name_desc");
+
+        // Combined Input Event Listeners
+        const inputs = ["sie_filter_search", "sie_filter_min", "sie_filter_max"];
+        inputs.forEach(id => document.getElementById(id).oninput = () => this.apply_filters());
+
+        // Apply number restriction helper
+        this.restrict_to_numbers(document.getElementById("sie_filter_min"));
+        this.restrict_to_numbers(document.getElementById("sie_filter_max"));
+
+        // Individual Clear Buttons (X)
+        document.querySelectorAll(".sie_clear_input").forEach(btn => {
+            btn.onclick = () => {
+                const target = document.getElementById(btn.dataset.target);
+                target.value = "";
+                this.apply_filters();
+            };
+        });
+
+        // Global Reset Button
+        document.getElementById("sie_filter_reset_all").onclick = () => {
+            inputs.forEach(id => document.getElementById(id).value = "");
+            this.apply_filters();
+        };
+    }
+
+    static cache_elements() {
+        this.app_data_cache = [];
+        const tabs = document.querySelectorAll("#games_list_public a.games_list_tab");
+
+        tabs.forEach(tab => {
+            const name_el = tab.querySelector(".games_list_tab_name");
+            const count_el = tab.querySelector(".games_list_tab_number");
+
+            const name = name_el ? name_el.innerText.trim() : "";
+            const text_amount = count_el ? count_el.innerText : "0";
+            // Extract numbers only for accurate integer sorting
+            const amount = parseInt(text_amount.replace(/\D/g, '')) || 0;
+
+            this.app_data_cache.push({
+                node: tab,
+                name: name,
+                amount: amount
+            });
+        });
+    }
+
+    static sort_list(type) {
+        GM_setValue("sie_filter_sort", type);
+
+        // Update active UI states
+        document.querySelectorAll(".sie_filter_buttons button").forEach(btn => btn.classList.remove("active"));
+        if (type === "amount_desc") document.getElementById("sie_sort_amount_desc").classList.add("active");
+        if (type === "amount_asc") document.getElementById("sie_sort_amount_asc").classList.add("active");
+        if (type === "name_asc") document.getElementById("sie_sort_name_asc").classList.add("active");
+        if (type === "name_desc") document.getElementById("sie_sort_name_desc").classList.add("active");
+
+        const container = document.querySelector("#games_list_public .games_list_tabs");
+        if (!container) return;
+
+        const sorted = [...this.app_data_cache].sort((a, b) => {
+            if (type === "name_asc") return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+            if (type === "name_desc") return b.name.toLowerCase().localeCompare(a.name.toLowerCase());
+            if (type === "amount_asc") return a.amount - b.amount;
+            return b.amount - a.amount; // default: amount_desc
+        });
+
+        // Append nodes in new order (DOM automatically moves existing elements)
+        sorted.forEach(item => container.appendChild(item.node));
+    }
+
+    static apply_filters() {
+        const query = document.getElementById("sie_filter_search").value.toLowerCase();
+        const min = parseInt(document.getElementById("sie_filter_min").value) || 0;
+        const max = parseInt(document.getElementById("sie_filter_max").value) || Infinity;
+
+        this.app_data_cache.forEach(item => {
+            const matches_text = item.name.toLowerCase().includes(query);
+            const matches_range = item.amount >= min && item.amount <= max;
+
+            // Hide element if it doesn't match both text and amount criteria
+            if (matches_text && matches_range) return item.node.classList.remove("sie_hidden_by_search");
+            item.node.classList.add("sie_hidden_by_search");
+        });
+    }
+
+    static restrict_to_numbers(element) {
+        element.onkeydown = (e) => {
+            // Allow control keys: backspace, delete, tab, escape, enter, ctrl, navigation
+            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                (e.ctrlKey === true || e.metaKey === true) ||
+                (e.keyCode >= 35 && e.keyCode <= 40)) return;
+
+            // Block non-number keys (top row and numpad)
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105))
+                e.preventDefault();
+        };
+    }
+}
+
+GM_addStyle(`
+    #sie_filter_controls {
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        border-bottom: 1px solid #2c3235;
+        margin-bottom: 5px;
+    }
+
+    .sie_filter_top_row {
+        display: flex;
+        gap: 5px;
+    }
+
+    .sie_filter_buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+        flex: 1;
+    }
+
+    .sie_filter_buttons .btn_small {
+        justify-content: center;
+        padding: 4px 0;
+    }
+
+    .sie_filter_buttons .btn_small.active {
+        background: #4e7297 !important;
+        color: white !important;
+    }
+
+    #sie_filter_reset_all {
+        width: 30px;
+        justify-content: center;
+        color: #ff5c5c;
+    }
+
+    .sie_filter_range {
+        display: flex;
+        gap: 5px;
+    }
+
+    .sie_input_wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    #sie_filter_search,
+    #sie_filter_min,
+    #sie_filter_max {
+        width: 100%;
+        background: #101214;
+        border: 1px solid #2c3235;
+        color: #fff;
+        padding: 4px 22px 4px 8px;
+        border-radius: 2px;
+        font-size: 12px;
+    }
+
+    /* Remove arrows from number inputs */
+    #sie_filter_min::-webkit-inner-spin-button,
+    #sie_filter_max::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .sie_clear_input {
+        position: absolute;
+        right: 6px;
+        cursor: pointer;
+        color: #555;
+        font-size: 10px;
+        user-select: none;
+    }
+
+    .sie_clear_input:hover { color: #fff; }
+
+    .sie_hidden_by_search {
+        display: none !important;
+    }
+`);
 
 // ==========================================================
 // ASF Integration
@@ -1004,32 +1217,66 @@ class ASF {
 }
 
 // ==========================================================
-// Styling
+// General Styling
 // ==========================================================
 GM_addStyle(`
-    .sie_item_stacker_container {
-        gap: 5px;
-        display: inline-flex;
+    .games_list_tabs {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr);
     }
 
-    .sie_item_stacker_container.sie_item_stacker_multi_row {
-        flex-direction: column;
-        align-items: flex-start;
+    .games_list_tab_separator,
+    .games_list_tab_row_separator {
+        display: none;
     }
 
-    .sie_item_stacker_container.sie_item_stacker_single_row {
-        flex-direction: row;
-        align-items: center;
+    .games_list_tabs_ctn {
+        border: 1px solid #2c3235;
+        padding: 0;
     }
 
-    .sie_item_stacker_row {
+    .games_list_tabs > div {
+        display: none;
+    }
+
+    a.games_list_tab {
+        width: 100%;
         display: flex;
+        gap: 10px;
         align-items: center;
-        gap: 5px;
+        background: unset;
+        border: unset !important;
     }
-    .sie_item_stacker_inputbox {
-        width: 50px;
-        color: #fff;
-        padding: 2px 4px;
+
+    .games_list_tab > span {
+        padding: 0;
+        line-height: 1;
+    }
+
+    .games_list_tab_icon {
+        margin: 8px 0;
+    }
+
+    .games_list_tab_number {
+        margin-left: auto;
+    }
+
+    .games_list_tab.active {
+        box-shadow: unset;
+        border-radius: 10px;
+        background: #2c4056 !important;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .games_list_tab:hover,
+    a.games_list_tab:hover {
+        background: #4e7297;
+        border-radius: 10px;
+    }
+
+    .games_list_tab:hover .games_list_tab_name {
+        text-decoration: none;
     }
 `);
