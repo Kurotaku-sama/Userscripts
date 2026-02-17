@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.1.1
+// @version         1.1.2
 // @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
 // @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
@@ -185,13 +185,26 @@ class Sidebar {
 
             @media (min-width: 1450px) {
                 #BG_bottom, #mainContents {
-                    width: unset !important;
+                    width: max-content !important;
                     max-width: unset !important;
-                    display: grid !important;
                 }
 
-                #mainContents > *:not(.tabitems_ctn):not(#tabcontent_inventory) {
+                #mainContents {
+                    display: grid !important;
+                    grid-template-columns: auto 1fr;
+                }
+
+                #mainContents > * {
                     grid-column: 1 / span 2;
+                }
+
+                #mainContents > .tabitems_ctn {
+                    grid-column: 1;
+                }
+
+                #mainContents > #tabcontent_inventory {
+                    grid-column: 2;
+                    margin-top: unset;
                 }
 
                 #tabcontent_inventory {
@@ -204,6 +217,10 @@ class Sidebar {
                     overflow-y: auto;
                     overflow-x: hidden;
                     max-height: min(100vh, 600px);
+                }
+
+                #game_list_favorites {
+                    margin-top: unset;
                 }
             }
         `);
@@ -700,12 +717,16 @@ class Favorites {
                 background: rgba(255, 255, 255, 0.05);
                 box-shadow: none;
             }
+
+            #sie_favorites_list .sie_hidden_by_search {
+                display: flex !important;
+            }
         `);
     }
 
     // Waits for the Steam inventory sidebar and injects the "Favorites" section header and list container
     static async add_favorites_container() {
-        const tabcontainer = await wait_for_element(".tabitems_ctn");
+        const tab_container = await wait_for_element(".tabitems_ctn");
         const favorites_html = `
             <div id="game_list_favorites" class="games_list_separator responsive_hidden">
                 Favorites
@@ -713,7 +734,7 @@ class Favorites {
             <div class="games_list_tabs_ctn">
                 <div id="sie_favorites_list" class="games_list_tabs"></div>
             </div>`;
-        tabcontainer.insertAdjacentHTML('afterbegin', favorites_html);
+        tab_container.insertAdjacentHTML('afterbegin', favorites_html);
     }
 
     // Scrapes the existing game list to map AppIDs to their names, item counts, and DOM elements
@@ -879,8 +900,11 @@ class Filter {
 
     static async init() {
         const container = await wait_for_element("#games_list_public");
-        this.inject_controls(container);
+
+        // initial cache before UI injection to get the total count for the placeholder
         this.cache_elements();
+
+        this.inject_controls(container);
 
         // Load initial sort state or default to amount_desc
         const current_sort = GM_getValue("sie_filter_sort", "amount_desc");
@@ -892,6 +916,7 @@ class Filter {
 
     static inject_controls(container) {
         const active_sort = GM_getValue("sie_filter_sort", "amount_desc");
+        const total_count = this.app_data_cache.length;
 
         const filter_html = `
             <div id="sie_filter_controls">
@@ -906,17 +931,17 @@ class Filter {
                 </div>
 
                 <div class="sie_input_wrapper">
-                    <input type="text" id="sie_filter_search" placeholder="Search inventories..." autocomplete="off">
+                    <input type="text" id="sie_filter_search" placeholder="Search ${total_count} inventories..." autocomplete="off">
                     <span class="sie_clear_input" data-target="sie_filter_search">✕</span>
                 </div>
 
                 <div class="sie_filter_range">
                     <div class="sie_input_wrapper">
-                        <input type="text" id="sie_filter_min" placeholder="Min" autocomplete="off">
+                        <input type="text" id="sie_filter_min" placeholder="Min Items" autocomplete="off">
                         <span class="sie_clear_input" data-target="sie_filter_min">✕</span>
                     </div>
                     <div class="sie_input_wrapper">
-                        <input type="text" id="sie_filter_max" placeholder="Max" autocomplete="off">
+                        <input type="text" id="sie_filter_max" placeholder="Max Items" autocomplete="off">
                         <span class="sie_clear_input" data-target="sie_filter_max">✕</span>
                     </div>
                 </div>
@@ -957,7 +982,14 @@ class Filter {
 
     static cache_elements() {
         this.app_data_cache = [];
-        const tabs = document.querySelectorAll("#games_list_public a.games_list_tab");
+        // Selector expanded to include public, private and failed inventory sections
+        const selectors = [
+            "#games_list_public a.games_list_tab",
+            "#games_list_private a.games_list_tab",
+            "#games_list_failed a.games_list_tab"
+        ];
+
+        const tabs = document.querySelectorAll(selectors.join(", "));
 
         tabs.forEach(tab => {
             const name_el = tab.querySelector(".games_list_tab_name");
@@ -997,7 +1029,12 @@ class Filter {
         });
 
         // Append nodes in new order (DOM automatically moves existing elements)
-        sorted.forEach(item => container.appendChild(item.node));
+        // Note: sorting remains primarily visual for the public container as per legacy logic
+        sorted.forEach(item => {
+            if (item.node.parentElement) {
+                item.node.parentElement.appendChild(item.node);
+            }
+        });
     }
 
     static apply_filters() {
@@ -1032,14 +1069,14 @@ class Filter {
         window.addEventListener('keydown', (e) => {
             // Check for CTRL+F (Windows/Linux) or CMD+F (Mac)
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                const searchInput = document.getElementById("sie_filter_search");
+                const search_input = document.getElementById("sie_filter_search");
 
-                if (searchInput) {
+                if (search_input) {
                     e.preventDefault(); // Prevent Browser Search
-                    searchInput.focus();
+                    search_input.focus();
 
                     // Select Text
-                    searchInput.select();
+                    search_input.select();
                 }
             }
         });
@@ -1255,8 +1292,16 @@ GM_addStyle(`
         display: none;
     }
 
-    .games_list_tabs_ctn {
+    .games_list_separator {
+        border-bottom: unset !important;
+    }
+
+    .games_list_separator,
+    .games_list_tabs_ctn{
         border: 1px solid #2c3235;
+    }
+
+    .games_list_tabs_ctn {
         padding: 0;
     }
 
