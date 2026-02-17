@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.1
+// @version         1.1.1
 // @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
 // @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
@@ -41,7 +41,7 @@
     if (GM_config.get("inv_favorites_enabled"))
         Favorites.init();
 
-    if (GM_config.get("filter_search__enabled"))
+    if (GM_config.get("filter_search_enabled"))
         Filter.init();
 
     if (GM_config.get("asf_enabled"))
@@ -100,11 +100,16 @@ async function init_gm_config() {
                 options: ['Name', 'Amount', 'Added to Favorites', 'Added to Favorites Reversed'],
                 default: 'Amount',
             },
-            filter_search__enabled: {
+            filter_search_enabled: {
                 section: ['Filter & Search'],
                 type: 'checkbox',
                 default: true,
                 label: 'Enable Filter & Search'
+            },
+            filter_search_ctrl_f_hotkey: {
+                type: 'checkbox',
+                default: true,
+                label: 'Override CTRL + F to focus searchbox'
             },
             asf_enabled: {
                 section: ['ArchiSteamFarm (ASF) Integration'],
@@ -880,6 +885,9 @@ class Filter {
         // Load initial sort state or default to amount_desc
         const current_sort = GM_getValue("sie_filter_sort", "amount_desc");
         this.sort_list(current_sort);
+
+        if (GM_config.get("filter_search_ctrl_f_hotkey"))
+            this.override_hotkey();
     }
 
     static inject_controls(container) {
@@ -1018,6 +1026,23 @@ class Filter {
             if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105))
                 e.preventDefault();
         };
+    }
+
+    static override_hotkey() {
+        window.addEventListener('keydown', (e) => {
+            // Check for CTRL+F (Windows/Linux) or CMD+F (Mac)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                const searchInput = document.getElementById("sie_filter_search");
+
+                if (searchInput) {
+                    e.preventDefault(); // Prevent Browser Search
+                    searchInput.focus();
+
+                    // Select Text
+                    searchInput.select();
+                }
+            }
+        });
     }
 }
 

@@ -32,10 +32,11 @@ This userscript enhances the Steam inventory experience by adding essential qual
 - **Custom Sorting:** Sort your pinned inventories by Name, Item Amount, or the date they were added.
 
 ### Inventory Filtering
-- **Advanced Search:** Find specific game inventories instantly with a real-time search field.
+- **Advanced Search:** Find specific game inventories instantly with search field.
 - **Amount Range:** Filter inventories by item count using Min and Max fields.
 - **Multi-Sort:** Toggle between Name and Amount sorting (Ascending ▴ / Descending ▾).
 - **Quick Reset:** Clear individual filters or reset everything with a single click.
+- **Override CTRL + F Hotkey:** The hotkey will focus automatically the search field instead the browsers native search.
 
 ### ASF Integration (IPC)
 - **Remote 2FA:** Accept or deny all mobile confirmations directly from the Steam inventory "More" menu.
