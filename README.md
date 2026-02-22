@@ -23,6 +23,7 @@
 | **fernsehserien.de episode names**            |  🇩🇪  | [![][b_rm]][rm_fernsehserien_de]   | [![][b_ins_ora]][js_fernsehserien_de]    |
 | **YouTube HitSquad Command Buttons**          |  🇺🇸  | [![][b_rm]][rm_yt_hsgf_cmd_btn]    | [![][b_ins_ora]][js_yt_hsgf_cmd_btn]     |
 | **Streamlabs HitSquad improvements**          |  🇺🇸  | [![][b_rm]][rm_streamlabs_hsqf]    | [![][b_ins_ora]][js_streamlabs_hsqf]     |
+
 <!-- | **ItzaGud improvements**                 |  🇺🇸  | [![][b_rm]][rm_itzagud]            | [![][b_ins_dre]][js_itzagud]       | -->
 
 <!-- ----- General Badges ----- -->
