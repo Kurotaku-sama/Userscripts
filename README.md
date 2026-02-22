@@ -12,7 +12,7 @@
 | **Highlight and Filter Searchengine**         |  🇺🇸  | [![][b_rm]][rm_search_filter]      | [![][b_ins_pur]][js_search_filter]       |
 | **Autoreload Streams**                        |  🇺🇸  | [![][b_rm]][rm_twitch_autroreload] | [![][b_ins_pur]][js_twitch_autroreload]  |
 | **Twitch Channel Points Bonus Collector**     |  🇺🇸  | [![][b_rm]][rm_twitch_cpbc]        | [![][b_ins_pur]][js_twitch_cpbc]         |
-| **Twitch Command Buttons**                    |  🇺🇸  | [![][b_rm]][rm_twitch_commands]    | [![][b_btn_hitsquad]][js_twitch_hitsquad]<br>[![][b_btn_stagger]][js_twitch_stagger]<br>[![][b_btn_lootnova]][js_twitch_lootnova]    |
+| **Twitch Command Buttons**                    |  🇺🇸  | [![][b_rm]][rm_twitch_commands]    | [![][b_ins_twitch_hitsquad]][js_twitch_hitsquad]<br>[![][b_ins_twitch_stagger]][js_twitch_stagger]<br>[![][b_ins_twitch_lootnova]][js_twitch_lootnova] |
 | **StreamElements improvements**               |  🇺🇸  | [![][b_rm]][rm_streamelements_imp] | [![][b_ins_pur]][js_streamelements_imp]  |
 | **Genshin Impact Teyvat Map Automate**        |  🇺🇸  | [![][b_rm]][rm_genshin_map]        | [![][b_ins_pur]][js_genshin_map]         |
 | **MyFigureCollection Downloader**             |  🇺🇸  | [![][b_rm]][rm_mfc_downloader]     | [![][b_ins_pur]][js_mfc_downloader]      |
@@ -27,17 +27,17 @@
 <!-- | **ItzaGud improvements**                 |  🇺🇸  | [![][b_rm]][rm_itzagud]            | [![][b_ins_dre]][js_itzagud]       | -->
 
 <!-- ----- General Badges ----- -->
-[b_rm]:         https://img.shields.io/badge/View-Readme-blue?style=flat-square
-[b_ins_pur]:    https://img.shields.io/badge/Install-purple?style=flat-square&logo=tampermonkey
-[b_ins_ora]:    https://img.shields.io/badge/Install-orange?style=flat-square&logo=tampermonkey
-[b_ins_dre]:    https://img.shields.io/badge/Install-darkred?style=flat-square&logo=tampermonkey
+[b_rm]:                   https://img.shields.io/badge/View-Readme-blue?style=flat-square
+[b_ins_pur]:              https://img.shields.io/badge/Install-purple?style=flat-square&logo=tampermonkey
+[b_ins_ora]:              https://img.shields.io/badge/Install-orange?style=flat-square&logo=tampermonkey
+[b_ins_dre]:              https://img.shields.io/badge/Install-darkred?style=flat-square&logo=tampermonkey
 <!-- ----- Steam Inventory Enhancer ----- -->
-[rm_steam_sih]:  userscripts/Steam_Inventory_Enhancer
-[rm_steam_sih]:  userscripts/Steam_Inventory_Enhancer
-[js_steam_sih]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js
+[rm_steam_sih]:           userscripts/Steam_Inventory_Enhancer
+[rm_steam_sih]:           userscripts/Steam_Inventory_Enhancer
+[js_steam_sih]:           https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js
 <!-- ----- Steam unfollow all shown curators ----- -->
-[rm_steam_unfollow_asc]: userscripts/Steam_unfollow_all_shown_curators
-[js_steam_unfollow_asc]: https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js
+[rm_steam_unfollow_asc]:  userscripts/Steam_unfollow_all_shown_curators
+[js_steam_unfollow_asc]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js
 <!-- ----- ChatGPT Bulk and Quick Delete ----- -->
 [rm_chatgpt_baqd]:        userscripts/ChatGPT_Bulk_and_Quick_Delete
 [js_chatgpt_baqd]:        https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js
@@ -48,16 +48,16 @@
 [rm_twitch_autroreload]:  userscripts/Autoreload_Streams
 [js_twitch_autroreload]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js
 <!-- ----- Twitch Channel Points Bonus Collector ----- -->
-[rm_twitch_cpbc]:   userscripts/Twitch_Channel_Points_Bonus_Collector
-[js_twitch_cpbc]:   https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Channel_Points_Bonus_Collector/script.user.js
+[rm_twitch_cpbc]:         userscripts/Twitch_Channel_Points_Bonus_Collector
+[js_twitch_cpbc]:         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Channel_Points_Bonus_Collector/script.user.js
 <!-- ----- Twitch Command Buttons ----- -->
-[rm_twitch_commands]:  userscripts/Twitch_Command_Buttons
-[js_twitch_hitsquad]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
-[js_twitch_stagger]:   https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js
-[js_twitch_lootnova]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js
-[b_btn_hitsquad]:      https://img.shields.io/badge/HitSquad-orange?style=flat-square&logo=tampermonkey
-[b_btn_stagger]:       https://img.shields.io/badge/Staggerrilla-orange?style=flat-square&logo=tampermonkey
-[b_btn_lootnova]:      https://img.shields.io/badge/LootNova-orange?style=flat-square&logo=tampermonkey
+[rm_twitch_commands]:     userscripts/Twitch_Command_Buttons
+[js_twitch_hitsquad]:     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
+[js_twitch_stagger]:      https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js
+[js_twitch_lootnova]:     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js
+[b_ins_twitch_hitsquad]:  https://img.shields.io/badge/HitSquad-orange?style=flat-square&logo=tampermonkey
+[b_ins_twitch_stagger]:   https://img.shields.io/badge/Staggerrilla-orange?style=flat-square&logo=tampermonkey
+[b_ins_twitch_lootnova]:  https://img.shields.io/badge/LootNova-orange?style=flat-square&logo=tampermonkey
 <!-- ----- StreamElements improvements ----- -->
 [rm_streamelements_imp]:  userscripts/StreamElements_improvements
 [js_streamelements_imp]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js
