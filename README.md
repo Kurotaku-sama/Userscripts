@@ -10,9 +10,9 @@
 | **Steam unfollow all shown curators**         |  🇺🇸  | [![][b_rm]][rm_steam_unfollow_asc] | [![][b_ins_pur]][js_steam_unfollow_asc]  |
 | **ChatGPT Bulk and Quick Delete**             |  🇺🇸  | [![][b_rm]][rm_chatgpt_baqd]       | [![][b_ins_pur]][js_chatgpt_baqd]        |
 | **Highlight and Filter Searchengine**         |  🇺🇸  | [![][b_rm]][rm_search_filter]      | [![][b_ins_pur]][js_search_filter]       |
+| **Autoreload Streams**                        |  🇺🇸  | [![][b_rm]][rm_twitch_autroreload] | [![][b_ins_pur]][js_twitch_autroreload]  |
 | **Twitch Channel Points Bonus Collector**     |  🇺🇸  | [![][b_rm]][rm_twitch_cpbc]        | [![][b_ins_pur]][js_twitch_cpbc]         |
 | **Twitch Command Buttons**                    |  🇺🇸  | [![][b_rm]][rm_twitch_commands]    | [![][badge_btn_hitsquad]][js_twitch_hitsquad]<br>[![][badge_btn_stagger]][js_twitch_stagger]<br>[![][badge_btn_lootnova]][js_twitch_lootnova]    |
-| **Autoreload Streams**                        |  🇺🇸  | [![][b_rm]][rm_twitch_autroreload] | [![][b_ins_pur]][js_twitch_autroreload]  |
 | **StreamElements improvements**               |  🇺🇸  | [![][b_rm]][rm_streamelements_imp] | [![][b_ins_pur]][js_streamelements_imp]  |
 | **Genshin Impact Teyvat Map Automate**        |  🇺🇸  | [![][b_rm]][rm_genshin_map]        | [![][b_ins_pur]][js_genshin_map]         |
 | **MyFigureCollection Downloader**             |  🇺🇸  | [![][b_rm]][rm_mfc_downloader]     | [![][b_ins_pur]][js_mfc_downloader]      |
@@ -43,6 +43,9 @@
 <!-- ----- Highlight and Filter Searchengine ----- -->
 [rm_search_filter]:       userscripts/Highlight_and_Filter_Searchengine_Results
 [js_search_filter]:       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
+<!-- ----- Autoreload Streams ----- -->
+[rm_twitch_autroreload]:  userscripts/Autoreload_Streams
+[js_twitch_autroreload]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js
 <!-- ----- Twitch Channel Points Bonus Collector ----- -->
 [rm_twitch_cpbc]:   userscripts/Twitch_Channel_Points_Bonus_Collector
 [js_twitch_cpbc]:   https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Channel_Points_Bonus_Collector/script.user.js
@@ -54,9 +57,6 @@
 [badge_btn_hitsquad]:  https://img.shields.io/badge/HitSquad-orange?style=flat-square&logo=tampermonkey
 [badge_btn_stagger]:   https://img.shields.io/badge/Stagger-orange?style=flat-square&logo=tampermonkey
 [badge_btn_lootnova]:  https://img.shields.io/badge/LootNova-orange?style=flat-square&logo=tampermonkey
-<!-- ----- Autoreload Streams ----- -->
-[rm_twitch_autroreload]:  userscripts/Autoreload_Streams
-[js_twitch_autroreload]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js
 <!-- ----- StreamElements improvements ----- -->
 [rm_streamelements_imp]:  userscripts/StreamElements_improvements
 [js_streamelements_imp]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js
