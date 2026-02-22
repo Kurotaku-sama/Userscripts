@@ -12,7 +12,7 @@
 | **Highlight and Filter Searchengine**         |  🇺🇸  | [![][b_rm]][rm_search_filter]      | [![][b_ins_pur]][js_search_filter]       |
 | **Autoreload Streams**                        |  🇺🇸  | [![][b_rm]][rm_twitch_autroreload] | [![][b_ins_pur]][js_twitch_autroreload]  |
 | **Twitch Channel Points Bonus Collector**     |  🇺🇸  | [![][b_rm]][rm_twitch_cpbc]        | [![][b_ins_pur]][js_twitch_cpbc]         |
-| **Twitch Command Buttons**                    |  🇺🇸  | [![][b_rm]][rm_twitch_commands]    | [![][badge_btn_hitsquad]][js_twitch_hitsquad]<br>[![][badge_btn_stagger]][js_twitch_stagger]<br>[![][badge_btn_lootnova]][js_twitch_lootnova]    |
+| **Twitch Command Buttons**                    |  🇺🇸  | [![][b_rm]][rm_twitch_commands]    | [![][b_btn_hitsquad]][js_twitch_hitsquad]<br>[![][b_btn_stagger]][js_twitch_stagger]<br>[![][b_btn_lootnova]][js_twitch_lootnova]    |
 | **StreamElements improvements**               |  🇺🇸  | [![][b_rm]][rm_streamelements_imp] | [![][b_ins_pur]][js_streamelements_imp]  |
 | **Genshin Impact Teyvat Map Automate**        |  🇺🇸  | [![][b_rm]][rm_genshin_map]        | [![][b_ins_pur]][js_genshin_map]         |
 | **MyFigureCollection Downloader**             |  🇺🇸  | [![][b_rm]][rm_mfc_downloader]     | [![][b_ins_pur]][js_mfc_downloader]      |
@@ -54,9 +54,9 @@
 [js_twitch_hitsquad]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
 [js_twitch_stagger]:   https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js
 [js_twitch_lootnova]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js
-[badge_btn_hitsquad]:  https://img.shields.io/badge/HitSquad-orange?style=flat-square&logo=tampermonkey
-[badge_btn_stagger]:   https://img.shields.io/badge/Stagger-orange?style=flat-square&logo=tampermonkey
-[badge_btn_lootnova]:  https://img.shields.io/badge/LootNova-orange?style=flat-square&logo=tampermonkey
+[b_btn_hitsquad]:      https://img.shields.io/badge/HitSquad-orange?style=flat-square&logo=tampermonkey
+[b_btn_stagger]:       https://img.shields.io/badge/Staggerrilla-orange?style=flat-square&logo=tampermonkey
+[b_btn_lootnova]:      https://img.shields.io/badge/LootNova-orange?style=flat-square&logo=tampermonkey
 <!-- ----- StreamElements improvements ----- -->
 [rm_streamelements_imp]:  userscripts/StreamElements_improvements
 [js_streamelements_imp]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js
@@ -94,6 +94,7 @@
 ---
 
 ## Legend
+
 | Symbol | Status      | Description                                    |
 | :----: | :---------: | :--------------------------------------------- |
 | 🟣     | Maintained  | Actively maintained and updated                |
