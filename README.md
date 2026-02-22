@@ -8,12 +8,12 @@
 | :-------------------------------------------- | :--: | :--------------------------------: | :--------------------------------------: |
 | **Steam Inventory Enhancer**                  |  🇺🇸  | [![][b_rm]][rm_steam_sih]          | [![][b_ins_pur]][js_steam_sih]           |
 | **Steam unfollow all shown curators**         |  🇺🇸  | [![][b_rm]][rm_steam_unfollow_asc] | [![][b_ins_pur]][js_steam_unfollow_asc]  |
+| **ChatGPT Bulk and Quick Delete**             |  🇺🇸  | [![][b_rm]][rm_chatgpt_baqd]       | [![][b_ins_pur]][js_chatgpt_baqd]        |
+| **Highlight and Filter Searchengine**         |  🇺🇸  | [![][b_rm]][rm_search_filter]      | [![][b_ins_pur]][js_search_filter]       |
 | **Twitch Channel Points Bonus Collector**     |  🇺🇸  | [![][b_rm]][rm_twitch_cpbc]        | [![][b_ins_pur]][js_twitch_cpbc]         |
 | **Twitch Command Buttons**                    |  🇺🇸  | [![][b_rm]][rm_twitch_commands]    | [![][badge_btn_hitsquad]][js_twitch_hitsquad]<br>[![][badge_btn_stagger]][js_twitch_stagger]<br>[![][badge_btn_lootnova]][js_twitch_lootnova]    |
 | **Autoreload Streams**                        |  🇺🇸  | [![][b_rm]][rm_twitch_autroreload] | [![][b_ins_pur]][js_twitch_autroreload]  |
 | **StreamElements improvements**               |  🇺🇸  | [![][b_rm]][rm_streamelements_imp] | [![][b_ins_pur]][js_streamelements_imp]  |
-| **ChatGPT Bulk and Quick Delete**             |  🇺🇸  | [![][b_rm]][rm_chatgpt_baqd]       | [![][b_ins_pur]][js_chatgpt_baqd]        |
-| **Highlight and Filter Searchengine**         |  🇺🇸  | [![][b_rm]][rm_search_filter]      | [![][b_ins_pur]][js_search_filter]       |
 | **Genshin Impact Teyvat Map Automate**        |  🇺🇸  | [![][b_rm]][rm_genshin_map]        | [![][b_ins_pur]][js_genshin_map]         |
 | **MyFigureCollection Downloader**             |  🇺🇸  | [![][b_rm]][rm_mfc_downloader]     | [![][b_ins_pur]][js_mfc_downloader]      |
 | **givee.club & giveaway.su improvements**     |  🇺🇸  | [![][b_rm]][rm_gicl_gisu_imp]      | [![][b_ins_pur]][js_gicl_gisu_imp]       |
@@ -37,6 +37,12 @@
 <!-- ----- Steam unfollow all shown curators ----- -->
 [rm_steam_unfollow_asc]: userscripts/Steam_unfollow_all_shown_curators
 [js_steam_unfollow_asc]: https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js
+<!-- ----- ChatGPT Bulk and Quick Delete ----- -->
+[rm_chatgpt_baqd]:        userscripts/ChatGPT_Bulk_and_Quick_Delete
+[js_chatgpt_baqd]:        https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js
+<!-- ----- Highlight and Filter Searchengine ----- -->
+[rm_search_filter]:       userscripts/Highlight_and_Filter_Searchengine_Results
+[js_search_filter]:       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
 <!-- ----- Twitch Channel Points Bonus Collector ----- -->
 [rm_twitch_cpbc]:   userscripts/Twitch_Channel_Points_Bonus_Collector
 [js_twitch_cpbc]:   https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Channel_Points_Bonus_Collector/script.user.js
@@ -54,12 +60,6 @@
 <!-- ----- StreamElements improvements ----- -->
 [rm_streamelements_imp]:  userscripts/StreamElements_improvements
 [js_streamelements_imp]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js
-<!-- ----- ChatGPT Bulk and Quick Delete ----- -->
-[rm_chatgpt_baqd]:        userscripts/ChatGPT_Bulk_and_Quick_Delete
-[js_chatgpt_baqd]:        https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js
-<!-- ----- Highlight and Filter Searchengine ----- -->
-[rm_search_filter]:       userscripts/Highlight_and_Filter_Searchengine_Results
-[js_search_filter]:       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
 <!-- ----- Genshin Impact Teyvat Map Automate ----- -->
 [rm_genshin_map]:         userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins
 [js_genshin_map]:         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins/script.user.js
