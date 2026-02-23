@@ -2,7 +2,7 @@
 // @name            StreamElements improvements
 // @name:de         StreamElements Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.7.9
+// @version         1.7.10
 // @description     A script for some improvements for StreamElements
 // @description:de  Ein Skript für einige Verbesserungen für StreamElements
 // @author          Kurotaku
@@ -506,7 +506,7 @@ function get_hidden_items_array() {
 }
 
 GM_addStyle(`
-body > div > div {
+#root > div > .w-full {
     margin: unset !important;
 }
 
