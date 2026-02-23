@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitch staggerrilla command buttons
 // @namespace       https://kurotaku.de
-// @version         2.0.10
+// @version         2.0.11
 // @description     Adds buttons to send commands in the Twitch chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -40,32 +40,32 @@ async function init_gm_config() {
         id: config_id,
         title: 'Twitch Staggerrilla Command Buttons',
         fields: {
-            buttons_general: {
-                section: ['Buttons'],
-                type: 'checkbox',
-                default: true,
-                label: 'General buttons',
-            },
-            voucher_buttons: {
-                section: ['Voucher'],
-                type: 'checkbox',
-                default: true,
-                label: 'Enable Voucher redemption buttons',
-            },
-            irc: {
-                section: ['IRC'],
-                type: 'checkbox',
-                default: false,
-                label: 'Use IRC (Recommended! Requires Oauth)',
-            },
-            auth_username: {
-                label: 'Username',
-                type: 'textbox',
-            },
-            auth_oauth: {
-                label: 'Oauth Token. Generate here: <a href="https://twitchtokengenerator.com" target="_blank">twitchtokengenerator.com</a>',
-                type: 'textbox',
-            },
+            // buttons_general: {
+            //     section: ['Buttons'],
+            //     type: 'checkbox',
+            //     default: true,
+            //     label: 'General buttons',
+            // },
+            // voucher_buttons: {
+            //     section: ['Voucher'],
+            //     type: 'checkbox',
+            //     default: true,
+            //     label: 'Enable Voucher redemption buttons',
+            // },
+            // irc: {
+            //     section: ['IRC'],
+            //     type: 'checkbox',
+            //     default: false,
+            //     label: 'Use IRC (Recommended! Requires Oauth)',
+            // },
+            // auth_username: {
+            //     label: 'Username',
+            //     type: 'textbox',
+            // },
+            // auth_oauth: {
+            //     label: 'Oauth Token. Generate here: <a href="https://twitchtokengenerator.com" target="_blank">twitchtokengenerator.com</a>',
+            //     type: 'textbox',
+            // },
             show_streamelements_points: {
                 section: ['Miscellaneous'],
                 type: 'checkbox',
@@ -87,11 +87,11 @@ async function init_gm_config() {
                 default: true,
                 label: 'Hide Power-Ups in Store',
             },
-            prevent_shadowban: {
-                type: 'checkbox',
-                default: true,
-                label: 'Prevent Shadowban. Commands become random case.<br>Shadowban means your messages temporarily don\'t appear.<br>Without IRC, you can\'t see if you\'re shadowbanned',
-            },
+            // prevent_shadowban: {
+            //     type: 'checkbox',
+            //     default: true,
+            //     label: 'Prevent Shadowban. Commands become random case.<br>Shadowban means your messages temporarily don\'t appear.<br>Without IRC, you can\'t see if you\'re shadowbanned',
+            // },
             custom_css_styles: {
                 label: 'Custom CSS Styles:',
                 type: 'textarea',
@@ -103,25 +103,4 @@ async function init_gm_config() {
         frame: create_configuration_container(),
     });
     await wait_for_gm_config();
-}
-
-function generate_button_groups() {
-    let buttongroups = "";
-    if(GM_config.get("buttons_general"))
-        buttongroups += `${btngrp_label("General")}
-                <div class="k-buttongroup">
-                ${btngrp_button("bleep", "Bleep")}
-                ${btngrp_button("bloop", "Bloop")}
-                ${btngrp_button("fish", "Fish")}
-                </div>`;
-
-    return(buttongroups);
-}
-
-async function generate_voucher_buttons() {
-    insert_voucher_buttons(
-        generate_voucher_button("20k Bubbers", "+20k") +
-        generate_voucher_button("50k Bubbers", "+50k") +
-        generate_voucher_button("100k Bubbers!", "+100k")
-    );
 }

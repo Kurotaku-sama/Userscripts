@@ -4,18 +4,24 @@
 
 ### This script is available in three versions, tailored for each specific streamer:
 
-**[HitSquadGodFather](https://www.twitch.tv/hitsquadgodfather)**<br>
-[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js)
-
- **[Staggerrilla](https://www.twitch.tv/staggerrilla)**<br>
-[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js)
-
- **[LootNova](https://www.twitch.tv/lootnova)**<br>
-[![Install](https://img.shields.io/badge/install-userscript-orange?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js)
-
-> ⚠️ **Note:** I do not maintain these scripts anymore as HitSquadGodFather got banned sadly and LootNova became a scam channel.
+> ⚠️ **Note:** I do not maintain these scripts anymore because:
+> - HitSquadGodFather got banned
+> - Staggerilla requested me to remove the Button functionality
+> - LootNova became a scam channel.<br><br>
+> However they still can be used on other channels as the library allows it to easily create versions for different streams!
 
 ---
+
+| Streamer | Install |
+| :--- | :--- |
+| **HitSquadGodFather** | [![][b_ins_ora]][js_twitch_hitsquad] |
+| **Staggerrilla** | [![][b_ins_ora]][js_twitch_stagger] |
+| **LootNova** | [![][b_ins_ora]][js_twitch_lootnova] |
+
+[b_ins_ora]:          https://img.shields.io/badge/Install-orange?style=flat-square&logo=tampermonkey
+[js_twitch_hitsquad]: https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
+[js_twitch_stagger]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_staggerilla.user.js
+[js_twitch_lootnova]: https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_lootnova.user.js
 
 ## Table of Contents
 

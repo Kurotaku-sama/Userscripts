@@ -1,19 +1,19 @@
 async function main() {
     await init_gm_config();
 
-    const custom_css = GM_config.get("custom_css_styles")?.trim();
+    const custom_css = (GM_config.fields["custom_css_styles"] ? GM_config.get("custom_css_styles") : "")?.trim();
     if (custom_css)
         GM_addStyle(custom_css);
 
-    if(GM_config.get("hide_powerups"))
+    if (GM_config.fields["hide_powerups"] && GM_config.get("hide_powerups"))
         hide_powerups();
 
-    if(GM_config.get("collect_point_bonus"))
+    if (GM_config.fields["collect_point_bonus"] && GM_config.get("collect_point_bonus"))
         collect_point_bonus();
 
     wait_for_element(".chat-input").then(async () => {
-        if(GM_config.get("irc"))
-            if(GM_config.get("auth_username") != "" && GM_config.get("auth_oauth") != "")
+        if (GM_config.fields["irc"] && GM_config.get("irc"))
+            if ((GM_config.fields["auth_username"] && GM_config.get("auth_username") != "") && (GM_config.fields["auth_oauth"] && GM_config.get("auth_oauth") != ""))
                 connect_to_twitch();
             else
                 Swal.fire({
@@ -24,18 +24,18 @@ async function main() {
                     backdrop: true,
                 });
 
-        if(GM_config.get("notifications"))
+        if (GM_config.fields["notifications"] && GM_config.get("notifications"))
             observe_chat_for_username_mentions();
 
-        wait_for_element(".community-points-summary").then(async () => {
-            if(GM_config.get("voucher_buttons"))
+        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof generate_voucher_buttons === "function")
+            wait_for_element(".community-points-summary").then(async () => {
                 generate_voucher_buttons();
-        });
+            });
 
-        if(GM_config.get("show_streamelements_points"))
+        if (GM_config.fields["show_streamelements_points"] && GM_config.get("show_streamelements_points"))
             show_streamelements_points();
 
-        insert_command_buttons(generate_button_groups());
+        insert_command_buttons();
     });
 }
 
@@ -241,8 +241,9 @@ function connect_to_twitch() {
         console.log("Twitch connection started.");
 
         // Authenticate and join the channel
-        socket.send(`PASS ${GM_config.get("auth_oauth").includes("oauth:") ? GM_config.get("auth_oauth") : "oauth:" + GM_config.get("auth_oauth")}`);
-        socket.send(`NICK ${GM_config.get("auth_username")}`);
+        const oauth = GM_config.fields["auth_oauth"] ? GM_config.get("auth_oauth") : "";
+        socket.send(`PASS ${oauth.includes("oauth:") ? oauth : "oauth:" + oauth}`);
+        socket.send(`NICK ${GM_config.fields["auth_username"] ? GM_config.get("auth_username") : ""}`);
         socket.send(`JOIN #${twitch_channel}`);
 
         // Start ping timer to prevent disconnect
@@ -307,7 +308,13 @@ function send_message_with_irc(message) {
 // UI and Button Handling
 // ========================
 
-function insert_command_buttons(buttongroups) {
+function insert_command_buttons() {
+    let buttongroups = "";
+    if (typeof generate_button_groups === "function")
+        buttongroups = generate_button_groups()
+
+    const html_buttongroups = buttongroups ? `<div id="k-actions" class="k-buttongroups">${buttongroups}</div>` : "";
+
     let html = `
         <div id="k-main-container" class="k-main-container">
             <div id="k-streamelements_points" class="k-streamelements_points"></div>
@@ -318,7 +325,7 @@ function insert_command_buttons(buttongroups) {
                 <div id="k-cart-button" title="Open store">🛒</div>
                 <div id="k-open-settings" title="Userscript settings">⚙️</div>
             </div>
-            <div id="k-actions" class="k-buttongroups">${buttongroups}</div>
+            ${html_buttongroups}
         </div>
     `;
     document.querySelector(".chat-input").insertAdjacentHTML("beforebegin", html);
@@ -629,21 +636,32 @@ async function collect_point_bonus() {
 // ========================
 
 async function twitch_store_observer() {
-    // Helper function that detects if the item page is opened
+    // Check if features are enabled using snake_case variables
+    const links_enabled = GM_config.fields["clickable_links_in_description"] && GM_config.get("clickable_links_in_description");
+    const bulk_enabled = GM_config.fields["bulk_purchase_panel"] && GM_config.get("bulk_purchase_panel");
+
+    // Exit if both features are disabled to save resources
+    if (!links_enabled && !bulk_enabled) return;
+
     const selector = "#channel-points-reward-center-body > .reward-center-body > div:not(.rewards-list)";
-    const container = await wait_for_element(selector);
 
-    if (container.querySelector(".reward-icon__image")) {
-        if(GM_config.get("clickable_links_in_description"))
-            clickable_links_in_description(container);
+    // Use while loop instead of recursion for better stability
+    while (true) {
+        // Wait for the reward item detail page to appear
+        const container = await wait_for_element(selector);
 
-        if (GM_config.get("bulk_purchase_panel"))
-            insert_twitch_store_amount_panel(container);
+        if (container.querySelector(".reward-icon__image")) {
+            // Apply features based on initial config check
+            if (links_enabled)
+                clickable_links_in_description(container);
+
+            if (bulk_enabled)
+                insert_twitch_store_amount_panel(container);
+        }
+
+        // Wait until the detail panel is closed before the next check
+        await wait_for_element_to_disappear(selector);
     }
-
-    // Wait till panel disappears
-    await wait_for_element_to_disappear(selector);
-    twitch_store_observer();
 }
 
 // ========================
@@ -1006,6 +1024,7 @@ GM_addStyle(`
 }
 
 .k-main-container {
+    min-height: 30px;
     min-width: 300px;
     position: relative;
     background: inherit;
