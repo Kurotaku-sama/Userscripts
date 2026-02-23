@@ -15,8 +15,8 @@
 | Streamer | Install |
 | :--- | :--- |
 | **HitSquadGodFather** | [![][b_ins_ora]][js_twitch_hitsquad] |
-| **Staggerrilla** | [![][b_ins_ora]][js_twitch_stagger] |
-| **LootNova** | [![][b_ins_ora]][js_twitch_lootnova] |
+| **Staggerrilla**      | [![][b_ins_ora]][js_twitch_stagger]  |
+| **LootNova**          | [![][b_ins_ora]][js_twitch_lootnova] |
 
 [b_ins_ora]:          https://img.shields.io/badge/Install-orange?style=flat-square&logo=tampermonkey
 [js_twitch_hitsquad]: https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
