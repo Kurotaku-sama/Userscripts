@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.1.2
+// @version         1.1.3
 // @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
 // @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
@@ -105,6 +105,16 @@ async function init_gm_config() {
                 type: 'checkbox',
                 default: true,
                 label: 'Enable Filter & Search'
+            },
+            filter_search_by_appid: {
+                type: 'checkbox',
+                default: false,
+                label: 'Search by AppID'
+            },
+            filter_show_only_missing: {
+                type: 'checkbox',
+                default: true,
+                label: 'Enable "Hide Owned" Filter Button'
             },
             filter_search_ctrl_f_hotkey: {
                 type: 'checkbox',
@@ -214,7 +224,7 @@ class Sidebar {
                 .games_list_tabs {
                     display: grid !important;
                     grid-template-columns: repeat(${rows}, 1fr);
-                    overflow-y: auto;
+                    overflow-y: scroll;
                     overflow-x: hidden;
                     max-height: min(100vh, 600px);
                 }
@@ -897,6 +907,8 @@ class Favorites {
 // ==========================================================
 class Filter {
     static app_data_cache = [];
+    static owned_app_ids = null; // Stores the user's owned app ids after fetch
+    static hide_owned_active = false; // Toggle state for the "Hide Owned" filter
 
     static async init() {
         const container = await wait_for_element("#games_list_public");
@@ -918,6 +930,19 @@ class Filter {
         const active_sort = GM_getValue("sie_filter_sort", "amount_desc");
         const total_count = this.app_data_cache.length;
 
+        // Define placeholder text based on config setting
+        const search_by_appid = GM_config.get("filter_search_by_appid");
+        const placeholder_text = search_by_appid
+            ? `Search ${total_count} inventories (Name or ID)...`
+            : `Search ${total_count} inventories...`;
+
+        // Check if the "Hide Owned" feature is enabled in config
+        const show_missing_enabled = GM_config.get("filter_show_only_missing");
+
+        // Check if the viewed inventory belongs to the logged-in user
+        // Using UserYou.strSteamId to compare the owner of the page with the own g_steamID
+        const is_own_profile = (typeof UserYou !== 'undefined' && UserYou.strSteamId === g_steamID);
+
         const filter_html = `
             <div id="sie_filter_controls">
                 <div class="sie_filter_top_row">
@@ -927,11 +952,12 @@ class Filter {
                         <button id="sie_sort_name_asc" class="btn_grey_black btn_small ${active_sort === 'name_asc' ? 'active' : ''}" title="Name: A to Z"><span>Name ▴</span></button>
                         <button id="sie_sort_name_desc" class="btn_grey_black btn_small ${active_sort === 'name_desc' ? 'active' : ''}" title="Name: Z to A"><span>Name ▾</span></button>
                     </div>
+                    ${(show_missing_enabled && !is_own_profile) ? `<button id="sie_filter_hide_owned" class="btn_grey_black btn_small" title="Hide inventories you already own"><span>Hide Owned</span></button>` : ''}
                     <button id="sie_filter_reset_all" class="btn_grey_black" title="Reset all filters"><span>✕</span></button>
                 </div>
 
                 <div class="sie_input_wrapper">
-                    <input type="text" id="sie_filter_search" placeholder="Search ${total_count} inventories..." autocomplete="off">
+                    <input type="text" id="sie_filter_search" placeholder="${placeholder_text}" autocomplete="off">
                     <span class="sie_clear_input" data-target="sie_filter_search">✕</span>
                 </div>
 
@@ -956,13 +982,19 @@ class Filter {
         document.getElementById("sie_sort_name_asc").onclick = () => this.sort_list("name_asc");
         document.getElementById("sie_sort_name_desc").onclick = () => this.sort_list("name_desc");
 
+        // Toggle Owned Filter Event Listener
+        const btn_owned = document.getElementById("sie_filter_hide_owned");
+        if (btn_owned) {
+            btn_owned.onclick = () => this.toggle_hide_owned();
+        }
+
         // Combined Input Event Listeners
         const inputs = ["sie_filter_search", "sie_filter_min", "sie_filter_max"];
         inputs.forEach(id => document.getElementById(id).oninput = () => this.apply_filters());
 
         // Apply number restriction helper
-        this.restrict_to_numbers(document.getElementById("sie_filter_min"));
-        this.restrict_to_numbers(document.getElementById("sie_filter_max"));
+        restrict_input_to_numbers(document.getElementById("sie_filter_min"));
+        restrict_input_to_numbers(document.getElementById("sie_filter_max"));
 
         // Individual Clear Buttons (X)
         document.querySelectorAll(".sie_clear_input").forEach(btn => {
@@ -976,6 +1008,11 @@ class Filter {
         // Global Reset Button
         document.getElementById("sie_filter_reset_all").onclick = () => {
             inputs.forEach(id => document.getElementById(id).value = "");
+            this.hide_owned_active = false;
+            if (btn_owned) {
+                btn_owned.classList.remove("active");
+                btn_owned.querySelector("span").innerText = "Hide Owned";
+            }
             this.apply_filters();
         };
     }
@@ -995,6 +1032,10 @@ class Filter {
             const name_el = tab.querySelector(".games_list_tab_name");
             const count_el = tab.querySelector(".games_list_tab_number");
 
+            // Extract AppID from the href attribute
+            const href_attr = tab.getAttribute("href") || "";
+            const app_id = href_attr.replace('#', '');
+
             const name = name_el ? name_el.innerText.trim() : "";
             const text_amount = count_el ? count_el.innerText : "0";
             // Extract numbers only for accurate integer sorting
@@ -1003,6 +1044,7 @@ class Filter {
             this.app_data_cache.push({
                 node: tab,
                 name: name,
+                app_id: app_id,
                 amount: amount
             });
         });
@@ -1037,32 +1079,89 @@ class Filter {
         });
     }
 
+    static async toggle_hide_owned() {
+        // Fetch user's own inventory app ids if not already cached
+        if (this.owned_app_ids === null) {
+            Swal.fire({
+                title: "Detecting owned inventories...",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                theme: "dark",
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                // Fetch the current user's own profile inventory using the own g_steamID
+                const response = await fetch(`https://steamcommunity.com/profiles/${g_steamID}/inventory/`);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+
+                // Extract all appids from the sidebar tabs of the user's own inventory
+                const own_tabs = doc.querySelectorAll(".games_list_tab");
+                this.owned_app_ids = Array.from(own_tabs).map(tab => {
+                    const href = tab.getAttribute("href") || "";
+                    return href.replace('#', '');
+                }).filter(id => id !== "");
+
+                Swal.close();
+            } catch (err) {
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to load your owned inventory list.",
+                    icon: "error",
+                    theme: "dark"
+                });
+                return;
+            }
+        }
+
+        // Toggle state and update UI
+        this.hide_owned_active = !this.hide_owned_active;
+        const btn = document.getElementById("sie_filter_hide_owned");
+
+        if (this.hide_owned_active) {
+            btn.classList.add("active");
+            btn.querySelector("span").innerText = "Show Owned";
+        } else {
+            btn.classList.remove("active");
+            btn.querySelector("span").innerText = "Hide Owned";
+        }
+
+        this.apply_filters();
+    }
+
     static apply_filters() {
         const query = document.getElementById("sie_filter_search").value.toLowerCase();
         const min = parseInt(document.getElementById("sie_filter_min").value) || 0;
         const max = parseInt(document.getElementById("sie_filter_max").value) || Infinity;
 
+        // Retrieve config setting for appid search
+        const search_by_appid = GM_config.get("filter_search_by_appid");
+
         this.app_data_cache.forEach(item => {
-            const matches_text = item.name.toLowerCase().includes(query);
+            // Check if search matches name
+            const matches_name = item.name.toLowerCase().includes(query);
+
+            // Check if search matches app_id only if enabled in config
+            const matches_id = search_by_appid ? item.app_id.includes(query) : false;
+
+            const matches_text = matches_name || matches_id;
             const matches_range = item.amount >= min && item.amount <= max;
 
-            // Hide element if it doesn't match both text and amount criteria
-            if (matches_text && matches_range) return item.node.classList.remove("sie_hidden_by_search");
+            // Check if the item should be hidden based on "Hide Owned" toggle
+            let matches_owned = true;
+            if (this.hide_owned_active && this.owned_app_ids) {
+                // Hide if the app_id is in our owned list
+                matches_owned = !this.owned_app_ids.includes(item.app_id);
+            }
+
+            // Hide element if it doesn't match all criteria
+            if (matches_text && matches_range && matches_owned) return item.node.classList.remove("sie_hidden_by_search");
             item.node.classList.add("sie_hidden_by_search");
         });
-    }
-
-    static restrict_to_numbers(element) {
-        element.onkeydown = (e) => {
-            // Allow control keys: backspace, delete, tab, escape, enter, ctrl, navigation
-            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
-                (e.ctrlKey === true || e.metaKey === true) ||
-                (e.keyCode >= 35 && e.keyCode <= 40)) return;
-
-            // Block non-number keys (top row and numpad)
-            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105))
-                e.preventDefault();
-        };
     }
 
     static override_hotkey() {
