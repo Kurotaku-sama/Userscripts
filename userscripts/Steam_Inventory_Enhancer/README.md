@@ -33,6 +33,8 @@ This userscript enhances the Steam inventory experience by adding essential qual
 
 ### Inventory Filtering
 - **Advanced Search:** Find specific game inventories instantly with search field.
+- **Search by AppID:** Toggleable option in settings to search inventories by their AppID.
+- **Hide Owned Inventories:** New toggle button to hide all inventories you already own (compares with your own inventory list).
 - **Amount Range:** Filter inventories by item count using Min and Max fields.
 - **Multi-Sort:** Toggle between Name and Amount sorting (Ascending ▴ / Descending ▾).
 - **Quick Reset:** Clear individual filters or reset everything with a single click.
