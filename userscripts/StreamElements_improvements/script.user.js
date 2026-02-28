@@ -288,7 +288,7 @@ function get_item_table() {
     document.querySelector(SELECTOR.FILTER_BAR)?.remove();
 
     // Download table button
-    let button_download_as_csv = "<a id='download-item-table' class='md-stroked md-button md-dark-theme'>Download table as CSV</a>";
+    let button_download_as_csv = `<a id='download-item-table' ${BUTTON_CLASSES}>Download table as CSV</a>`;
     store_items_container.style.display = "unset"; // Change from grid to unset to allow 100 % width
     store_items_container.innerHTML = button_download_as_csv + table;
     document.getElementById("download-item-table").addEventListener ("click", function() {download_table_as_csv("item-table")}, false);
@@ -669,5 +669,12 @@ ${SELECTOR.ITEMS} {
 .table-item-cost,
 .table-item-stock {
     text-align: center;
+}
+
+#download-item-table {
+    display: block;
+    max-width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 `);
