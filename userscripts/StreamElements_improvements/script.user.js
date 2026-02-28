@@ -2,7 +2,7 @@
 // @name            StreamElements improvements
 // @name:de         StreamElements Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.7.10
+// @version         1.7.11
 // @description     A script for some improvements for StreamElements
 // @description:de  Ein Skript für einige Verbesserungen für StreamElements
 // @author          Kurotaku
@@ -31,7 +31,7 @@ const SELECTOR = {
     SIDEBAR: "aside",
     STORE: "main .grid",
     FILTER_BAR: "main > div > div:first-of-type",
-    ITEMS: "main .grid .bg-bg-card",
+    ITEMS: "main .grid > div",
     ITEM: {
         TITLE: ":scope h3",
         DESC: ":scope > :nth-child(2) > :nth-child(1) > p",
@@ -527,6 +527,7 @@ main .grid .bg-bg-card div:nth-child(1) > span {
 
 /* ----- CUSTOM ELEMENTS ----- */
 #custom_container > a {
+    margin-bottom: 20px;
     display: block;
     text-align: center;
     margin-top: 15px;
