@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.1.3
+// @version         1.1.4
 // @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
 // @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
@@ -250,8 +250,10 @@ class Stacker {
     // Delay to prevent rate limiting (429) from Steam API
     static DELAY_MS = 300;
     static INV_AMOUNT = 1000;
+
     // Inventories where stacking is not supported or handled differently by Steam
-    static ITEM_STACKER_IGNORED_INVENTORIES = [753, 730, 440, 570, 238460, 252490, 304930];
+    // 440 TF2 | 570 Dota 2 | 730 Steam | 753 CS2 | 238460 BattleBlock Theater | 252490 Rust | 304930 Unturned | 1269260 Artifact Foundry
+    static ITEM_STACKER_IGNORED_INVENTORIES = [440, 570, 730, 753, 238460, 252490, 304930, 1269260];
 
     static init() {
         // Attempt to retrieve the required WebAPI token from the page source
@@ -1419,7 +1421,7 @@ GM_addStyle(`
 
     .games_list_tab > span {
         padding: 0;
-        line-height: 1;
+        line-height: 2;
     }
 
     .games_list_tab_icon {
