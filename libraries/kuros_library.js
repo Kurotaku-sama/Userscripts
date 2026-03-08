@@ -477,6 +477,7 @@ function create_configuration_container() {
         input[type="text"] {
             background-color: var(--input-bg-color);
             border: 1px solid var(--input-border-color);
+            border-radius: 4px !important;
             padding: 5px;
             width: 100%;
             box-sizing: border-box;
@@ -616,6 +617,40 @@ function create_configuration_container() {
             text-align: center;
             text-decoration: none;
             margin-bottom: var(--gap-size);
+        }
+
+        /* --- GM_config Field Layout Fix --- */
+        /* Stack fields vertically by default */
+        .config_var {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        /* Force label to the top (Position 1) */
+        .config_var .field_label {
+            order: 1 !important;
+        }
+
+        /* Force inputs/selects/textareas to the bottom (Position 2) */
+        .config_var input,
+        .config_var select,
+        .config_var textarea {
+            order: 2 !important;
+        }
+
+        /* Exception: Checkboxes should stay inline */
+        .config_var:has(input[type="checkbox"]) {
+            flex-direction: row !important;
+            align-items: center !important;
+        }
+
+        /* Ensure checkbox is on the left, label on the right */
+        .config_var:has(input[type="checkbox"]) input {
+            order: 1 !important;
+        }
+
+        .config_var:has(input[type="checkbox"]) label {
+            order: 2 !important;
         }
     `;
 
