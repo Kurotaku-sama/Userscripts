@@ -57,4 +57,5 @@ Inside the settings panel, one line per streamer:<br>
 ---
 
 ## Screenshot
+
 ![Settings](settings.png)
