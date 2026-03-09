@@ -21,3 +21,9 @@ All deletions are performed using ChatGPT’s internal backend API.
 - Bulk deletion of multiple chats via selection mode
 - Quick delete of single chats using Shift + Click
 - Export the currently opened chat as a TXT file
+
+---
+
+## Screenshot
+
+![Settings](settings.png)
