@@ -8,6 +8,7 @@
 | :-------------------------------------------- | :--: | :--------------------------------: | :--------------------------------------: |
 | **Steam Inventory Enhancer**                  |  🇺🇸  | [![][b_rm]][rm_steam_sih]          | [![][b_ins_pur]][js_steam_sih]           |
 | **Steam unfollow all shown curators**         |  🇺🇸  | [![][b_rm]][rm_steam_unfollow_asc] | [![][b_ins_pur]][js_steam_unfollow_asc]  |
+| **SteamDB Free Packages Claimer**             |  🇺🇸  | [![][b_rm]][rm_steamdb_fpc]        | [![][b_ins_pur]][js_steamdb_fpc]         |
 | **ChatGPT Bulk and Quick Delete**             |  🇺🇸  | [![][b_rm]][rm_chatgpt_baqd]       | [![][b_ins_pur]][js_chatgpt_baqd]        |
 | **Highlight and Filter Searchengine**         |  🇺🇸  | [![][b_rm]][rm_search_filter]      | [![][b_ins_pur]][js_search_filter]       |
 | **Autoreload Streams**                        |  🇺🇸  | [![][b_rm]][rm_twitch_autroreload] | [![][b_ins_pur]][js_twitch_autroreload]  |
@@ -38,6 +39,9 @@
 <!-- ----- Steam unfollow all shown curators ----- -->
 [rm_steam_unfollow_asc]:  userscripts/Steam_unfollow_all_shown_curators
 [js_steam_unfollow_asc]:  https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js
+<!-- ----- SteamDB Free Packages Claimer ----- -->
+[rm_steamdb_fpc]:         userscripts/SteamDB_Free_Packages_Claimer
+[js_steamdb_fpc]:         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/SteamDB_Free_Packages_Claimer/script.user.js
 <!-- ----- ChatGPT Bulk and Quick Delete ----- -->
 [rm_chatgpt_baqd]:        userscripts/ChatGPT_Bulk_and_Quick_Delete
 [js_chatgpt_baqd]:        https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js
