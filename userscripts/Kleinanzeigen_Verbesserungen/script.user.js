@@ -2,7 +2,7 @@
 // @name            Kleinanzeigen improvements
 // @name:de         Kleinanzeigen Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         2.7.4
+// @version         2.7.5
 // @description     Some improvements for kleinanzeigen.de
 // @description:de  Einige Verbesserungen für kleinanzeigen.de
 // @author          Kurotaku
@@ -309,12 +309,55 @@ async function anzeige_aufgeben_seite() {
     default_values_were_added = true;
 }
 
-function meins_to_nachrichten() {
-    GM_addStyle(`#site-mainnav-my {width: 70px;}`);
-    wait_for_element('#site-mainnav-my').then(async () => {
-        document.querySelector("#site-mainnav-my-link .ka-site-mainnav--item--text").innerHTML = document.querySelector("#site-subnav-msgbox").innerHTML;
-        document.querySelector("#site-mainnav-my-link").href = document.querySelector("#site-subnav-msgbox").href;
-    });
+async function meins_to_nachrichten() {
+    const selector_parent = 'li[data-testid="nav-menu-item-my-ads-item"], #site-mainnav-my';
+    const selector_button = '#nav-menu-item-my-ads, #site-mainnav-my-link';
+    const selector_text = '.text-bodyRegularStrong, .ka-site-mainnav--item--text';
+    const clone_id = "nav-menu-item-my-ads-clone";
+
+    // Inject styles: hide original buttons and ensure only our clone is visible
+    GM_addStyle(`
+        ${selector_parent} { width: 70px !important; }
+        ${selector_button}:not([id="${clone_id}"]) { display: none !important; }
+        #${clone_id} { display: flex !important; }
+    `);
+
+    // Infinite loop to handle dynamic re-rendering of the navigation menu
+    while (true) {
+        // Wait until the parent navigation item is available in the DOM
+        const parent_li = await wait_for_element(selector_parent);
+        const original_button = parent_li.querySelector(selector_button);
+
+        // Check if the original exists and our clone is not already present
+        if (original_button && !parent_li.querySelector(`#${clone_id}`)) {
+            // Create a deep copy of the original button
+            const clone = original_button.cloneNode(true);
+            clone.id = clone_id;
+
+            // Update label to "Nachrichten" before injecting the clone
+            const text_label = clone.querySelector(selector_text);
+            if (text_label)
+                text_label.innerHTML = "Nachrichten";
+
+            // Forward hover event to the hidden original button to trigger the panel
+            clone.onmouseenter = () => {
+                original_button.click();
+            };
+
+            // Override click to navigate directly to the messages page
+            clone.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = "/m-nachrichten.html";
+            };
+
+            // Insert the customized clone into the DOM next to the hidden original
+            parent_li.insertBefore(clone, original_button);
+        }
+
+        // Wait until the clone is removed (e.g., by a page update) before restarting the loop
+        await wait_for_element_to_disappear(`#${clone_id}`);
+    }
 }
 
 function filter_search_containing_words() {
