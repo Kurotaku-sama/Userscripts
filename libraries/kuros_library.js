@@ -174,26 +174,26 @@ function wait_for_element(selector, container = document.documentElement) {
     })
 }
 
-function wait_for_element_to_disappear(selector, container = document.documentElement) {
+function wait_for_element_to_disappear(target, container = document.documentElement) {
     return new Promise(resolve => {
-        const node = container.querySelector(selector)
-        if (!node) return resolve()
+        const is_selector = typeof target === 'string';
+        const get_node = () => is_selector ? container.querySelector(target) : (document.body.contains(target) ? target : null);
+
+        if (!get_node()) return resolve();
 
         const observer = new MutationObserver(() => {
-            const el = container.querySelector(selector)
-            if (!el) {
-                observer.disconnect()
-                resolve()
+            if (!get_node()) {
+                observer.disconnect();
+                resolve();
             }
-        })
+        });
 
         observer.observe(container, {
             childList: true,
             subtree: true
-        })
-    })
+        });
+    });
 }
-
 
 const ko_fi = `
 <a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="kofi-button">
