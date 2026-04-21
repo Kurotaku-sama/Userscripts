@@ -273,19 +273,19 @@ const donation_styles = `
   }
 
   /* --- Specific: KO-FI STYLES --- */
-  .is-kofi {
+  .link-kofi {
     background: linear-gradient(135deg, #6a1292, #c850c0);
   }
 
-  .is-kofi:hover {
+  .link-kofi:hover {
     transform: translateY(-4px) scale(1.03) rotateX(5deg);
   }
 
-  .is-kofi .donation-icon {
+  .link-kofi .donation-icon {
     height: 30px; /* Slightly smaller to fit 50px container comfortably */
   }
 
-  .is-kofi:hover .donation-icon {
+  .link-kofi:hover .donation-icon {
     animation: kofi_shake 2s ease-in-out infinite;
   }
 
@@ -296,11 +296,11 @@ const donation_styles = `
   }
 
   /* --- Specific: PAYPAL STYLES --- */
-  .is-paypal {
+  .link-paypal {
     background: linear-gradient(135deg, #003087, #009cde);
   }
 
-  .is-paypal .donation-icon {
+  .link-paypal .donation-icon {
     height: 26px; /* Adjusted for 50px height */
     filter: brightness(0) invert(1);
   }
@@ -308,7 +308,7 @@ const donation_styles = `
 `;
 
 const ko_fi = `
-<a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="donation-button is-kofi">
+<a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="donation-button link-kofi">
     <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi" class="donation-icon" />
     <span class="donation-text">Ko-fi</span>
     <div class="donation-shine"></div>
@@ -316,7 +316,7 @@ const ko_fi = `
 `;
 
 const paypal = `
-<a href="https://www.paypal.me/Kurotaku1337" target="_blank" rel="noopener" class="donation-button is-paypal">
+<a href="https://www.paypal.me/Kurotaku1337" target="_blank" rel="noopener" class="donation-button link-paypal">
     <img src="https://www.paypalobjects.com/webstatic/de_DE/i/de-pp-logo-200px.png" alt="PayPal" class="donation-icon" />
     <span class="donation-text"></span>
     <div class="donation-shine"></div>
