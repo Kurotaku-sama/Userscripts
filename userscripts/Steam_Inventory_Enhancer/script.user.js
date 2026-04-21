@@ -1,13 +1,15 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.1.4
+// @version         1.2
 // @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
 // @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
 // @match           https://steamcommunity.com/profiles/*/inventory*
 // @match           https://steamcommunity.com/id/*/inventory*
+// @match           https://steamcommunity.com/market/listings/*
+// @match           https://steamcommunity.com/market/search*
 // @icon            https://steamcommunity.com/favicon.ico
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js
@@ -28,24 +30,33 @@
 (async function() {
     await init_gm_config();
 
-    if (GM_config.get("inv_sidebar_enabled"))
-        Sidebar.init();
+    const current_url = window.location.href;
+    const is_inventory = /steamcommunity\.com\/(id|profiles)\/.*\/inventory/.test(current_url);
+    const is_market = current_url.includes('steamcommunity.com/market/listings/') || current_url.includes('steamcommunity.com/market/search');
+    if (!is_inventory && !is_market) return;
 
-    if (GM_config.get("item_stacker_enabled")) {
-        (async () => {
-            await wait_for_element(".new_trade_offer_btn");
-            Stacker.init();
-        })();
+    if (is_inventory) {
+        if (GM_config.get("inv_sidebar_enabled"))
+            Sidebar.init();
+
+        if (GM_config.get("item_stacker_enabled")) {
+            (async () => {
+                await wait_for_element(".new_trade_offer_btn");
+                Stacker.init();
+            })();
+        }
+
+        if (GM_config.get("inv_favorites_enabled"))
+            Favorites.init();
+
+        if (GM_config.get("filter_search_enabled"))
+            Filter.init();
+
+        if (GM_config.get("asf_enabled"))
+            ASF.init();
     }
-
-    if (GM_config.get("inv_favorites_enabled"))
-        Favorites.init();
-
-    if (GM_config.get("filter_search_enabled"))
-        Filter.init();
-
-    if (GM_config.get("asf_enabled"))
-        ASF.init();
+    if (GM_config.get("owned_count_enabled"))
+        Itemcounter.init();
 })();
 
 async function init_gm_config() {
@@ -121,6 +132,42 @@ async function init_gm_config() {
                 default: true,
                 label: 'Override CTRL + F to focus searchbox'
             },
+            owned_count_enabled: {
+                section: ['Item amount owned Display'],
+                type: 'checkbox',
+                default: true,
+                label: 'Enable Amount Counter',
+            },
+            owned_count_show_market_listing: {
+                type: 'checkbox',
+                default: true,
+                label: 'Show on Market Listings',
+            },
+            owned_count_show_market_search: {
+                type: 'checkbox',
+                default: true,
+                label: 'Show in Market Search Results',
+            },
+            owned_count_show_inventory: {
+                type: 'checkbox',
+                default: true,
+                label: 'Show on Inventory Pages',
+            },
+            owend_count_cache: {
+                label: 'Inventory Cache Duration (Minutes):<br><small>Set how long inventory data is stored locally for each inventory before a fresh update from Steam is required. High values improve performance and prevent rate-limiting.</small>',
+                type: 'int',
+                default: 30,
+            },
+            owned_count_contexts: {
+                label: 'Scanable Context-IDs <small>(Default: 1, 2, 6)<br>(Modification not recommended)</small>',
+                type: 'input',
+                default: '1, 2, 6',
+            },
+            owned_count_blacklist: {
+                label: 'Blacklisted AppIDs <small>(Comma separated)</small>',
+                type: 'input',
+                default: '',
+            },
             asf_enabled: {
                 section: ['ArchiSteamFarm (ASF) Integration'],
                 type: 'checkbox',
@@ -139,7 +186,7 @@ async function init_gm_config() {
             },
             asf_port: {
                 label: 'Port',
-                type: 'number',
+                type: 'int',
                 default: 1242,
             },
             asf_password: {
@@ -237,7 +284,6 @@ class Sidebar {
     }
 }
 
-
 // ==========================================================
 // Stacker
 // ==========================================================
@@ -257,6 +303,8 @@ class Stacker {
 
     static init() {
         // Attempt to retrieve the required WebAPI token from the page source
+        this.inject_styles();
+
         if (!this.fetch_api_token())
             console.error("[SIE Stacker] Failed to load Token.");
 
@@ -294,6 +342,35 @@ class Stacker {
         document.getElementById("sie_item_stacker_btn_unstack").onclick = () => this.execute_action("unstack");
     }
 
+    static inject_styles() {
+        GM_addStyle(`
+            .sie_item_stacker_container {
+                gap: 5px;
+                display: inline-flex;
+            }
+
+            .sie_item_stacker_container.sie_item_stacker_multi_row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sie_item_stacker_container.sie_item_stacker_single_row {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .sie_item_stacker_row {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .sie_item_stacker_inputbox {
+                width: 50px;
+                color: #fff;
+                padding: 2px 4px;
+            }
+        `);
+    }
 
     static fetch_api_token() {
         // Steam stores the loyalty/webapi token in a JSON blob within this element
@@ -657,34 +734,6 @@ class Stacker {
     }
 }
 
-GM_addStyle(`
-    .sie_item_stacker_container {
-        gap: 5px;
-        display: inline-flex;
-    }
-
-    .sie_item_stacker_container.sie_item_stacker_multi_row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .sie_item_stacker_container.sie_item_stacker_single_row {
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .sie_item_stacker_row {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    .sie_item_stacker_inputbox {
-        width: 50px;
-        color: #fff;
-        padding: 2px 4px;
-    }
-`);
-
 // ==========================================================
 // Favorites
 // ==========================================================
@@ -935,8 +984,8 @@ class Filter {
         // Define placeholder text based on config setting
         const search_by_appid = GM_config.get("filter_search_by_appid");
         const placeholder_text = search_by_appid
-            ? `Search ${total_count} inventories (Name or ID)...`
-            : `Search ${total_count} inventories...`;
+        ? `Search ${total_count} inventories (Name or ID)...`
+        : `Search ${total_count} inventories...`;
 
         // Check if the "Hide Owned" feature is enabled in config
         const show_missing_enabled = GM_config.get("filter_show_only_missing");
@@ -1268,11 +1317,290 @@ GM_addStyle(`
 `);
 
 // ==========================================================
+// Itemcounter Module
+// ==========================================================
+class Itemcounter {
+    static cache_key = 'sie_inventory_cache_storage';
+    static app_itemcache = new Map();
+    static last_app_id = null;
+
+    static async init() {
+        // Apply the visual styles and perform an initial cleanup of the persistent storage
+        this.inject_styles();
+        this.clean_expired_cache();
+
+        const url = window.location.href;
+
+        // Route the logic based on the current Steam URL to initialize page-specific observers
+        if (url.includes('/inventory')) {
+            this.insert_cache_delete_button();
+            if (GM_config.get('owned_count_show_inventory'))
+                this.init_inventory_page();
+        }
+        else if (url.includes('/market/listings/')) {
+            if (GM_config.get('owned_count_show_market_listing'))
+                this.init_single_listing();
+        }
+        else if (url.includes('/market/search')) {
+            if (GM_config.get('owned_count_show_market_search'))
+                this.init_search_results();
+        }
+    }
+
+    static inject_styles() {
+        // Register custom CSS rules for the ownership badges using Greasemonkey's style injection
+        GM_addStyle(`
+            .sie-owned-badge {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background-color: #2e4e37;
+                color: #a4d007;
+                border: 1px solid #4c7c43;
+                padding: 2px 5px;
+                border-radius: 4px;
+                font-size: 11px;
+                white-space: nowrap;
+                z-index: 1;
+                user-select: none;
+                -ms-user-select: none;
+                -webkit-user-select: none;
+            }
+
+            .market_listing_row .sie-owned-badge {
+                position: absolute;
+                top: unset;
+                bottom: 5px;
+                right: 5px;
+            }
+        `);
+    }
+
+    static async insert_cache_delete_button() {
+        // Locate the 'More' dropdown menu in the inventory and append a custom clear-cache option
+        const dropdown_menu = await wait_for_element("#inventory_more_dropdown .popup_body.popup_menu");
+        const sie_cache_html = `
+            <div class="popup_menu_separator"></div>
+            <a class="popup_menu_item" id="sie_clear_cache_btn" href="javascript:void(0);">
+                <span style="color: #a4d007;">SIE:</span> Delete inventory cache
+            </a>
+        `;
+
+        // Inject the HTML string and attach an event listener to trigger the clearing process
+        dropdown_menu.insertAdjacentHTML('beforeend', sie_cache_html);
+
+        document.getElementById('sie_clear_cache_btn')?.addEventListener('click', () => {
+            this.clear_cache();
+        });
+    }
+
+    static clear_cache() {
+        // Reset the Greasemonkey storage and clear the local runtime cache map
+        GM_setValue(this.cache_key, {});
+        this.app_itemcache = new Map();
+        this.last_app_id = null;
+
+        // Clean up the UI by removing all currently visible badges from the DOM
+        document.querySelectorAll('.sie-owned-badge').forEach(b => b.remove());
+
+        // Notify the user of the successful operation via a toast notification
+        Swal.fire({
+            title: 'Item cache deleted',
+            icon: 'success',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            theme: 'dark'
+        });
+    }
+
+    static clean_expired_cache() {
+        try {
+            // Calculate the expiration threshold in milliseconds based on user settings
+            const storage = GM_getValue(this.cache_key, {});
+            const cache_ms = (GM_config.get('owend_count_cache') ?? 30) * 60 * 1000;
+            const now = Date.now();
+            let changed = false;
+
+            // Iterate through all AppIDs in the cache and delete those that have expired
+            for (const id in storage) {
+                if (now - storage[id].cache_creation >= cache_ms) {
+                    delete storage[id];
+                    changed = true;
+                }
+            }
+
+            // Synchronize the modified object back to Greasemonkey storage if entries were removed
+            if (changed)
+                GM_setValue(this.cache_key, storage);
+        } catch (e) {
+            console.error("[SIE] Cache clearing error:", e);
+        }
+    }
+
+static async get_inventory(app_id) {
+        // Validate the AppID and check if it is part of the user's defined blacklist
+        if (!app_id) return new Map();
+
+        const blacklist = (GM_config.get('owned_count_blacklist') || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s !== '' && !isNaN(s));
+
+        if (blacklist.includes(app_id.toString()))
+            return new Map();
+
+        let storage = GM_getValue(this.cache_key, {});
+        const now = Date.now();
+        // Use nullish coalescing to ensure 0 is respected and not overwritten by fallback
+        const cache_ms = (GM_config.get('owend_count_cache') ?? 30) * 60 * 1000;
+
+        // Perform a cache-first lookup to minimize API requests to Steam's servers
+        if (cache_ms > 0 && storage[app_id] && (now - storage[app_id].cache_creation < cache_ms))
+            return new Map(Object.entries(storage[app_id].items));
+
+        const counts = new Map();
+        const contexts = (GM_config.get('owned_count_contexts') || '1, 2, 6').split(',').map(s => s.trim());
+
+        try {
+            // Concurrent fetching of all specified inventory contexts using the profiles API
+            const results = await Promise.all(contexts.map(ctx =>
+                                                           fetch(`https://steamcommunity.com/profiles/${g_steamID}/inventory/json/${app_id}/${ctx}/?l=german`, { credentials: 'include' })
+                                                           .then(r => r.ok ? r.json() : null).catch(() => null)
+                                                          ));
+
+            // Parse the API results and aggregate item amounts by their market hash names
+            results.forEach(data => {
+                if (!data || !data.success) return;
+                Object.values(data.rgInventory || {}).forEach(item => {
+                    const desc = (data.rgDescriptions || {})[`${item.classid}_${item.instanceid}`];
+                    const name = desc?.market_hash_name || desc?.name;
+                    if (name) counts.set(name, (counts.get(name) || 0) + parseInt(item.amount || 1, 10));
+                });
+            });
+
+            // If data was retrieved, store it in the persistent cache with a current timestamp
+            // Only write to GM storage if cache is not disabled (0 minutes)
+            if (counts.size > 0 && cache_ms > 0) {
+                storage[app_id] = { cache_creation: now, items: Object.fromEntries(counts) };
+                GM_setValue(this.cache_key, storage);
+            }
+        } catch (e) { console.error("[SIE] API Fetch Fehler:", e); }
+        return counts;
+    }
+    static async init_inventory_page() {
+        // Define a local helper to detect game changes in the inventory tabs
+        const check_app_id = async () => {
+            const active = document.querySelector('.games_list_tab.active');
+            const id = active ? active.getAttribute('href').replace('#', '') : window.location.hash.replace('#', '').split('_')[0];
+            if (id && id !== this.last_app_id) {
+                this.last_app_id = id;
+                this.app_itemcache = await this.get_inventory(id);
+                return true;
+            }
+            return false;
+        };
+
+        await check_app_id();
+
+        // Enter a monitoring loop to handle Steam's dynamic loading of item description panels
+        while (true) {
+            try {
+                // Wait for an item's header to appear, update the badge, then wait for it to be removed
+                const h1 = await wait_for_element('.inventory_page_right h1');
+                await check_app_id();
+                this.update_badge(h1);
+                await wait_for_element_to_disappear(h1);
+            } catch (e) {
+                console.error("[SIE] Fehler im Loop-Zyklus:", e);
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+    }
+
+    static update_badge(h1_element) {
+        // Clean up any existing badges in the right-side container to prevent duplicate overlays
+        const main_container = document.querySelector('.inventory_page_right');
+        if (main_container)
+            main_container.querySelectorAll('.sie-owned-badge').forEach(old => old.remove());
+
+        // Find the active item description box and ensure it is properly positioned for badge overlay
+        const info_box = h1_element.closest('div[id^="iteminfo"]');
+        if (!info_box) return;
+
+        if (getComputedStyle(info_box).position === 'static')
+            info_box.style.position = 'relative';
+
+        let name = null;
+        // Determine the item's identity via its market link for better reliability than simple text
+        const market_link = info_box.querySelector('a[href*="/market/listings/"]');
+        if (market_link) {
+            const parts = market_link.href.split('/');
+            name = decodeURIComponent(parts[parts.length - 1]);
+        }
+        if (!name) name = h1_element.innerText.trim();
+
+        const count = this.app_itemcache.get(name) || 0;
+
+        // If the item is owned, insert the badge at the top of the information panel
+        if (count > 0) {
+            const txt = `💼 You Own: ${count}`;
+            info_box.insertAdjacentHTML('afterbegin', `<div class="sie-owned-badge">${txt}</div>`);
+        }
+    }
+
+    static async init_search_results() {
+        // Identify the target game from the search URL and fetch the corresponding inventory
+        const id = new URLSearchParams(window.location.search).get('appid');
+        if (!id) return;
+        const counts = await this.get_inventory(id);
+        const grid = document.getElementById('searchResultsRows');
+
+        if (grid) {
+            // Function to process each visible listing row and append ownership data
+            const update = () => {
+                document.querySelectorAll('.market_listing_row').forEach(row => {
+                    if (row.querySelector('.sie-owned-badge')) return;
+                    const c = counts.get(row.getAttribute('data-hash-name'));
+                    if (c)
+                        row.querySelector('.market_listing_item_name_block')?.insertAdjacentHTML('beforeend', `<div class="sie-owned-badge">💼 ${c}</div>`);
+                });
+            };
+            // Use a MutationObserver to automatically handle lazy loading and pagination in the search grid
+            new MutationObserver(update).observe(grid, { childList: true, subtree: true });
+            update();
+        }
+    }
+
+    static async init_single_listing() {
+        // Extract AppID and the specific item name from the listing's URL path
+        const p = window.location.pathname.split('/');
+        const appid = p[3];
+        const item_name = decodeURIComponent(p[4]);
+        const counts = await this.get_inventory(appid);
+        const c = counts.get(item_name) || 0;
+
+        // If the item is owned, wait for the React-rendered description to load and inject the badge
+        if (c > 0)
+            wait_for_element('.market_listing_iteminfo > .largeiteminfo_react_placeholder > div > div:first-child')
+                .then((target) => {
+                target.style.position = 'relative';
+                target.insertAdjacentHTML('beforeend', `<div class="sie-owned-badge">💼 Owned: ${c}</div>`);
+            });
+    }
+}
+
+// ==========================================================
 // ASF Integration
 // ==========================================================
 class ASF {
     // Initializes the ASF integration by injecting menu items into the Steam inventory "More" dropdown
     static async init() {
+        this.insert_asf_buttons();
+    }
+
+    static async insert_asf_buttons() {
         // Wait for the Steam inventory's popup menu to exist in the DOM before modification
         const dropdown_menu = await wait_for_element("#inventory_more_dropdown .popup_body.popup_menu");
 
@@ -1283,10 +1611,10 @@ class ASF {
         const asf_html = `
             <div class="popup_menu_separator"></div>
             <a class="popup_menu_item" id="sie_asf_2faok" href="javascript:void(0);">
-                <span style="color: #67c1f5;">ASF:</span> Accepts all 2FA confirmations (2faok)
+                <span style="color: #67c1f5;">SIE ASF:</span> Accepts all 2FA confirmations (2faok)
             </a>
             <a class="popup_menu_item" id="sie_asf_2fano" href="javascript:void(0);">
-                <span style="color: #67c1f5;">ASF:</span> Denies all 2FA confirmations (2fano)
+                <span style="color: #67c1f5;">SIE ASF:</span> Denies all 2FA confirmations (2fano)
             </a>
         `;
 

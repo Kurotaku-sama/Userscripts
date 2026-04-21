@@ -8,7 +8,7 @@
 
 ## Description
 
-This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It provides a customizable sidebar for better navigation, powerful mass stacking/unstacking tools, a favorites system, a comprehensive filtering and sorting menu, and ASF integration for seamless 2FA management.
+This userscript enhances the Steam inventory experience by adding essential quality-of-life features. It provides a customizable sidebar for better navigation, powerful mass stacking/unstacking tools, a favorites system, a comprehensive filtering and sorting menu, an integrated item counter for ownership tracking across the market and inventory, and ASF integration for seamless 2FA management.
 
 ![Inventory Preview](inventory.png)
 
@@ -40,6 +40,12 @@ This userscript enhances the Steam inventory experience by adding essential qual
 - **Quick Reset:** Clear individual filters or reset everything with a single click.
 - **Override CTRL + F Hotkey:** The hotkey will focus automatically the search field instead the browsers native search.
 
+### Itemcounter (Owned Indicator)
+- **Ownership Tracking:** Instantly see how many copies of an item you already own directly in your inventory, market listings, and search results.
+- **Caching:** Inventory data is stored locally with a configurable expiration time to reduce Steam API load and ensure fast display.
+- **App Blacklist:** Exclude specific AppIDs (e.g., games with thousands of items) from being tracked.
+- **Toggleable:** Separate settings to enable or disable the counter for the inventory page, market listings, or search results individually.
+
 ### ASF Integration (IPC)
 - **Remote 2FA:** Accept or deny all mobile confirmations directly from the Steam inventory "More" menu.
 - **Configurable:** Works with your local or remote ArchiSteamFarm instance via IPC.
@@ -58,7 +64,8 @@ This userscript enhances the Steam inventory experience by adding essential qual
 2. **Stacking:** Uses the Steam WebAPI to calculate and execute "Combine" operations with built-in delays to prevent rate limits.
 3. **Favorites:** Saves selected AppIDs to local storage and highlights them with a custom star icon.
 4. **Filtering:** Caches inventory nodes and applies real-time CSS filtering and DOM reordering based on user input.
-5. **ASF:** Sends commands via `GM_xmlhttpRequest` to your ASF IPC interface.
+5. **Itemcounter:** Fetches the full inventory for the current AppID and caches the results to display ownership counts. If the item count is 0, no data is cached to ensure accuracy on the next load.
+6. **ASF:** Sends commands via `GM_xmlhttpRequest` to your ASF IPC interface.
 
 ---
 
