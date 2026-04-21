@@ -12,10 +12,16 @@ if (typeof GM_registerMenuCommand === "function") {
                 <strong>Check out my other Userscripts and please leave a star if you like my work:</strong><br>
                 <a href="https://github.com/Kurotaku-sama/Userscripts" target="_blank" style="color: #7066e0">GitHub Repo</a> |
                 <a href="https://kurotaku-sama.github.io/Userscripts/" target="_blank" style="color: #7066e0">GitHub.io</a><br><br>
-                If you encounter any issues, feel free to DM me on Discord: <b>Kurotaku</b><br>
-                ${ko_fi}
+                Found a bug? Reach out to me on Discord: <b>Kurotaku</b><br><br>
+                If you like my work feel free to support me:
+                <div class="donation-wrapper">
+                    ${donation_styles}
+                    ${ko_fi}
+                    ${paypal}
+                </div>
                 `,
             theme: "dark",
+            confirmButtonText: 'Close',
             backdrop: true,
         });
     });
@@ -195,25 +201,32 @@ function wait_for_element_to_disappear(target, container = document.documentElem
     });
 }
 
-const ko_fi = `
-<a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="kofi-button">
-    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi cup" class="kofi-icon" />
-    <span class="kofi-text">If you like my work feel free<br>to support me on Ko-fi</span>
-    <div class="kofi-shine"></div>
-</a>
-
+const donation_styles = `
 <style>
-  .kofi-button {
+  .donation-wrapper {
     margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  /* Base styles for all donation buttons */
+  .donation-button {
     position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center; /* Center content horizontally */
     gap: 10px;
     text-decoration: none;
-    background: linear-gradient(135deg, #6a1292, #c850c0);
     border-radius: 12px;
-    padding: 10px 20px;
-    color: white;
+    padding: 0 20px; /* Removed vertical padding to maintain exact height */
+
+    /* Fixed height constraints */
+    height: 50px;
+    min-height: 50px;
+    box-sizing: border-box; /* Ensures padding doesn't add to height */
+
+    color: white !important;
     font-size: 13px;
     font-family: "Segoe UI", sans-serif;
     font-weight: bold;
@@ -222,33 +235,27 @@ const ko_fi = `
     overflow: hidden;
   }
 
-  .kofi-button:visited {
-    text-decoration: none;
-    color: white;
-  }
-
-  .kofi-button:hover {
-    transform: translateY(-4px) scale(1.03) rotateX(5deg);
+  .donation-button:hover {
+    transform: translateY(-4px) scale(1.03);
     box-shadow: 0 12px 24px rgba(0,0,0,0.25);
     text-decoration: none;
-    color: white;
   }
 
-  .kofi-icon {
-    height: 32px;
-    width: auto;
+  .donation-icon {
     display: block;
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
     transition: transform 0.3s ease-in-out;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
   }
 
-  .kofi-text {
+  .donation-text {
+    font-size: 20px;
     position: relative;
     text-align: center;
-    color: white;
+    line-height: 1; /* Adjusted for fixed height */
   }
 
-  .kofi-shine {
+  /* Universal shine effect animation */
+  .donation-shine {
     position: absolute;
     top: -50%;
     left: -50%;
@@ -257,37 +264,63 @@ const ko_fi = `
     background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
     transform: rotate(25deg);
     pointer-events: none;
-    animation: kofi_shine 3s infinite linear;
+    animation: donation_shine_anim 3s infinite linear;
   }
 
-  @keyframes kofi_shine {
+  @keyframes donation_shine_anim {
     0% { transform: translateX(-100%) rotate(25deg); }
     100% { transform: translateX(100%) rotate(25deg); }
   }
 
-  @keyframes kofi_shake_icon {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
-    50% { transform: rotate(10deg); }
-    75% { transform: rotate(-10deg); }
-    100% { transform: rotate(0deg); }
+  /* --- Specific: KO-FI STYLES --- */
+  .is-kofi {
+    background: linear-gradient(135deg, #6a1292, #c850c0);
   }
 
-  .kofi-button:hover .kofi-icon {
-    animation: kofi_shake_icon 2s ease-in-out infinite;
+  .is-kofi:hover {
+    transform: translateY(-4px) scale(1.03) rotateX(5deg);
   }
 
-  @keyframes kofi_shake_icon {
-    0% { transform: rotate(0deg); }
-    10% { transform: rotate(-10deg); }
-    20% { transform: rotate(10deg); }
-    30% { transform: rotate(-10deg); }
-    40% { transform: rotate(10deg); }
-    50% { transform: rotate(0deg); }
-    60% { transform: rotate(0deg); }
-    100% { transform: rotate(0deg); }
+  .is-kofi .donation-icon {
+    height: 30px; /* Slightly smaller to fit 50px container comfortably */
+  }
+
+  .is-kofi:hover .donation-icon {
+    animation: kofi_shake 2s ease-in-out infinite;
+  }
+
+  @keyframes kofi_shake {
+    0%, 50%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(-10deg); }
+    20%, 40% { transform: rotate(10deg); }
+  }
+
+  /* --- Specific: PAYPAL STYLES --- */
+  .is-paypal {
+    background: linear-gradient(135deg, #003087, #009cde);
+  }
+
+  .is-paypal .donation-icon {
+    height: 26px; /* Adjusted for 50px height */
+    filter: brightness(0) invert(1);
   }
 </style>
+`;
+
+const ko_fi = `
+<a href="https://ko-fi.com/kurotaku1337" target="_blank" rel="noopener" class="donation-button is-kofi">
+    <img src="https://storage.ko-fi.com/cdn/cup-border.png" alt="Ko-fi" class="donation-icon" />
+    <span class="donation-text">Ko-fi</span>
+    <div class="donation-shine"></div>
+</a>
+`;
+
+const paypal = `
+<a href="https://www.paypal.me/Kurotaku1337" target="_blank" rel="noopener" class="donation-button is-paypal">
+    <img src="https://www.paypalobjects.com/webstatic/de_DE/i/de-pp-logo-200px.png" alt="PayPal" class="donation-icon" />
+    <span class="donation-text"></span>
+    <div class="donation-shine"></div>
+</a>
 `;
 
 // --------------------------
@@ -533,7 +566,6 @@ function create_configuration_container() {
             max-width: calc(100% - 30px);
         }
 
-
         /* Select / Dropdown styling */
         select {
             -webkit-appearance: none !important;
@@ -549,7 +581,6 @@ function create_configuration_container() {
             box-shadow: none !important;
             width: 100%;
             margin-top: 5px;
-
             /* Optional: Prevents the ugly standard arrow design in some browsers */
             background-image: url('data:image/svg+xml;charset=US-ASCII,<svg%20xmlns="http://www.w3.org/2000/svg"%20width="12"%20height="12"%20viewBox="0%200%2024%2024" fill="white"><path%20d="M7%2010l5%205%205-5z"/></svg>');
             background-repeat: no-repeat;
@@ -569,7 +600,6 @@ function create_configuration_container() {
             border: none !important;
             outline: none !important;
         }
-
 
         /* Section headers */
         .section_header {
