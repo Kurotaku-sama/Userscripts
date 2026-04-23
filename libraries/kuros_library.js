@@ -16,8 +16,8 @@ if (typeof GM_registerMenuCommand === "function") {
                 If you like my work feel free to support me:
                 <div class="donation-wrapper">
                     ${donation_styles}
-                    ${ko_fi}
                     ${paypal}
+                    ${ko_fi}
                 </div>
                 `,
             theme: "dark",
@@ -272,6 +272,16 @@ const donation_styles = `
     100% { transform: translateX(100%) rotate(25deg); }
   }
 
+  /* --- Specific: PAYPAL STYLES --- */
+  .link-paypal {
+    background: linear-gradient(135deg, #003087, #009cde);
+  }
+
+  .link-paypal .donation-icon {
+    height: 26px; /* Adjusted for 50px height */
+    filter: brightness(0) invert(1);
+  }
+
   /* --- Specific: KO-FI STYLES --- */
   .link-kofi {
     background: linear-gradient(135deg, #6a1292, #c850c0);
@@ -294,17 +304,15 @@ const donation_styles = `
     10%, 30% { transform: rotate(-10deg); }
     20%, 40% { transform: rotate(10deg); }
   }
-
-  /* --- Specific: PAYPAL STYLES --- */
-  .link-paypal {
-    background: linear-gradient(135deg, #003087, #009cde);
-  }
-
-  .link-paypal .donation-icon {
-    height: 26px; /* Adjusted for 50px height */
-    filter: brightness(0) invert(1);
-  }
 </style>
+`;
+
+const paypal = `
+<a href="https://www.paypal.me/Kurotaku1337" target="_blank" rel="noopener" class="donation-button link-paypal">
+    <img src="https://www.paypalobjects.com/webstatic/de_DE/i/de-pp-logo-200px.png" alt="PayPal" class="donation-icon" />
+    <span class="donation-text"></span>
+    <div class="donation-shine"></div>
+</a>
 `;
 
 const ko_fi = `
@@ -315,13 +323,6 @@ const ko_fi = `
 </a>
 `;
 
-const paypal = `
-<a href="https://www.paypal.me/Kurotaku1337" target="_blank" rel="noopener" class="donation-button link-paypal">
-    <img src="https://www.paypalobjects.com/webstatic/de_DE/i/de-pp-logo-200px.png" alt="PayPal" class="donation-icon" />
-    <span class="donation-text"></span>
-    <div class="donation-shine"></div>
-</a>
-`;
 
 // --------------------------
 // GM_config Functions
