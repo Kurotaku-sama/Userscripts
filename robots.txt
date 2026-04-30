@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kurotaku-sama.github.io/Userscripts/sitemap.xml
