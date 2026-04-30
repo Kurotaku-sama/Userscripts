@@ -2,8 +2,5 @@ markdown: kramdown
 title: Kurotaku's Userscripts
 description: A collection with Quality-of-life userscripts for Steam, Twitch, and more. made by Kurotaku
 theme: jekyll-theme-cayman
-url: "https://kurotaku-sama.github.io"
-baseurl: "/Userscripts"
 plugins:
   - jekyll-seo-tag
-  - jekyll-sitemap
