@@ -4,6 +4,7 @@ description: A collection with Quality-of-life userscripts for Steam, Twitch, an
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-seo-tag
+  - jekyll-sitemap
 
 url: "https://kurotaku-sama.github.io"
 baseurl: "/Userscripts"
