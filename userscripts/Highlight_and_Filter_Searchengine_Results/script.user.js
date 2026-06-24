@@ -2,15 +2,14 @@
 // @name            Highlight and Filter Searchengine Results
 // @name:de         Hervorheben und Filtern Suchmaschinen Ergebnisse
 // @namespace       https://kurotaku.de
-// @version         1.0.2
+// @version         1.0.3
 // @description     Highlight certain search results and remove blacklisted domains
 // @description:de  Bestimmte Suchergebnisse hervorheben und Domains aus der Blacklist entfernen
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
-// @include         https://www.startpage.com/do/search*
-// @include         https://www.startpage.com/sp/search*
-// @include         https://duckduckgo.com/*&q=*
-// @include         https://www.google.*/search?*
+// @include         https://www.startpage.com/*
+// @include         https://duckduckgo.com/*
+// @include         https://www.google.*/*
 // @icon            https://www.startpage.com/sp/cdn/favicons/favicon-32x32-gradient.png
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
@@ -29,6 +28,7 @@
 // Sample SITE_DATA
 // websitename: {
 //     "insertion_container": "container that is a parent of the result_container and will contain the removed and highlighted results containers",
+//     "search_patterns": "string or array of URL patterns (supports * as wildcard) that identify search result pages",
 //     "result_container": "container that holds the search results",
 //     "result_selector": "direct child elements of result_container that are individual search results",
 //     "domain_selector": "first link inside result used to extract the domain",
@@ -39,6 +39,7 @@
 const SITE_DATA = {
     startpage: {
         site_key: "startpage",
+        search_patterns: ["*/do/search*", "*/sp/search*"],
         insertion_container: "#main",
         result_container: ".w-gl",
         result_selector: ":scope > .result",
@@ -46,6 +47,7 @@ const SITE_DATA = {
     },
     google: {
         site_key: "google",
+        search_patterns: ["*/search?*"],
         insertion_container: "#center_col",
         result_container: "#search",
         result_selector: ":scope > .g, :scope > div > div > div > div",
@@ -53,6 +55,7 @@ const SITE_DATA = {
     },
     duckduckgo: {
         site_key: "duckduckgo",
+        search_patterns: ["*&q=*", "*?q=*"],
         insertion_container: "section[data-area='mainline']",
         result_container: "section[data-area='mainline'] > ol",
         result_selector: ":scope > li",
@@ -81,10 +84,15 @@ switch(true) {
 (async function() {
     await init_gm_config();
 
-    // If page is google and searchtype is images, then abort
+    if(is_search_page())
+        await run_search_features();
+})();
+
+// Runs all search result processing features after confirming we are on a search page
+async function run_search_features() {
     if(DATA.site_key === "google") {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('udm') === '2')
+        if(params.get('udm') === '2')
             return;
     }
 
@@ -99,7 +107,6 @@ switch(true) {
             }
         `);
 
-    // Only grab results if at least one feature is enabled
     if(GM_config.get("highlight_enabled") || GM_config.get("blacklist_filter_enabled") || GM_config.get("special_sections_filter_enabled")) {
         add_dynamic_styles();
 
@@ -117,7 +124,7 @@ switch(true) {
         if(GM_config.get("search_tabs_enabled"))
             filter_search_tabs();
     }
-})();
+}
 
 // --------------------------
 // GM_config initialization
@@ -203,6 +210,19 @@ async function init_gm_config() {
 }
 
 // --------------------------
+// Check is search page
+// --------------------------
+function is_search_page() {
+    const url = window.location.href;
+    const patterns = Array.isArray(DATA.search_patterns) ? DATA.search_patterns : [DATA.search_patterns];
+    return patterns.some(pattern => {
+        // Escape regex special chars except "*", then replace "*" with ".*" for wildcard matching
+        const regex_str = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+        return new RegExp(regex_str).test(url);
+    });
+}
+
+// --------------------------
 // Containers creation
 // --------------------------
 async function create_containers() {
@@ -262,11 +282,11 @@ function highlight_results(results) {
 
         // If a match is found, add the result to the list to be highlighted
         if(match_obj)
-            to_highlight.push({result, index: highlight_terms.length - 1});
+            to_highlight.push({result, index: highlight_terms.indexOf(match_obj)});
     });
 
     // Sort so higher priority terms appear first
-    to_highlight.sort((a,b) => b.index - a.index);
+    to_highlight.sort((a,b) => a.index - b.index);
 
     // Move and style highlighted results
     to_highlight.forEach((obj, i) => {
@@ -427,7 +447,7 @@ function prepare_terms(config_key) {
 // Apply custom style and re-order a single search result
 function style_result(result, index, last) {
     // Move result up (negative order puts it first)
-    result.style.order = -1 - index;
+    result.style.order = index;
 
     // NOT USED ANYMORE STYLE IS ADDED VIA CLASS
     // Append user CSS styles from GM_config
