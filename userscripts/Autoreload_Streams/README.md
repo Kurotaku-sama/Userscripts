@@ -1,6 +1,7 @@
 ---
 title: "Userscript: Autoreload Streams"
 description: "Automatically reloads streams from Twitch, Kick, Trovo and dlive after a user-defined amount of time. Keeps the stream session active and prevents freezing or crashing of the player."
+permalink: /userscripts/Autoreload_Streams/
 ---
 
 **If you like my work feel free to support me on:**<br>
