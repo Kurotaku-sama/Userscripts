@@ -21,6 +21,7 @@
 | **MyFigureCollection Downloader**             |  🇺🇸  | [![][b_rm]][rm_mfc_downloader]     | [![][b_ins_pur]][js_mfc_downloader]      |
 | **givee.club & giveaway.su improvements**     |  🇺🇸  | [![][b_rm]][rm_gicl_gisu_imp]      | [![][b_ins_pur]][js_gicl_gisu_imp]       |
 | **z0r Controls**                              |  🇺🇸  | [![][b_rm]][rm_z0r_controls]       | [![][b_ins_pur]][js_z0r_controls]        |
+| **Synchronkartei Tabellenübersicht**          |  🇩🇪  | [![][b_rm]][rm_synchronkartei]     | [![][b_ins_pur]][js_synchronkartei]      |
 | **Kleinanzeigen Verbesserungen**              |  🇩🇪  | [![][b_rm]][rm_kleinanzeigen]      | [![][b_ins_pur]][js_kleinanzeigen]       |
 | **Podcast.de Autodownload**                   |  🇩🇪  | [![][b_rm]][rm_podcast_autodl]     | [![][b_ins_pur]][js_podcast_autodl]      |
 | **fernsehserien.de episode names**            |  🇩🇪  | [![][b_rm]][rm_fernsehserien_de]   | [![][b_ins_ora]][js_fernsehserien_de]    |
@@ -79,6 +80,9 @@
 <!-- ----- z0r Controls ----- -->
 [rm_z0r_controls]:        userscripts/z0r_Controls
 [js_z0r_controls]:        https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/z0r_Controls/script.user.js
+<!-- ----- Synchronkartei Tabellenübersicht ----- -->
+[rm_synchronkartei]:      userscripts/Synchronkartei_Tabellenuebersicht
+[js_synchronkartei]:      https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js
 <!-- ----- Kleinanzeigen Verbesserungen ----- -->
 [rm_kleinanzeigen]:       userscripts/Kleinanzeigen_Verbesserungen
 [js_kleinanzeigen]:       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kleinanzeigen_Verbesserungen/script.user.js
