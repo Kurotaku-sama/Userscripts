@@ -1,6 +1,6 @@
 ---
 title: "Userscript: Kleinanzeigen Verbesserungen"
-description: "Standardwerte für Anzeigen, verbesserte Filter, blendet Werbung aus, vergrößert Bildvorschauen, bietet einen Screenshot-Modus für Nachrichten etc."
+description: "Standardwerte für Anzeigen, verbesserte Filter, blendet Werbung aus, vergrößert Bildvorschauen sowie einen Screenshot-Modus für Nachrichten etc."
 permalink: /userscripts/Kleinanzeigen_Verbesserungen/
 ---
 
