@@ -143,7 +143,7 @@ For most of my userscripts, you can easily access the settings by:
 ## Important Notes
 
 - I primarily use **Firefox**, so I cannot guarantee full functionality on **Chromium-based browsers**.
-- **Tampermonkey** is the recommended userscript manager, but alternatives like **Violentmonkey** and **Greasemonkey** should also work.
+- **Tampermonkey** or **Violentmonkey** are the recommended userscript manager, **Greasemonkey** and **FireMonkey** should also work.
 
 ### Userscript Managers:
 - [Tampermonkey](https://www.tampermonkey.net/)
