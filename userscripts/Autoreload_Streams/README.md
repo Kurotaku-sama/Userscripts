@@ -55,7 +55,7 @@ Inside the settings panel, one line per streamer:<br>
 ---
 
 ## Notes
--
+
 - `"true"` = autoreload enabled, `"false"` = disabled
 - If no site is specified, the rule applies to **all supported sites**
 - Global site autoreload settings are applied if no streamer-specific match is found
