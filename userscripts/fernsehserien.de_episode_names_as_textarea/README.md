@@ -1,3 +1,9 @@
+---
+title: "Userscript: fernsehserien.de episode names as textarea"
+description: "Adds a button on fernsehserien.de episode guides that shows all episode titles per season in a textarea for easy copying, e.g. for bulk rename tools."
+permalink: /userscripts/fernsehserien.de_episode_names_as_textarea/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

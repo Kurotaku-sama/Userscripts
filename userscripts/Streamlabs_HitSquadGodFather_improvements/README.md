@@ -1,3 +1,9 @@
+---
+title: "Userscript: Streamlabs HitSquadGodFather improvements"
+description: "Hides or grays out store items, sorts by price, adds a Steam search button, and switches the layout to a StreamElements style design."
+permalink: /userscripts/Streamlabs_HitSquadGodFather_improvements/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

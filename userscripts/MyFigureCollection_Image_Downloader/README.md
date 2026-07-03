@@ -1,3 +1,9 @@
+---
+title: "Userscript: MyFigureCollection Image Downloader"
+description: "Downloads primary or full gallery images for MyFigureCollection items, automatically or via button, as a ZIP archive or individual files."
+permalink: /userscripts/MyFigureCollection_Image_Downloader/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

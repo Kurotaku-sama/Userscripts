@@ -1,3 +1,9 @@
+---
+title: "Userscript: Highlight and Filter Searchengine Results"
+description: "Highlights preferred domains and removes blacklisted results on Google, Startpage and DuckDuckGo. Also supports rearranging or hiding Google search tabs."
+permalink: /userscripts/Highlight_and_Filter_Searchengine_Results/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

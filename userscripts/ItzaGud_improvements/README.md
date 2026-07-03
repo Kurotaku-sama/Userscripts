@@ -1,3 +1,9 @@
+---
+title: "Userscript: ItzaGud.net improvements"
+description: "Deprecated userscript that added GudCoinz to USD conversion, collapsible comments, batch mission buttons and video autoplay to the discontinued ItzaGud.net site."
+permalink: /userscripts/ItzaGud_improvements/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

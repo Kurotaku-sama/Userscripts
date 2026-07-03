@@ -1,3 +1,9 @@
+---
+title: "Userscript: z0r Controls"
+description: "Navigate posts on z0r.de using A/D or the arrow keys, and open the Disqus comments section with the spacebar."
+permalink: /userscripts/z0r_Controls/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

@@ -1,3 +1,9 @@
+---
+title: "Userscript: givee.club & giveaway.su improvements"
+description: "Enhances givee.club and giveaway.su with sponsored content removal, hide/quick-hide buttons for giveaways, exact draw times, and task automation buttons."
+permalink: /userscripts/givee.club_&_giveaway.su_improvements/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)

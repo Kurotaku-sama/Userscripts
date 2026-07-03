@@ -1,3 +1,9 @@
+---
+title: "Userscript: Steam unfollow all shown curators"
+description: "Adds buttons to load and unfollow all curators shown on the Steam curators page, useful for quickly cleaning up your curator follow list."
+permalink: /userscripts/Steam_unfollow_all_shown_curators/
+---
+
 **If you like my work feel free to support me on:**<br>
 [![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
 [![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)
