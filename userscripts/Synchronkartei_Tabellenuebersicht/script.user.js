@@ -666,7 +666,9 @@ GM_addStyle(`
         text-decoration: underline;
     }
 
-    .sk-center { text-align: center !important; }
+    .sk-center { 
+        text-align: center !important; 
+    }
 
     .sk-info-icon {
         cursor: help;
@@ -694,5 +696,7 @@ GM_addStyle(`
         opacity: 0.7;
     }
 
-    .sk-sort-arrow { opacity: 0.7; }
+    .sk-sort-arrow { 
+        opacity: 0.7; 
+    }
 `);
