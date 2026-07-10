@@ -2,7 +2,7 @@
 // @name            Highlight and Filter Searchengine Results
 // @name:de         Hervorheben und Filtern Suchmaschinen Ergebnisse
 // @namespace       https://kurotaku.de
-// @version         1.0.3
+// @version         1.0.4
 // @description     Highlight certain search results and remove blacklisted domains
 // @description:de  Bestimmte Suchergebnisse hervorheben und Domains aus der Blacklist entfernen
 // @author          Kurotaku
@@ -16,6 +16,7 @@
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @require         https://cdn.jsdelivr.net/npm/tldts@6/dist/index.umd.min.js
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_listValues
@@ -121,7 +122,8 @@ async function run_search_features() {
         if(GM_config.get("special_sections_filter_enabled"))
             remove_special_sections(all_results);
 
-        if(GM_config.get("search_tabs_enabled"))
+        // Tab rearrange/removal is a Google only feature, other sites do not have this tab bar
+        if(DATA.site_key === "google" && GM_config.get("search_tabs_enabled"))
             filter_search_tabs();
     }
 }
@@ -199,11 +201,12 @@ async function init_gm_config() {
             },
         },
         events: {
-            init: () => {
-                GM_config.set("highlight_terms", GM_config.get("highlight_terms").replace(/^\s*$(?:\r\n?|\n)/gm, ""));
-                GM_config.set("blacklist_filter_terms", GM_config.get("blacklist_filter_terms").replace(/^\s*$(?:\r\n?|\n)/gm, ""));
+            save: () => {
+                GM_config.set("highlight_terms", clean_terms_text(GM_config.get("highlight_terms")));
+                GM_config.set("blacklist_filter_terms", clean_terms_text(GM_config.get("blacklist_filter_terms")));
+                GM_config.write();
+                location.reload();
             },
-            save: () => { location.reload() },
         },
         frame: create_configuration_container(),
     });
@@ -245,23 +248,16 @@ async function create_containers() {
 // Extract domain
 // --------------------------
 function extract_domain(result) {
-    // Select the element containing the link
     const el = result.querySelector(DATA.domain_selector);
 
     if(el && el.href) {
         try {
-            // Parse the hostname and remove "www."
-            let host = new URL(el.href).hostname.replace(/^www\./, "").toLowerCase();
-
-            // Keep only the last two parts (example.com) if more than 2 parts
-            let parts = host.split(".");
-            if(parts.length > 2) host = parts.slice(-2).join(".");
-
-            return host;
-        } catch(e) {}; // Ignore parsing errors
+            const parsed = tldts.parse(el.href);
+            console.log("PARSED = " + parsed.domain);
+            return parsed.domain ? parsed.domain.toLowerCase() : "";
+        } catch(e) {};
     }
 
-    // Return empty string if no valid domain found
     return "";
 }
 
@@ -295,6 +291,16 @@ function highlight_results(results) {
         container.appendChild(result);
         style_result(result, index, i === to_highlight.length-1); // last gets extra margin
     });
+
+    // Startpage silently re-fetches its search results from time to time, which wipes out
+    // our injected container along with it, and the highlighted results lose their highlight.
+    // Watch for that specific case and redo the whole highlighting pass once it happens
+    if(DATA.site_key === "startpage")
+        wait_for_element_to_disappear(container).then(async () => {
+            await create_containers();
+            const fresh_results = await get_resultlist();
+            highlight_results(fresh_results);
+        });
 }
 
 // --------------------------
@@ -333,6 +339,16 @@ function filter_blacklisted(results) {
             document.querySelectorAll(".blacklisted_result").forEach(el => el.classList.toggle("hidden"));
         });
     }
+
+    // Startpage silently re-fetches its search results from time to time, which wipes out
+    // our injected container along with it, and newly fetched results stay unfiltered.
+    // Watch for that specific case and redo the whole blacklist pass once it happens
+    if(DATA.site_key === "startpage" && removed_container)
+        wait_for_element_to_disappear(removed_container).then(async () => {
+            await create_containers();
+            const fresh_results = await get_resultlist();
+            filter_blacklisted(fresh_results);
+        });
 }
 
 // --------------------------
@@ -449,10 +465,6 @@ function style_result(result, index, last) {
     // Move result up (negative order puts it first)
     result.style.order = index;
 
-    // NOT USED ANYMORE STYLE IS ADDED VIA CLASS
-    // Append user CSS styles from GM_config
-    // result.setAttribute("style", result.getAttribute("style") + GM_config.get("highlight_styles"))
-
     // Add CSS class instead
     result.classList.add("highlighted_result");
 
@@ -476,6 +488,25 @@ async function get_resultlist() {
     const results = Array.from(container.querySelectorAll(DATA.result_selector));
     return results;
 }
+
+// Strips protocol prefix and everything from the first slash onward from a raw domain string
+function clean_domain_input(raw) {
+    return raw.replace(/^https?:\/\//i, "").split("/")[0].trim();
+}
+
+// Cleans a full textarea value: removes empty lines, trims whitespace, normalizes each domain term
+function clean_terms_text(text) {
+    return text.split("\n")
+        .map(line => line.trim())
+        .filter(line => line)
+        .map(line => {
+        const parts = line.split("|");
+        if(parts.length === 2) return `${parts[0].trim()}|${clean_domain_input(parts[1])}`;
+        return clean_domain_input(parts[0]);
+    })
+        .join("\n");
+}
+
 
 // --------------------------
 // Styles
