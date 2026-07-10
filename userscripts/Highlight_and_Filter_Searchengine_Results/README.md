@@ -101,3 +101,8 @@ This ensures Google does not reorder tabs or add unnecessary ones for each searc
 - If a domain is present in both the blacklist and the highlight list, it will still be **removed**.
 - All domain matching ignores `http://`, `https://`, and `www.` prefixes.
   For example, entering `fandom.com` will highlight or block all subpages like `gamename.fandom.com`.
+
+## Libraries Used
+
+- **[tldts](https://github.com/remusao/tldts)**
+  For accurate domain extraction using the Public Suffix List
