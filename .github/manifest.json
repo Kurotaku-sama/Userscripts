@@ -1,5 +1,5 @@
 {
-  "Highlight and Filter Searchengine Results": { "version": "1.0.3", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js" },
+  "Highlight and Filter Searchengine Results": { "version": "1.0.4", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js" },
   "Genshin Impact Teyvat Interactive Map - Automate Mark Pins": { "version": "1.3.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Genshin_Impact_Teyvat_Interactive_Map_-_Automate_mark_pins/script.user.js" },
   "ChatGPT Bulk & Quick Delete": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js" },
   "Autoreload Streams": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js" },
@@ -19,6 +19,6 @@
   "Streamlabs HitSquadGodFather improvements": { "version": "1.1.6", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Streamlabs_HitSquadGodFather_improvements/script.user.js" },
   "Podcast.de Autodownload": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Podcast.de_Autodownload/script.user.js" },
   "Twitch Channel Points Bonus Collector": { "version": "1.1.4", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Channel_Points_Bonus_Collector/script.user.js" },
-  "Steam Inventory Enhancer": { "version": "1.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js" },
+  "Steam Inventory Enhancer": { "version": "1.2.1", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js" },
   "YouTube HitSquadGodFather Command Buttons": { "version": "1.2.11", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/YouTube_HitSquadGodFather_Command_Buttons/script.user.js" }
 }
