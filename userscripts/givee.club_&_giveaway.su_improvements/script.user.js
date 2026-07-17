@@ -2,7 +2,7 @@
 // @name            givee.club & giveaway.su improvements
 // @name:de         givee.club & giveaway.su Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.0.4
+// @version         1.1
 // @description     A script for some improvements for givee.club & giveaway.su
 // @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
 // @author          Kurotaku
@@ -66,20 +66,20 @@ let gicl, gisu;
 
     insert_buttons();
 
-    if(gicl.get("hide_ads"))
+    if (gicl.get("hide_ads"))
         hide_ads();
 
     wait_for_element(DATA.sele_giveaways_container).then(async () => {
         hide_items();
 
-        if(get_field("hide_item_buttons"))
+        if (get_field("hide_item_buttons"))
             hide_item_buttons();
     });
 
-    if(LOC.includes("/event/"))
+    if (LOC.includes("/event/"))
         insert_giveaway_draw_time();
 
-    if(LOC.includes("/event/") || LOC.includes("/giveaway/view/"))
+    if (LOC.includes("/event/") || LOC.includes("/giveaway/view/"))
         insert_task_button();
 })();
 
@@ -98,6 +98,7 @@ async function init_gm_config() {
                 click: () => window.open("https://raw.githubusercontent.com/longnull/GiveawayCompanion/master/GiveawayCompanion.user.js", "_blank"),
             },
             hide_ads: {
+                section: ["General Settings"],
                 type: "checkbox",
                 default: true,
                 label: "Hide sponsored content",
@@ -112,18 +113,48 @@ async function init_gm_config() {
                 default: true,
                 label: "Hide items by default",
             },
-            instant_hide: {
+            show_source_steam: {
+                section: ["Platform Filters<br><small>Show/Hide Giveaways which are directly on Steam, GOG, etc.</small>"],
                 type: "checkbox",
-                default: false,
-                label: "Instant hide",
+                default: true,
+                label: "Show Steam giveaways",
+            },
+            show_source_epicgames: {
+                type: "checkbox",
+                default: true,
+                label: "Show Epic Games giveaways",
+            },
+            show_source_ubisoft: {
+                type: "checkbox",
+                default: true,
+                label: "Show Ubisoft giveaways",
+            },
+            show_source_amazonprimegaming: {
+                type: "checkbox",
+                default: true,
+                label: "Show Amazon Prime Gaming giveaways",
+            },
+            show_source_gog: {
+                type: "checkbox",
+                default: true,
+                label: "Show GOG giveaways",
+            },
+            instant_hide: {
+                section: ["Advanced Settings"],
+                type: "checkbox",
+                default: true,
+                label: "Instant hide (Hide without page refresh)",
             },
             items_to_hide: {
                 label: "Hide items by name<br>(each item name must be written in a new line)",
                 type: "textarea",
             },
         },
+        events: {
+            save: () => { location.reload(); },
+        },
         frame: create_configuration_container(),
-    })
+    });
 
     gisu = new GM_config({
         id: config_id_gisu,
@@ -136,6 +167,7 @@ async function init_gm_config() {
                 click: () => window.open("https://raw.githubusercontent.com/longnull/GiveawayCompanion/master/GiveawayCompanion.user.js", "_blank"),
             },
             hide_item_buttons: {
+                section: ["General Settings"],
                 type: "checkbox",
                 default: true,
                 label: "Button in top right corner for quick hide",
@@ -146,17 +178,21 @@ async function init_gm_config() {
                 label: "Hide items by default",
             },
             instant_hide: {
+                section: ["Advanced Settings"],
                 type: "checkbox",
                 default: false,
-                label: "Instant hide",
+                label: "Instant hide (Hide without page refresh)",
             },
             items_to_hide: {
                 label: "Hide items by name<br>(each item name must be written in a new line)",
                 type: "textarea",
             },
         },
+        events: {
+            save: () => { location.reload(); },
+        },
         frame: create_configuration_container(),
-    })
+    });
 
     GM_registerMenuCommand("Settings givee.club", () => gicl.open());
     GM_registerMenuCommand("Settings giveaway.su", () => gisu.open());
@@ -198,7 +234,7 @@ async function insert_buttons() {
 
         // Remove empty <a> tags (giveaway.su specific)
         if (CURRENT_DOMAIN === "giveaway.su") {
-            const empty_links = menu_element.querySelectorAll('a');
+            const empty_links = menu_element.querySelectorAll("a");
             empty_links.forEach(a => {
                 if (!a.textContent.trim()) a.remove();
             });
@@ -224,7 +260,7 @@ function hide_ads() {
     const elements = document.querySelectorAll(DATA.sele_ads);
 
     elements.forEach(ad => {
-        const parent = ad.closest('.col-md-4.col-sm-6');
+        const parent = ad.closest(".col-md-4.col-sm-6");
         parent ? parent.remove() : ad.remove();
     });
 }
@@ -235,7 +271,7 @@ function hide_item_buttons() {
 
     items.forEach((item) => {
         if (!item.parentNode.classList.contains("gray-out-item")) {
-            item.parentNode.insertAdjacentHTML('afterbegin', eye_button);
+            item.parentNode.insertAdjacentHTML("afterbegin", eye_button);
             item.parentNode.querySelector(".eye-container").addEventListener("click", add_to_hidden, false);
         }
     });
@@ -251,10 +287,10 @@ function add_to_hidden(event) {
     let href_and_title = get_event_href_and_title(item);
     get_config().set("items_to_hide", get_prepared_items_to_hide(href_and_title)); // Override old list
 
-    if(get_field("hide_items_from_list_by_default"))
+    if (get_field("hide_items_from_list_by_default"))
         item.classList.add("gray-out-item");
 
-    if(get_field("instant_hide"))
+    if (get_field("instant_hide"))
         item.classList.add("hide-item");
 
     get_config().save();
@@ -278,27 +314,49 @@ function get_prepared_items_to_hide(new_title = null) {
     // Process the items string
     items_to_hide = items_to_hide
         .replace(/^\s*$(?:\r\n?|\n)/gm, "") // Remove blank lines
-        .split('\n')                        // Split into array
+        .split("\n")                        // Split into array
         .map(line => trim_spaces(line))     // Trim each line
         .filter(line => line !== "")        // Remove empty lines
         .filter((line, index, self) =>      // Remove duplicates
             self.indexOf(line) === index
         )
         .sort(sort_alphabetically)          // Sort alphabetically
-        .join('\n');                        // Join back to string
+        .join("\n");                        // Join back to string
 
     return items_to_hide;
+}
+
+function should_hide_by_source(event) {
+    // These platform filters only exist on givee.club
+    if (CURRENT_DOMAIN !== "givee.club")
+        return false;
+
+    const sources = [
+        { class_name: "event-source-steam", config_name: "show_source_steam" },
+        { class_name: "event-source-epicgames", config_name: "show_source_epicgames" },
+        { class_name: "event-source-ubisoft", config_name: "show_source_ubisoft" },
+        { class_name: "event-source-amazonprimegaming", config_name: "show_source_amazonprimegaming" },
+        { class_name: "event-source-gog", config_name: "show_source_gog" }
+    ];
+
+    for (const source of sources) {
+        if (event.querySelector(`.${source.class_name}`)) {
+            if (!get_field(source.config_name))
+                return true;
+        }
+    }
+    return false;
 }
 
 function hide_items() {
     let hidden_items = get_hidden_items_array();
     let events = document.querySelectorAll(DATA.sele_giveaway_container); // Get all items in store
     events.forEach(function(event) {
-        if(event.querySelector(DATA.sele_ads) === null) {
+        if (event.querySelector(DATA.sele_ads) === null) {
             let href = get_event_href(event);
-            if(hidden_items.includes(href)) {
+            if (hidden_items.includes(href) || should_hide_by_source(event)) {
                 event.classList.add("gray-out-item");
-                if(get_field("hide_items_from_list_by_default"))
+                if (get_field("hide_items_from_list_by_default"))
                     event.classList.add("hide-item");
             }
         }
@@ -314,7 +372,7 @@ function get_hidden_items_array() {
 
 function insert_task_button() {
     wait_for_element(DATA.sele_task_button_destination).then(async (destination) => {
-        const button = "<button type='button' class='btn btn-success btn-sm' id='k-check-tasks'>Check Tasks</button>";
+        const button = `<button type="button" class="btn btn-success btn-sm" id="k-check-tasks">Check Tasks</button>`;
         destination.innerHTML = button + destination.innerHTML;
         document.getElementById("k-check-tasks").addEventListener ("click", check_tasks, false);
     });
@@ -327,20 +385,20 @@ function check_tasks() {
 
 function insert_giveaway_draw_time() {
     let countdown = document.querySelector(".event-countdown");
-    if(countdown) {
+    if (countdown) {
         let time = new Date();
         let time_left = parseInt(countdown.getAttribute("data-timeleft"));
         time.setSeconds(time.getSeconds() + time_left);
-        countdown.insertAdjacentHTML('afterend', `<div class="event_countdown">Giveaway will be drawn on: <span>${format_date_time(time)}</span></div>`);
+        countdown.insertAdjacentHTML("afterend", `<div class="event_countdown">Giveaway will be drawn on: <span>${format_date_time(time)}</span></div>`);
     }
 }
 
 function format_date_time(time) {
-    let date = time.getDate() >= 10 ? time.getDate() : '0'+time.getDate();
-    let month = time.getMonth() >= 10 ? time.getMonth() : '0'+time.getMonth();
+    let date = time.getDate() >= 10 ? time.getDate() : "0"+time.getDate();
+    let month = time.getMonth() >= 10 ? time.getMonth() : "0"+time.getMonth();
     let full_year = time.getFullYear();
-    let hours = time.getHours() >= 10 ? time.getHours() : '0'+time.getHours();
-    let minutes = time.getMinutes() >= 10 ? time.getMinutes() : '0'+time.getMinutes();
+    let hours = time.getHours() >= 10 ? time.getHours() : "0"+time.getHours();
+    let minutes = time.getMinutes() >= 10 ? time.getMinutes() : "0"+time.getMinutes();
     let formated_date = `${date}.${month}.${full_year} - ${hours}:${(minutes)}`;
     return formated_date
 }
@@ -368,7 +426,7 @@ GM_addStyle(`
   width: 40px;
 }
 
-.gray-out-item {filter: saturate(0%)}
+.gray-out-item { filter: saturate(0%) }
 
-.hide-item {display: none !important}
+.hide-item { display: none !important }
 `);

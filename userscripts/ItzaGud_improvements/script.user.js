@@ -82,7 +82,7 @@ async function init_gm_config() {
             },
         },
         events: {
-            save: () => { location.reload() },
+            save: () => { location.reload(); },
         },
         frame: create_configuration_container(),
     });

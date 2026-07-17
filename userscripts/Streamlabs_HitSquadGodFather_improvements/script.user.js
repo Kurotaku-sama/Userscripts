@@ -145,7 +145,7 @@ async function init_gm_config() {
         },
         events: {
             init: () => { GM_config.set("items_to_hide", get_prepared_items_to_hide()) },
-            save: () => { location.reload() },
+            save: () => { location.reload(); },
         },
         frame: create_configuration_container(),
     });

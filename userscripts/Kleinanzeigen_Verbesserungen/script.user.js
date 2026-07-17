@@ -146,7 +146,7 @@ async function init_gm_config() {
         },
         events: {
             init: () => {GM_config.set("filter_search_containing_words", GM_config.get("filter_search_containing_words").replace(/^\s*$(?:\r\n?|\n)/gm, ""))}, // To prevent blank lines
-            save: () => { location.reload() },
+            save: () => { location.reload(); },
         },
         frame: create_configuration_container(),
     });
