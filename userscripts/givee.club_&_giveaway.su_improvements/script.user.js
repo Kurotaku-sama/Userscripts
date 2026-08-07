@@ -2,7 +2,7 @@
 // @name            givee.club & giveaway.su improvements
 // @name:de         givee.club & giveaway.su Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.1
+// @version         1.1.1
 // @description     A script for some improvements for givee.club & giveaway.su
 // @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
 // @author          Kurotaku
@@ -293,7 +293,7 @@ function add_to_hidden(event) {
     if (get_field("instant_hide"))
         item.classList.add("hide-item");
 
-    get_config().save();
+    get_config().write();
 }
 
 function get_event_href_and_title(event) {
