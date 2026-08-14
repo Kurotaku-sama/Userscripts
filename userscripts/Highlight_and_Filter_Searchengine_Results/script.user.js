@@ -1,438 +1,606 @@
 // ==UserScript==
-// @name            givee.club & giveaway.su improvements
-// @name:de         givee.club & giveaway.su Verbesserungen
+// @name            Highlight and Filter Searchengine Results
+// @name:de         Hervorheben und Filtern Suchmaschinen Ergebnisse
 // @namespace       https://kurotaku.de
-// @version         1.1
-// @description     A script for some improvements for givee.club & giveaway.su
-// @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
+// @version         1.0.4
+// @description     Highlight certain search results and remove blacklisted domains
+// @description:de  Bestimmte Suchergebnisse hervorheben und Domains aus der Blacklist entfernen
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
-// @match           https://givee.club/*
-// @match           https://giveaway.su/*
-// @icon            https://givee.club/favicon.ico
-// @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/givee.club_&_giveaway.su_improvements/script.user.js
-// @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/givee.club_&_giveaway.su_improvements/script.user.js
+// @include         https://www.startpage.com/*
+// @include         https://duckduckgo.com/*
+// @include         https://www.google.*/*
+// @icon            https://www.startpage.com/sp/cdn/favicons/favicon-32x32-gradient.png
+// @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
+// @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @require         https://cdn.jsdelivr.net/npm/tldts@6/dist/index.umd.min.js
 // @grant           GM_getValue
 // @grant           GM_setValue
 // @grant           GM_listValues
 // @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
-// @run-at          document-body
 // ==/UserScript==
 
 
+// Sample SITE_DATA
+// websitename: {
+//     "insertion_container": "container that is a parent of the result_container and will contain the removed and highlighted results containers",
+//     "search_patterns": "string or array of URL patterns (supports * as wildcard) that identify search result pages",
+//     "result_container": "container that holds the search results",
+//     "result_selector": "direct child elements of result_container that are individual search results",
+//     "domain_selector": "first link inside result used to extract the domain",
+//     "style_removed_container": "optional inline styles for the removed results container",
+//     "style_highlighted_results_container": "optional inline styles for the highlighted results container"
+// }
+
 const SITE_DATA = {
-    "givee.club": {
-        sele_menu: `.user button[data-action="account-rewards"]`,
-        sele_giveaways_container: "#event-active",
-        sele_giveaway_container: "#event-active .col-md-4.col-sm-6",
-        sele_giveaway_card: ".event-card",
-        sele_giveaway_title: ".event-title .vertical-align-middle",
-        sele_ads: ".definetelynotanad",
-        sele_task_button_destination: ".actions-submit",
-        sele_task_buttons: ".event-actions tr button.btn-default",
-        html_button_toggle_visibility_open: `&nbsp;<button class="btn btn-default btn-xs" id="button_toggle_visibility"><i class="glyphicon glyphicon-eye-open"></i> <span class="hidden-xs">Show hidden</span></button>`,
-        html_button_toggle_visibility_close: `&nbsp;<button class="btn btn-default btn-xs" id="button_toggle_visibility"><i class="glyphicon glyphicon-eye-close"></i> <span class="hidden-xs">Hide hidden</span></button>`,
-        html_button_config: `&nbsp;<button class="btn btn-default btn-xs" id="button_config"><i class="glyphicon glyphicon-cog"></i> <span class="hidden-xs">Config</span></button>`,
-        menu_insert: "afterend"
+    startpage: {
+        site_key: "startpage",
+        search_patterns: ["*/do/search*", "*/sp/search*"],
+        insertion_container: "#main",
+        result_container: ".w-gl",
+        result_selector: ":scope > .result",
+        domain_selector: "a[href^='http']",
     },
-    "giveaway.su": {
-        sele_menu: "ul.menu",
-        sele_giveaways_container: "#giveaways",
-        sele_giveaway_container: "#giveaways .col-md-4.col-sm-6",
-        sele_giveaway_card: ".giveaway-item",
-        sele_giveaway_title: ".giveaway-title .vertical-align-middle",
-        sele_ads: ".definetelynotanad",
-        sele_task_button_destination: "#getKey",
-        sele_task_buttons: "#actions tr button.btn-default",
-        html_button_toggle_visibility_open: `<li id="button_toggle_visibility"><a><i class="glyphicon glyphicon-eye-open"></i> <span>Show hidden</span></a></li>`,
-        html_button_toggle_visibility_close: `<li id="button_toggle_visibility"><a><i class="glyphicon glyphicon-eye-close"></i> <span>Hide hidden</span></a></li>`,
-        html_button_config: `<li id="button_config"><a><i class="glyphicon glyphicon-cog"></i> <span>Config</span</a></li>`,
-        menu_insert: "afterbegin"
-    }
+    google: {
+        site_key: "google",
+        search_patterns: ["*/search?*"],
+        insertion_container: "#center_col",
+        result_container: "#search",
+        result_selector: ":scope > .g, :scope > div > div > div > div",
+        domain_selector: "a[href^='http']",
+    },
+    duckduckgo: {
+        site_key: "duckduckgo",
+        search_patterns: ["*&q=*", "*?q=*"],
+        insertion_container: "section[data-area='mainline']",
+        result_container: "section[data-area='mainline'] > ol",
+        result_selector: ":scope > li",
+        domain_selector: "a[href^='http']",
+        style_highlighted_results_container: "list-style: none;",
+    },
 };
 
 const CURRENT_DOMAIN = window.location.hostname;
-const DATA = SITE_DATA[CURRENT_DOMAIN];
-const LOC = window.location.href;
-let gicl, gisu;
+let DATA = null;
+
+switch(true) {
+    case CURRENT_DOMAIN.includes("startpage.com"):
+        DATA = SITE_DATA.startpage;
+        break;
+    case CURRENT_DOMAIN.includes("google."):
+        DATA = SITE_DATA.google;
+        break;
+    case CURRENT_DOMAIN.includes("duckduckgo.com"):
+        DATA = SITE_DATA.duckduckgo;
+        break;
+    default:
+        throw new Error("Unsupported domain, script stopped");
+}
 
 (async function() {
     await init_gm_config();
 
-    insert_buttons();
-
-    if (gicl.get("hide_ads"))
-        hide_ads();
-
-    wait_for_element(DATA.sele_giveaways_container).then(async () => {
-        hide_items();
-
-        if (get_field("hide_item_buttons"))
-            hide_item_buttons();
-    });
-
-    if (LOC.includes("/event/"))
-        insert_giveaway_draw_time();
-
-    if (LOC.includes("/event/") || LOC.includes("/giveaway/view/"))
-        insert_task_button();
+    if(is_search_page())
+        await run_search_features();
 })();
 
-async function init_gm_config() {
-    const config_id_gicl = "configuration_gicl";
-    const config_id_gisu = "configuration_gisu";
-
-    gicl = new GM_config({
-        id: config_id_gicl,
-        title: "givee.club improvements",
-        fields: {
-            companion: {
-                type: "button",
-                size: 100,
-                label: "Install Giveaway Companion (Recommended)",
-                click: () => window.open("https://raw.githubusercontent.com/longnull/GiveawayCompanion/master/GiveawayCompanion.user.js", "_blank"),
-            },
-            hide_ads: {
-                section: ["General Settings"],
-                type: "checkbox",
-                default: true,
-                label: "Hide sponsored content",
-            },
-            hide_item_buttons: {
-                type: "checkbox",
-                default: true,
-                label: "Button in top right corner for quick hide",
-            },
-            hide_items_from_list_by_default: {
-                type: "checkbox",
-                default: true,
-                label: "Hide items by default",
-            },
-            show_source_steam: {
-                section: ["Platform Filters<br><small>Show/Hide Giveaways which are directly on Steam, GOG, etc.</small>"],
-                type: "checkbox",
-                default: true,
-                label: "Show Steam giveaways",
-            },
-            show_source_epicgames: {
-                type: "checkbox",
-                default: true,
-                label: "Show Epic Games giveaways",
-            },
-            show_source_ubisoft: {
-                type: "checkbox",
-                default: true,
-                label: "Show Ubisoft giveaways",
-            },
-            show_source_amazonprimegaming: {
-                type: "checkbox",
-                default: true,
-                label: "Show Amazon Prime Gaming giveaways",
-            },
-            show_source_gog: {
-                type: "checkbox",
-                default: true,
-                label: "Show GOG giveaways",
-            },
-            instant_hide: {
-                section: ["Advanced Settings"],
-                type: "checkbox",
-                default: true,
-                label: "Instant hide (Hide without page refresh)",
-            },
-            items_to_hide: {
-                label: "Hide items by name<br>(each item name must be written in a new line)",
-                type: "textarea",
-            },
-        },
-        events: {
-            save: () => {
-                GM_config.write();
-                location.reload();
-            },
-        },
-        frame: create_configuration_container(),
-    });
-
-    gisu = new GM_config({
-        id: config_id_gisu,
-        title: "giveaway.su improvements",
-        fields: {
-            companion: {
-                type: "button",
-                size: 100,
-                label: "Install Giveaway Companion (Recommended)",
-                click: () => window.open("https://raw.githubusercontent.com/longnull/GiveawayCompanion/master/GiveawayCompanion.user.js", "_blank"),
-            },
-            hide_item_buttons: {
-                section: ["General Settings"],
-                type: "checkbox",
-                default: true,
-                label: "Button in top right corner for quick hide",
-            },
-            hide_items_from_list_by_default: {
-                type: "checkbox",
-                default: true,
-                label: "Hide items by default",
-            },
-            instant_hide: {
-                section: ["Advanced Settings"],
-                type: "checkbox",
-                default: false,
-                label: "Instant hide (Hide without page refresh)",
-            },
-            items_to_hide: {
-                label: "Hide items by name<br>(each item name must be written in a new line)",
-                type: "textarea",
-            },
-        },
-        events: {
-            save: () => {
-                GM_config.write();
-                location.reload();
-            },
-        },
-        frame: create_configuration_container(),
-    });
-
-    GM_registerMenuCommand("Settings givee.club", () => gicl.open());
-    GM_registerMenuCommand("Settings giveaway.su", () => gisu.open());
-    await wait_for_gm_config();
-}
-
-function get_config() {
-    if (CURRENT_DOMAIN === "givee.club")
-        return gicl;
-    else if (CURRENT_DOMAIN === "giveaway.su")
-        return gisu;
-    return null;
-}
-
-function get_field(field_name) {
-    const config = get_config();
-    return config ? config.get(field_name) : false;
-}
-
-async function insert_buttons() {
-    // Wait for menu element based on current domain
-    wait_for_element(DATA.sele_menu).then((menu_element) => {
-        let html = "";
-
-        // Check if we're on homepage (for toggle button)
-        const home = document.querySelector(DATA.sele_giveaways_container);
-        if (home)
-            html += get_field("hide_items_from_list_by_default") ? DATA.html_button_toggle_visibility_open : DATA.html_button_toggle_visibility_close;
-
-        // Always add config button
-        html += DATA.html_button_config;
-
-        // Insert buttons using domain-specific method
-        menu_element.insertAdjacentHTML(DATA.menu_insert, html);
-
-        // Add event listeners
-        document.getElementById("button_config")?.addEventListener("click", () => get_config()?.open());
-        document.getElementById("button_toggle_visibility")?.addEventListener("click", toggle_visibility);
-
-        // Remove empty <a> tags (giveaway.su specific)
-        if (CURRENT_DOMAIN === "giveaway.su") {
-            const empty_links = menu_element.querySelectorAll("a");
-            empty_links.forEach(a => {
-                if (!a.textContent.trim()) a.remove();
-            });
-        }
-    });
-}
-
-function toggle_visibility() {
-    const btn = document.getElementById("button_toggle_visibility");
-    const icon = btn.querySelector("i");
-    const text = btn.querySelector("span");
-
-    icon.classList.toggle("glyphicon-eye-open");
-    icon.classList.toggle("glyphicon-eye-close");
-
-    text.textContent = text.textContent == "Show hidden" ? "Hide hidden" : "Show hidden";
-
-    let hidden = document.querySelectorAll(".gray-out-item");
-    hidden.forEach(el => el.classList.toggle("hide-item"));
-}
-
-function hide_ads() {
-    const elements = document.querySelectorAll(DATA.sele_ads);
-
-    elements.forEach(ad => {
-        const parent = ad.closest(".col-md-4.col-sm-6");
-        parent ? parent.remove() : ad.remove();
-    });
-}
-
-function hide_item_buttons() {
-    const items = document.querySelectorAll(DATA.sele_giveaway_card);
-    const eye_button = `<div class="eye-container"><i class="glyphicon glyphicon-eye-close"></i></div>`;
-
-    items.forEach((item) => {
-        if (!item.parentNode.classList.contains("gray-out-item")) {
-            item.parentNode.insertAdjacentHTML("afterbegin", eye_button);
-            item.parentNode.querySelector(".eye-container").addEventListener("click", add_to_hidden, false);
-        }
-    });
-}
-
-function add_to_hidden(event) {
-    let item = event.target; // Get the item
-    while(item.classList.value !== "col-md-4 col-sm-6") // Go up till you reach the item
-        item = item.parentNode;
-
-    item.querySelector(".eye-container")?.remove();
-
-    let href_and_title = get_event_href_and_title(item);
-    get_config().set("items_to_hide", get_prepared_items_to_hide(href_and_title)); // Override old list
-
-    if (get_field("hide_items_from_list_by_default"))
-        item.classList.add("gray-out-item");
-
-    if (get_field("instant_hide"))
-        item.classList.add("hide-item");
-
-    get_config().save();
-}
-
-function get_event_href_and_title(event) {
-    return `${event.querySelector(DATA.sele_giveaway_card).pathname} - ${event.querySelector(DATA.sele_giveaway_title).innerText}`;
-}
-
-function get_event_href(event) {
-    return `${event.querySelector(DATA.sele_giveaway_card).pathname}`;
-}
-
-function get_prepared_items_to_hide(new_title = null) {
-    let items_to_hide = get_field("items_to_hide") || "";
-
-    // Add new title if provided
-    if (new_title)
-        items_to_hide += `\n${new_title.trim()}`;
-
-    // Process the items string
-    items_to_hide = items_to_hide
-        .replace(/^\s*$(?:\r\n?|\n)/gm, "") // Remove blank lines
-        .split("\n")                        // Split into array
-        .map(line => trim_spaces(line))     // Trim each line
-        .filter(line => line !== "")        // Remove empty lines
-        .filter((line, index, self) =>      // Remove duplicates
-            self.indexOf(line) === index
-        )
-        .sort(sort_alphabetically)          // Sort alphabetically
-        .join("\n");                        // Join back to string
-
-    return items_to_hide;
-}
-
-function should_hide_by_source(event) {
-    // These platform filters only exist on givee.club
-    if (CURRENT_DOMAIN !== "givee.club")
-        return false;
-
-    const sources = [
-        { class_name: "event-source-steam", config_name: "show_source_steam" },
-        { class_name: "event-source-epicgames", config_name: "show_source_epicgames" },
-        { class_name: "event-source-ubisoft", config_name: "show_source_ubisoft" },
-        { class_name: "event-source-amazonprimegaming", config_name: "show_source_amazonprimegaming" },
-        { class_name: "event-source-gog", config_name: "show_source_gog" }
-    ];
-
-    for (const source of sources) {
-        if (event.querySelector(`.${source.class_name}`)) {
-            if (!get_field(source.config_name))
-                return true;
-        }
+// Runs all search result processing features after confirming we are on a search page
+async function run_search_features() {
+    if(DATA.site_key === "google") {
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('udm') === '2')
+            return;
     }
-    return false;
-}
 
-function hide_items() {
-    let hidden_items = get_hidden_items_array();
-    let events = document.querySelectorAll(DATA.sele_giveaway_container); // Get all items in store
-    events.forEach(function(event) {
-        if (event.querySelector(DATA.sele_ads) === null) {
-            let href = get_event_href(event);
-            if (hidden_items.includes(href) || should_hide_by_source(event)) {
-                event.classList.add("gray-out-item");
-                if (get_field("hide_items_from_list_by_default"))
-                    event.classList.add("hide-item");
+    await create_containers();
+
+    if(DATA.site_key === "startpage" && GM_config.get("startpage_sponsorblock"))
+        GM_addStyle(`
+            ${DATA.insertion_container} > .result,
+            #main > .result,
+            #main iframe {
+                display: none !important;
             }
-        }
-    })
-}
+        `);
 
-function get_hidden_items_array() {
-    let hidden_items = get_field("items_to_hide").split("\n");
-    hidden_items = hidden_items.map(function (el) {return el.split(" - ")[0].trim();}); // Trim away the spaces
-    hidden_items = hidden_items.filter((el) => el !== ""); // Remove all empty lines (shouldn't happen anymore, but safe is safe)
-    return hidden_items;
-}
+    if(GM_config.get("highlight_enabled") || GM_config.get("blacklist_filter_enabled") || GM_config.get("special_sections_filter_enabled")) {
+        add_dynamic_styles();
 
-function insert_task_button() {
-    wait_for_element(DATA.sele_task_button_destination).then(async (destination) => {
-        const button = `<button type="button" class="btn btn-success btn-sm" id="k-check-tasks">Check Tasks</button>`;
-        destination.innerHTML = button + destination.innerHTML;
-        document.getElementById("k-check-tasks").addEventListener ("click", check_tasks, false);
-    });
-}
+        const all_results = await get_resultlist();
 
-function check_tasks() {
-    let buttons = document.querySelectorAll(DATA.sele_task_buttons);
-    buttons.forEach(button => button.click());
-}
+        if(GM_config.get("highlight_enabled"))
+            highlight_results(all_results);
 
-function insert_giveaway_draw_time() {
-    let countdown = document.querySelector(".event-countdown");
-    if (countdown) {
-        let time = new Date();
-        let time_left = parseInt(countdown.getAttribute("data-timeleft"));
-        time.setSeconds(time.getSeconds() + time_left);
-        countdown.insertAdjacentHTML("afterend", `<div class="event_countdown">Giveaway will be drawn on: <span>${format_date_time(time)}</span></div>`);
+        if(GM_config.get("blacklist_filter_enabled"))
+            filter_blacklisted(all_results);
+
+        if(GM_config.get("special_sections_filter_enabled"))
+            remove_special_sections(all_results);
+
+        // Tab rearrange/removal is a Google only feature, other sites do not have this tab bar
+        if(DATA.site_key === "google" && GM_config.get("search_tabs_enabled"))
+            filter_search_tabs();
     }
 }
 
-function format_date_time(time) {
-    let date = time.getDate() >= 10 ? time.getDate() : "0"+time.getDate();
-    let month = time.getMonth() >= 10 ? time.getMonth() : "0"+time.getMonth();
-    let full_year = time.getFullYear();
-    let hours = time.getHours() >= 10 ? time.getHours() : "0"+time.getHours();
-    let minutes = time.getMinutes() >= 10 ? time.getMinutes() : "0"+time.getMinutes();
-    let formated_date = `${date}.${month}.${full_year} - ${hours}:${(minutes)}`;
-    return formated_date
+// --------------------------
+// GM_config initialization
+// --------------------------
+async function init_gm_config() {
+    const config_id = "configuration_hiafisere";
+    await migrate_config_id(config_id);
+    GM_registerMenuCommand("Settings", () => GM_config.open());
+    GM_config.init({
+        id: config_id,
+        title: 'Highlight and Filter Searchengine Results',
+        fields: {
+            highlight_enabled: {
+                section: ['Highlight'],
+                type: 'checkbox',
+                default: true,
+                label: 'Enable Highlighting',
+            },
+            highlight_terms: {
+                label: 'Highlight Domain Terms<br>Enter one domain per line, e.g. "example.com".<br>Optional: prefix with site keys separated by ";" followed by "|", e.g. "google;duckduckgo|example.com"',
+                type: 'textarea',
+            },
+            highlight_styles: {
+                label: 'CSS Styles (this will be applied to highlighted search results)',
+                type: 'input',
+                default: 'padding: 20px; border: cyan 2px solid;',
+            },
+            blacklist_filter_enabled: {
+                type: 'checkbox',
+                default: true,
+                label: 'Enable Blacklist Filter',
+                section: ['Blacklist Filter'],
+            },
+            blacklist_filter_notification_enabled: {
+                type: 'checkbox',
+                default: false,
+                label: 'Do not show removed results notification',
+            },
+            blacklist_filter_terms: {
+                label: 'Blacklist Domain Terms<br>Enter one domain per line, e.g. "example.com".<br>Optional: prefix with site keys separated by ";" followed by "|", e.g. "google;duckduckgo|example.com"',
+                type: 'textarea',
+            },
+            blacklist_styles: {
+                label: 'CSS Styles (this will be applied to blacklisted search results)',
+                type: 'input',
+                default: 'padding: 20px; border: red 2px solid',
+            },
+            search_tabs_enabled: {
+                section: ['Search Tabs (Only Google)'],
+                type: 'checkbox',
+                default: false,
+                label: 'Enable Tab Rearrange/Filter',
+            },
+            search_tabs_order: {
+                label: 'Tab Order (semicolon separated, e.g. "All;Web;Images;Videos;Short videos")',
+                type: 'text',
+            },
+            search_tabs_remove: {
+                label: 'Tabs to Remove/Hide (semicolon separated, e.g. "News;Products")',
+                type: 'text',
+            },
+            startpage_sponsorblock: {
+                section: ['Miscellaneous'],
+                type: 'checkbox',
+                default: true,
+                label: 'Sponsorblock on Startpage',
+            },
+            special_sections_filter_enabled: {
+                type: 'checkbox',
+                default: false,
+                label: 'Remove Special Sections on Google & DuckDuckGo (Tables, Sitelinks etc.)',
+            },
+        },
+        events: {
+            save: () => {
+                GM_config.set("highlight_terms", clean_terms_text(GM_config.get("highlight_terms")));
+                GM_config.set("blacklist_filter_terms", clean_terms_text(GM_config.get("blacklist_filter_terms")));
+                GM_config.write();
+                location.reload();
+            },
+        },
+        frame: create_configuration_container(),
+    });
 }
+
+// --------------------------
+// Check is search page
+// --------------------------
+function is_search_page() {
+    const url = window.location.href;
+    const patterns = Array.isArray(DATA.search_patterns) ? DATA.search_patterns : [DATA.search_patterns];
+    return patterns.some(pattern => {
+        // Escape regex special chars except "*", then replace "*" with ".*" for wildcard matching
+        const regex_str = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+        return new RegExp(regex_str).test(url);
+    });
+}
+
+// --------------------------
+// Containers creation
+// --------------------------
+async function create_containers() {
+    const container = await wait_for_element(DATA.insertion_container);
+
+    // removed_results_container
+    if(!document.getElementById("removed_results_container")) {
+        const style = DATA.style_removed_container ? ` style="${DATA.style_removed_container}"` : "";
+        container.insertAdjacentHTML("afterbegin", `<div class="removed_results_container"${style}></div>`);
+    }
+
+    // highlighted_results_container
+    if(!document.getElementById("highlighted_results_container")) {
+        const style = DATA.style_highlighted_results_container ? ` style="${DATA.style_highlighted_results_container}"` : "";
+        container.insertAdjacentHTML("afterbegin", `<div class="highlighted_results_container"${style}></div>`);
+    }
+}
+
+// --------------------------
+// Extract domain
+// --------------------------
+function extract_domain(result) {
+    const el = result.querySelector(DATA.domain_selector);
+
+    if(el && el.href) {
+        try {
+            const parsed = tldts.parse(el.href);
+            console.log("PARSED = " + parsed.domain);
+            return parsed.domain ? parsed.domain.toLowerCase() : "";
+        } catch(e) {};
+    }
+
+    return "";
+}
+
+// --------------------------
+// Highlighting
+// --------------------------
+function highlight_results(results) {
+    const highlight_terms = prepare_terms("highlight_terms"); // Get terms from config
+    const container = document.querySelector(".highlighted_results_container"); // Where highlighted results go
+
+    let to_highlight = [];
+
+    results.forEach((result, i) => {
+        // Extract the domain from the current search result
+        const domain = extract_domain(result);
+        // Check if the domain matches any of the configured highlight terms for this site (or global)
+        const match_obj = highlight_terms.find(obj => ( !obj.sites || obj.sites.includes(DATA.site_key) ) && domain.includes(obj.term));
+
+        // If a match is found, add the result to the list to be highlighted
+        if(match_obj)
+            to_highlight.push({result, index: highlight_terms.indexOf(match_obj)});
+    });
+
+    // Sort so higher priority terms appear first
+    to_highlight.sort((a,b) => a.index - b.index);
+
+    // Move and style highlighted results
+    to_highlight.forEach((obj, i) => {
+        const {result, index} = obj;
+        result.parentNode.removeChild(result);
+        container.appendChild(result);
+        style_result(result, index, i === to_highlight.length-1); // last gets extra margin
+    });
+
+    // Startpage silently re-fetches its search results from time to time, which wipes out
+    // our injected container along with it, and the highlighted results lose their highlight.
+    // Watch for that specific case and redo the whole highlighting pass once it happens
+    if(DATA.site_key === "startpage")
+        wait_for_element_to_disappear(container).then(async () => {
+            await create_containers();
+            const fresh_results = await get_resultlist();
+            highlight_results(fresh_results);
+        });
+}
+
+// --------------------------
+// Blacklist filtering
+// --------------------------
+function filter_blacklisted(results) {
+    // Get blacklist terms from config
+    const blacklist_terms = prepare_terms("blacklist_filter_terms");
+    let removed_count = 0;
+
+    results.forEach(result => {
+        // Extract the domain from the current search result
+        const domain = extract_domain(result);
+        // Check if the domain matches any of the blacklist terms for this site (or global)
+        if(blacklist_terms.some(obj => (!obj.sites || obj.sites.includes(DATA.site_key)) && domain.includes(obj.term))) {
+            // Add classes instead of removing
+            result.classList.add("blacklisted_result", "hidden");
+            removed_count++;
+        }
+    });
+
+    // Update notification area if results were removed
+    const removed_container = document.querySelector(".removed_results_container");
+
+    if(removed_container && removed_count > 0 && !GM_config.get("blacklist_filter_notification_enabled")) {
+        const html = `
+            <span class="removed_blacklist_text">Removed ${removed_count} blacklisted results</span>
+            <label class="blacklist_toggle_wrapper">
+                <input type="checkbox" id="blacklist_toggle">
+                <span class="blacklist_toggle_slider"></span>
+            </label>
+        `;
+        removed_container.innerHTML = html;
+
+        removed_container.querySelector("#blacklist_toggle").addEventListener("change", () => {
+            document.querySelectorAll(".blacklisted_result").forEach(el => el.classList.toggle("hidden"));
+        });
+    }
+
+    // Startpage silently re-fetches its search results from time to time, which wipes out
+    // our injected container along with it, and newly fetched results stay unfiltered.
+    // Watch for that specific case and redo the whole blacklist pass once it happens
+    if(DATA.site_key === "startpage" && removed_container)
+        wait_for_element_to_disappear(removed_container).then(async () => {
+            await create_containers();
+            const fresh_results = await get_resultlist();
+            filter_blacklisted(fresh_results);
+        });
+}
+
+// --------------------------
+// Search tabs filter/sort
+// --------------------------
+function filter_search_tabs() {
+    // Select the container that holds all tabs
+    const container = document.querySelector("div[role='list']");
+    if(!container) return;
+
+    // Collect all direct tab items (role=listitem)
+    const all_tabs = Array.from(container.querySelectorAll("div[role='listitem']"));
+    if(all_tabs.length === 0) return;
+
+    // Read user configuration for ordering and removing tabs
+    const order_config = GM_config.get("search_tabs_order")
+    .split(";")
+    .map(t => t.trim().toLowerCase())
+    .filter(t => t);
+
+    const remove_config = GM_config.get("search_tabs_remove")
+    .split(";")
+    .map(t => t.trim().toLowerCase())
+    .filter(t => t);
+
+    // Return early if both configs are empty
+    if(order_config.length === 0 && remove_config.length === 0)
+        return;
+
+    // Helper: get visible tab name text robustly
+    const get_tab_name = el => {
+        const link = el.querySelector("a"); // primary link inside tab
+        if(link) return link.textContent.trim();
+        // fallback: any visible text
+        return el.textContent.trim();
+    };
+
+    // Remove tabs that are in the remove_config
+    const filtered_tabs = all_tabs.filter(tab => !remove_config.includes(get_tab_name(tab).toLowerCase()));
+
+    // Sort tabs according to order_config
+    const sorted_tabs = [];
+    order_config.forEach(name => {
+        filtered_tabs.forEach(tab => {
+            if(get_tab_name(tab).toLowerCase() === name && !sorted_tabs.includes(tab))
+                sorted_tabs.push(tab);
+        });
+    });
+
+    // Append any remaining tabs that were not in order_config
+    filtered_tabs.forEach(tab => {
+        if(!sorted_tabs.includes(tab)) sorted_tabs.push(tab);
+    });
+
+    // Clear original container and append new order
+    container.innerHTML = "";
+    sorted_tabs.forEach(tab => container.appendChild(tab));
+}
+
+// --------------------------
+// Special sections removal
+// --------------------------
+function remove_special_sections(results) {
+    switch (DATA.site_key) {
+        case "google":
+            results.forEach(result => {
+                const tables = result.querySelectorAll("table");
+                tables.forEach(table => table.style.display = "none");
+
+                const sitelinks = result.querySelectorAll(".sld, .mslg");
+                sitelinks.forEach(sl => sl.style.display = "none");
+            })
+            break;
+
+        case "duckduckgo":
+            results.forEach(result => {
+                const ul = result.querySelector("article ul");
+                if(ul && ul.parentNode && ul.parentNode.parentNode)
+                    ul.parentNode.parentNode.style.display = "none";
+            })
+            break;
+
+        default:
+            break;
+    }
+}
+
+// --------------------------
+// Helper functions
+// --------------------------
+// Prepare list of terms from GM_config with optional site filtering
+function prepare_terms(config_key) {
+    return GM_config.get(config_key)
+        .split("\n") // Split lines by newline
+        .map(line => line.trim()) // Remove leading/trailing whitespace
+        .filter(line => line) // Remove empty lines
+        .map(line => {
+        const parts = line.split("|"); // Split site keys from term
+        // Skip lines with more than 2 parts
+        if(parts.length > 2) return null;
+
+        // If no site keys, treat as global term
+        if(parts.length === 1) return {sites: null, term: parts[0].toLowerCase()};
+
+        // Parse multiple site keys separated by ";"
+        const sites = parts[0].split(";").map(s => s.trim().toLowerCase());
+        return {sites, term: parts[1].toLowerCase()};
+    })
+        .filter(x => x); // Remove null entries
+}
+
+// Apply custom style and re-order a single search result
+function style_result(result, index, last) {
+    // Move result up (negative order puts it first)
+    result.style.order = index;
+
+    // Add CSS class instead
+    result.classList.add("highlighted_result");
+
+    // Ensure max width
+    result.style.maxWidth = "100%";
+
+    // Add spacing only for the last highlighted element
+    result.style.margin = !last ? "unset" : "0 0 30px 0";
+}
+
+// Collect all search results on the page (waits until first result exists)
+async function get_resultlist() {
+    // Wait until container exists
+    const container = await wait_for_element(DATA.result_container);
+    if(!container) return [];
+
+    // Wait until at least one result exists inside the container
+    await wait_for_element(DATA.result_selector, container);
+
+    // Grab all results
+    const results = Array.from(container.querySelectorAll(DATA.result_selector));
+    return results;
+}
+
+// Strips protocol prefix and everything from the first slash onward from a raw domain string
+function clean_domain_input(raw) {
+    return raw.replace(/^https?:\/\//i, "").split("/")[0].trim();
+}
+
+// Cleans a full textarea value: removes empty lines, trims whitespace, normalizes each domain term
+function clean_terms_text(text) {
+    return text.split("\n")
+        .map(line => line.trim())
+        .filter(line => line)
+        .map(line => {
+        const parts = line.split("|");
+        if(parts.length === 2) return `${parts[0].trim()}|${clean_domain_input(parts[1])}`;
+        return clean_domain_input(parts[0]);
+    })
+        .join("\n");
+}
+
+
+// --------------------------
+// Styles
+// --------------------------
+function add_dynamic_styles() {
+    // Get highlight styles from GM_config, split by semicolon into individual CSS rules
+    const highlight_styles = GM_config.get("highlight_styles")
+    .split(";") // Split string into array at each semicolon
+    .map(s => s.trim()) // Remove leading/trailing whitespace from each rule
+    .filter(Boolean) // Remove any empty strings resulting from extra semicolons
+    .map(s => s.endsWith("!") ? s : `${s} !important`) // Append !important if not already present
+    .join("; "); // Join back into a single string separated by semicolons;
+
+    // Get blacklist styles from GM_config, process in the same way
+    const blacklist_styles = GM_config.get("blacklist_styles")
+    .split(";") // Split string into array at each semicolon
+    .map(s => s.trim()) // Trim whitespace
+    .filter(Boolean) // Remove empty entries
+    .map(s => s.endsWith("!") ? s : `${s} !important`) // Append !important
+    .join("; "); // Join back into a single string;
+
+    // Inject the processed styles into the page using GM_addStyle
+    GM_addStyle(`
+    .highlighted_result { ${highlight_styles} }
+    .blacklisted_result { ${blacklist_styles} }
+    `);
+};
 
 GM_addStyle(`
-#button_toggle_visibility {
-  width: 95px;
+.hidden {
+    display: none !important;
 }
 
-.event_countdown {
-  text-align: center;
-  font-size: 18px;
-  margin-top: 20px;
+.highlighted_results_container {
+    display: grid;
+    grid-template-columns: 100%;
+    margin-bottom: 20px;
 }
 
-.event_countdown > span {
-  font-weight: bold;
+.highlighted_results_container > div,
+.highlighted_results_container > div > div,
+.highlighted_results_container > div > div > div {
+    margin: unset !important;
 }
 
-.eye-container {
-  position: absolute;
-  right: 0;
-  padding: 10px;
-  height: 40px;
-  width: 40px;
+.removed_results_container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: red;
+    font-weight: bold;
+    font-size: 14px;
 }
 
-.gray-out-item { filter: saturate(0%) }
+.blacklist_toggle_wrapper {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    cursor: pointer;
+}
 
-.hide-item { display: none !important }
+.blacklist_toggle_wrapper input {
+    display: none;
+}
+
+.blacklist_toggle_slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: red;
+    border-radius: 20px;
+    transition: 0.3s;
+}
+
+.blacklist_toggle_slider::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 2px;
+    top: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+#blacklist_toggle:checked + .blacklist_toggle_slider {
+    background-color: #ccc;
+}
+
+#blacklist_toggle:checked + .blacklist_toggle_slider::before {
+    transform: translateX(20px);
+}
 `);
