@@ -2,7 +2,7 @@
 // @name            Highlight and Filter Searchengine Results
 // @name:de         Hervorheben und Filtern Suchmaschinen Ergebnisse
 // @namespace       https://kurotaku.de
-// @version         1.0.4
+// @version         1.0.5
 // @description     Highlight certain search results and remove blacklisted domains
 // @description:de  Bestimmte Suchergebnisse hervorheben und Domains aus der Blacklist entfernen
 // @author          Kurotaku
@@ -23,6 +23,7 @@
 // @grant           GM_deleteValue
 // @grant           GM_addStyle
 // @grant           GM_registerMenuCommand
+// @noframes
 // ==/UserScript==
 
 
@@ -103,7 +104,8 @@ async function run_search_features() {
         GM_addStyle(`
             ${DATA.insertion_container} > .result,
             #main > .result,
-            #main iframe {
+            #main iframe,
+            [data-identifier$="-promo-impression"] {
                 display: none !important;
             }
         `);
@@ -125,6 +127,10 @@ async function run_search_features() {
         // Tab rearrange/removal is a Google only feature, other sites do not have this tab bar
         if(DATA.site_key === "google" && GM_config.get("search_tabs_enabled"))
             filter_search_tabs();
+
+        // Startpage silently swaps its results in after the initial paint, watch for that and reprocess
+        if(DATA.site_key === "startpage")
+            await observe_result_container();
     }
 }
 
@@ -231,16 +237,15 @@ function is_search_page() {
 async function create_containers() {
     const container = await wait_for_element(DATA.insertion_container);
 
-    // removed_results_container
+    // id is required here, the existence check below relies on it, class stays for CSS targeting
     if(!document.getElementById("removed_results_container")) {
         const style = DATA.style_removed_container ? ` style="${DATA.style_removed_container}"` : "";
-        container.insertAdjacentHTML("afterbegin", `<div class="removed_results_container"${style}></div>`);
+        container.insertAdjacentHTML("afterbegin", `<div id="removed_results_container" class="removed_results_container"${style}></div>`);
     }
 
-    // highlighted_results_container
     if(!document.getElementById("highlighted_results_container")) {
         const style = DATA.style_highlighted_results_container ? ` style="${DATA.style_highlighted_results_container}"` : "";
-        container.insertAdjacentHTML("afterbegin", `<div class="highlighted_results_container"${style}></div>`);
+        container.insertAdjacentHTML("afterbegin", `<div id="highlighted_results_container" class="highlighted_results_container"${style}></div>`);
     }
 }
 
@@ -266,7 +271,7 @@ function extract_domain(result) {
 // --------------------------
 function highlight_results(results) {
     const highlight_terms = prepare_terms("highlight_terms"); // Get terms from config
-    const container = document.querySelector(".highlighted_results_container"); // Where highlighted results go
+    const container = document.getElementById("highlighted_results_container"); // Where highlighted results go
 
     let to_highlight = [];
 
@@ -291,16 +296,6 @@ function highlight_results(results) {
         container.appendChild(result);
         style_result(result, index, i === to_highlight.length-1); // last gets extra margin
     });
-
-    // Startpage silently re-fetches its search results from time to time, which wipes out
-    // our injected container along with it, and the highlighted results lose their highlight.
-    // Watch for that specific case and redo the whole highlighting pass once it happens
-    if(DATA.site_key === "startpage")
-        wait_for_element_to_disappear(container).then(async () => {
-            await create_containers();
-            const fresh_results = await get_resultlist();
-            highlight_results(fresh_results);
-        });
 }
 
 // --------------------------
@@ -309,6 +304,10 @@ function highlight_results(results) {
 function filter_blacklisted(results) {
     // Get blacklist terms from config
     const blacklist_terms = prepare_terms("blacklist_filter_terms");
+    // Container only ever holds the notification text and toggle switch, matched results stay in place
+    const removed_container = document.getElementById("removed_results_container");
+    if(!removed_container) return;
+
     let removed_count = 0;
 
     results.forEach(result => {
@@ -316,16 +315,14 @@ function filter_blacklisted(results) {
         const domain = extract_domain(result);
         // Check if the domain matches any of the blacklist terms for this site (or global)
         if(blacklist_terms.some(obj => (!obj.sites || obj.sites.includes(DATA.site_key)) && domain.includes(obj.term))) {
-            // Add classes instead of removing
+            // Keep the result where it is, moving it broke Startpage's own emotion styles overriding ours
             result.classList.add("blacklisted_result", "hidden");
             removed_count++;
         }
     });
 
     // Update notification area if results were removed
-    const removed_container = document.querySelector(".removed_results_container");
-
-    if(removed_container && removed_count > 0 && !GM_config.get("blacklist_filter_notification_enabled")) {
+    if(removed_count > 0 && !GM_config.get("blacklist_filter_notification_enabled")) {
         const html = `
             <span class="removed_blacklist_text">Removed ${removed_count} blacklisted results</span>
             <label class="blacklist_toggle_wrapper">
@@ -339,16 +336,6 @@ function filter_blacklisted(results) {
             document.querySelectorAll(".blacklisted_result").forEach(el => el.classList.toggle("hidden"));
         });
     }
-
-    // Startpage silently re-fetches its search results from time to time, which wipes out
-    // our injected container along with it, and newly fetched results stay unfiltered.
-    // Watch for that specific case and redo the whole blacklist pass once it happens
-    if(DATA.site_key === "startpage" && removed_container)
-        wait_for_element_to_disappear(removed_container).then(async () => {
-            await create_containers();
-            const fresh_results = await get_resultlist();
-            filter_blacklisted(fresh_results);
-        });
 }
 
 // --------------------------
@@ -487,6 +474,48 @@ async function get_resultlist() {
     // Grab all results
     const results = Array.from(container.querySelectorAll(DATA.result_selector));
     return results;
+}
+
+// --------------------------
+// Result container change observer
+// --------------------------
+let result_mutation_observer = null;
+let result_mutation_timer = null;
+
+// Startpage silently swaps its results in after the initial paint, this watches for that and reruns everything
+async function observe_result_container() {
+    const container = await wait_for_element(DATA.result_container);
+    if(!container) return;
+
+    if(result_mutation_observer) result_mutation_observer.disconnect();
+
+    result_mutation_observer = new MutationObserver(() => {
+        clearTimeout(result_mutation_timer);
+        result_mutation_timer = setTimeout(reprocess_results, 300);
+    });
+
+    result_mutation_observer.observe(container, {childList: true, subtree: true});
+}
+
+// Reruns highlight, blacklist and special section filtering against the freshly swapped in results
+async function reprocess_results() {
+    // Disconnect first, our own DOM moves below would otherwise retrigger the observer
+    result_mutation_observer.disconnect();
+
+    await create_containers();
+    const fresh_results = await get_resultlist();
+
+    if(GM_config.get("highlight_enabled"))
+        highlight_results(fresh_results);
+
+    if(GM_config.get("blacklist_filter_enabled"))
+        filter_blacklisted(fresh_results);
+
+    if(GM_config.get("special_sections_filter_enabled"))
+        remove_special_sections(fresh_results);
+
+    const container = await wait_for_element(DATA.result_container);
+    result_mutation_observer.observe(container, {childList: true, subtree: true});
 }
 
 // Strips protocol prefix and everything from the first slash onward from a raw domain string
