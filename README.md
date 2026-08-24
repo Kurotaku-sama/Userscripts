@@ -111,11 +111,11 @@
 
 ## Legend
 
-| Symbol | Status      | Description                                    |
-| :----: | :---------: | :--------------------------------------------- |
-| 🟣     | Maintained  | Actively maintained and updated                |
-| 🟠     | Obsolete    | No longer needed but still functional          |
-| 🔴     | Deprecated  | Outdated, may not work, no further development |
+| Symbol | Status       | Description                                         |
+| :----: | :----------: | :-------------------------------------------------- |
+| 🟣     | Maintained   | Actively maintained and updated                     |
+| 🟠     | Unmaintained | Still functional, but no longer actively maintained |
+| 🔴     | Deprecated   | Outdated, may not work, no further development      |
 
 **Note:** Scripts that are permanently broken or no longer functional are removed from this list to keep it clean. However, they remain in the repository's subfolders for archival purposes.
 
