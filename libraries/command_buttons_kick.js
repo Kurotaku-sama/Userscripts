@@ -20,7 +20,24 @@ async function main() {
             });
 
         insert_command_buttons();
+        watch_for_panel_removal();
     });
+}
+
+// Kick occasionally re-renders the whole chat, which wipes out the injected panel along
+// with it. This keeps watching for the panel to disappear and re-inserts it every time.
+async function watch_for_panel_removal() {
+    while (true) {
+        await wait_for_element_to_disappear("#k-main-container");
+        await wait_for_element("#chatroom-footer");
+
+        insert_command_buttons();
+
+        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof generate_voucher_buttons === "function")
+            wait_for_element('[data-testid="channel-points-button"]').then(async () => {
+                generate_voucher_buttons();
+            });
+    }
 }
 
 // ========================
@@ -409,8 +426,8 @@ GM_addStyle(`
 .k-actionbutton,
 .k-targetbutton {
     padding: 10px;
-    background-color: #2a2d32;
-    color: #ffffff;
+    background-color: var(--color-primary-base);
+    color: var(--color-primary-onPrimary);
     display: inline-flex;
     position: relative;
     align-items: center;
@@ -429,7 +446,7 @@ GM_addStyle(`
 
 .k-actionbutton:hover,
 .k-targetbutton:hover {
-    background-color: #3a3d42;
+    filter: brightness(1.15);
 }
 
 .k-main-container {
