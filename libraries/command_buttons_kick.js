@@ -5,11 +5,6 @@ async function main() {
     if (custom_css)
         GM_addStyle(custom_css);
 
-    if (GM_config.fields["notifications"] && GM_config.get("notifications"))
-        wait_for_element("nav img.rounded-full").then(async () => {
-            username = get_kick_username();
-        });
-
     wait_for_element("#chatroom-footer").then(async () => {
         if (GM_config.fields["notifications"] && GM_config.get("notifications"))
             observe_chat_for_username_mentions();
@@ -31,18 +26,6 @@ async function watch_for_panel_removal() {
 
         insert_command_buttons();
     }
-}
-
-// ========================
-// Username
-// ========================
-
-let username = null;
-
-// The navbar shows the logged-in user's profile picture with their username in the alt attribute
-function get_kick_username() {
-    const profile_image = document.querySelector("nav img.rounded-full");
-    return profile_image?.alt || null;
 }
 
 // ========================
@@ -214,12 +197,12 @@ function insert_voucher_buttons(html) {
     });
 }
 
-// Kick re-renders the rewards panel independently from the chat panel, so this needs
-// its own watch loop instead of piggybacking on watch_for_panel_removal().
+// Kick re-renders the chat input area independently from the rest of the chat, so this
+// needs its own watch loop instead of piggybacking on watch_for_panel_removal().
 async function watch_for_voucher_panel_removal() {
     while (true) {
         await wait_for_element_to_disappear("#k-voucher-container");
-        await wait_for_element("#rewards-panel");
+        await wait_for_element("#chat-input-wrapper");
 
         if (typeof generate_voucher_buttons === "function")
             generate_voucher_buttons();
@@ -360,38 +343,98 @@ function disable_draggable() {
 // Notifications
 // ========================
 
-function observe_chat_for_username_mentions() {
-    wait_for_element("#chatroom-messages").then(async () => {
-        const chat_container = document.querySelector("#chatroom-messages");
+// Kick occasionally replaces #chatroom-messages entirely during a re-render, which leaves
+// a previously attached MutationObserver watching a detached, dead node that never fires
+// again. This keeps re-attaching to a fresh container every time that happens.
+// Kick occasionally swaps #chatroom-messages out for a brand new node during a re-render
+// (old one removed, new one added in the same tick), so watching that specific node
+// directly is unreliable: by the time a check runs, some selector always matches something,
+// just not necessarily the same element the observer is attached to. Observing a stable
+// ancestor that never gets replaced, and re-querying #chatroom-messages fresh on every
+// mutation instead of holding onto a reference, sidesteps that entirely.
+async function observe_chat_for_username_mentions() {
+    // Kick's chat list is virtualized: scrolling removes and recreates the DOM nodes for
+    // messages that are already off-screen, even ones already seen. A WeakSet keyed on the
+    // node itself would treat every recreated node as brand new and re-notify for it, so
+    // this tracks the message's own "data-index" value instead, that one is stable and
+    // keeps counting up, it's never reused for a different message.
+    const notified_indices = new Set();
+
+    // Kick's own chat history sometimes keeps streaming in for a few seconds after the chat
+    // container (re)appears (backfilling older messages, not just brand new ones), so
+    // notifications stay suppressed during that window and only turn on once things have
+    // settled down. This restarts every time the container goes away and comes back, not
+    // just once at script start, since a fresh backfill can happen again at that point too.
+    let warm_up_done = false;
+    let chat_was_present = false;
+
+    const start_warm_up = async () => {
+        warm_up_done = false;
         await sleep_s(5);
+        warm_up_done = true;
+    };
 
-        if (username && username != "") {
-            // Create a MutationObserver to watch for new messages
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    mutation.addedNodes.forEach((node) => {
-                        // Check if the added node is a chat message
-                        let msg = node.innerText?.trim();
-                        if (msg && msg.toLowerCase().includes(username.toLowerCase())) {
-                            let author = node.querySelector('button[data-prevent-expand="true"]')?.textContent;
-                            GM_notification({
-                                title: `Channel: ${kick_channel} - ${author} mentioned you!`,
-                                text: `${msg}`,
-                                timeout: 15000,
-                                silent: false
-                            });
-                        }
-                    });
-                });
-            });
+    // Kick already highlights every message that mentions the logged-in user (or replies
+    // to one of their messages) with a "border-green-500" class on the message wrapper,
+    // even when the message text itself contains no @mention (plain replies included).
+    // Using that class as the trigger is far more reliable than matching the username
+    // against the raw text ourselves, and it needs no username lookup at all.
+    const check_for_mentions = () => {
+        const chat_container = document.querySelector("#chatroom-messages");
 
-            // Start observing the chat container for new child nodes
-            observer.observe(chat_container, {
-                childList: true, // Watch for added or removed child nodes
-                subtree: true, // Watch all descendants of the container
-            });
+        if (!chat_container) {
+            chat_was_present = false;
+            return;
         }
+
+        if (!chat_was_present) {
+            chat_was_present = true;
+            start_warm_up(); // chat just (re)appeared, wait a bit before notifying again
+        }
+
+        chat_container.querySelectorAll(".border-green-500").forEach(node => {
+            const message_wrapper = node.closest("[data-index]");
+            const message_id = message_wrapper?.getAttribute("data-index");
+
+            if (!message_id || notified_indices.has(message_id))
+                return;
+
+            notified_indices.add(message_id);
+
+            if (!warm_up_done)
+                return;
+
+            let msg = node.innerText?.trim();
+            let author = node.querySelector('button[data-prevent-expand="true"]')?.textContent;
+
+            GM_notification({
+                title: `Channel: ${kick_channel} - ${author} mentioned you!`,
+                text: `${msg}`,
+                timeout: 15000,
+                silent: false
+            });
+        });
+    };
+
+    // Debounce the callback instead of narrowing the observed target: document.body is
+    // guaranteed to never get swapped out itself (unlike every element nested inside it,
+    // several of which we've already seen Kick replace during re-renders), so it stays the
+    // safe choice here, this just keeps the expensive re-scan from running on every single
+    // one of the many small mutations a busy page fires off in quick succession.
+    let debounce_timer = null;
+    const observer = new MutationObserver(() => {
+        clearTimeout(debounce_timer);
+        debounce_timer = setTimeout(check_for_mentions, 200);
     });
+
+    observer.observe(document.body, {
+        childList: true, // Watch for added or removed child nodes
+        subtree: true, // Watch all descendants of the container
+        attributes: true, // Watch for the highlight class being added
+        attributeFilter: ["class"],
+    });
+
+    check_for_mentions(); // starts the initial warm-up too
 }
 
 // ========================
@@ -498,6 +541,7 @@ GM_addStyle(`
 
 .k-buttongroup-label {
     font-size: 13px;
+    user-select: none;
 }
 
 .k-labelgroup {
