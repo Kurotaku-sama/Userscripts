@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Kick hitsquadgodfather command buttons
-// @namespace       https://kurotaku.de
+// @namespace       https://kurotaku.dev
 // @version         1.0
 // @description     Adds buttons to send commands in the Kick chat
 // @author          Kurotaku
@@ -247,8 +247,6 @@ function generate_button_groups() {
 }
 
 async function generate_voucher_buttons() {
-    // NOTE: The voucher name below has to match the exact reward title text shown
-    // on the Kick rewards panel for hitsquadgodfather, adjust once known.
     insert_voucher_buttons(
         (GM_config.get("voucher_buttons") ?
          generate_voucher_button("1000 Clams Voucher", "1k Clams Voucher") : "")
