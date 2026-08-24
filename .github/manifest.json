@@ -1,6 +1,7 @@
 {
   "Podcast.de Autodownload": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Podcast.de_Autodownload/script.user.js" },
   "Kleinanzeigen improvements": { "version": "2.7.5", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kleinanzeigen_Verbesserungen/script.user.js" },
+  "Kick hitsquadgodfather command buttons": { "version": "1.0", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kick_Command_Buttons/script_hitsquad.user.js" },
   "givee.club & giveaway.su improvements": { "version": "1.1.1", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/givee.club_&_giveaway.su_improvements/script.user.js" },
   "Autoreload Streams": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js" },
   "Synchronkartei Tabellenübersicht": { "version": "1.0", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js" },
@@ -8,7 +9,7 @@
   "fernsehserien.de episode names as textarea": { "version": "2.1.1", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/fernsehserien.de_episode_names_as_textarea/script.user.js" },
   "Steam unfollow all shown curators": { "version": "1.1.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_unfollow_all_shown_curators/script.user.js" },
   "ItzaGud.net improvements": { "version": "0.7.3", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ItzaGud_improvements/script.user.js" },
-  "Highlight and Filter Searchengine Results": { "version": "1.0.4", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js" },
+  "Highlight and Filter Searchengine Results": { "version": "1.0.5", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Highlight_and_Filter_Searchengine_Results/script.user.js" },
   "Streamlabs HitSquadGodFather improvements": { "version": "1.1.6", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Streamlabs_HitSquadGodFather_improvements/script.user.js" },
   "StreamElements improvements": { "version": "1.7.12", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/StreamElements_improvements/script.user.js" },
   "ChatGPT Bulk & Quick Delete": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/ChatGPT_Bulk_and_Quick_Delete/script.user.js" },
