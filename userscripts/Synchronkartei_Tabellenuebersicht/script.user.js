@@ -9,6 +9,7 @@
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant           GM_getValue
 // @grant           GM_setValue
@@ -666,8 +667,8 @@ GM_addStyle(`
         text-decoration: underline;
     }
 
-    .sk-center { 
-        text-align: center !important; 
+    .sk-center {
+        text-align: center !important;
     }
 
     .sk-info-icon {
@@ -696,7 +697,7 @@ GM_addStyle(`
         opacity: 0.7;
     }
 
-    .sk-sort-arrow { 
-        opacity: 0.7; 
+    .sk-sort-arrow {
+        opacity: 0.7;
     }
 `);

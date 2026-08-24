@@ -10,7 +10,8 @@
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Twitch_Command_Buttons/script_hitsquad.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/twitch_command_buttons.js
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/command_buttons_twitch.js
 // @require         https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
