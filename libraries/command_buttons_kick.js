@@ -14,13 +14,11 @@ async function main() {
         if (GM_config.fields["notifications"] && GM_config.get("notifications"))
             observe_chat_for_username_mentions();
 
-        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof generate_voucher_buttons === "function")
-            wait_for_element('[data-testid="channel-points-button"]').then(async () => {
-                generate_voucher_buttons();
-            });
-
         insert_command_buttons();
         watch_for_panel_removal();
+
+        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof generate_voucher_buttons === "function")
+            generate_voucher_buttons();
     });
 }
 
@@ -32,11 +30,6 @@ async function watch_for_panel_removal() {
         await wait_for_element("#chatroom-footer");
 
         insert_command_buttons();
-
-        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof generate_voucher_buttons === "function")
-            wait_for_element('[data-testid="channel-points-button"]').then(async () => {
-                generate_voucher_buttons();
-            });
     }
 }
 
@@ -87,6 +80,8 @@ function send_message_with_event(message) {
 // ========================
 
 function insert_command_buttons() {
+    document.querySelectorAll("#k-main-container").forEach(el => el.remove()); // safety net in case this runs while the panel is already present
+
     let buttongroups = "";
     if (typeof generate_button_groups === "function")
         buttongroups = generate_button_groups()
@@ -195,18 +190,40 @@ function generate_command(event) {
         });
 }
 
-function insert_voucher_buttons(html) {
-    wait_for_element("#k-main-container").then(async () => {
-        html = `<div class="k-store-buttongroups"><div class="k-buttongroup">${html}</div></div>`;
-        document.querySelector("#k-main-container")?.insertAdjacentHTML("afterend", html);
+let voucher_watch_started = false;
 
-        let buttons = document.querySelectorAll(".k-get_voucher_button");
-        buttons.forEach(button => {
+function insert_voucher_buttons(html) {
+    wait_for_element("#rewards-panel").then(async () => {
+        document.querySelectorAll("#k-voucher-container").forEach(el => el.remove()); // safety net against duplicates, nuke all matches
+
+        const wrapped_html = `<div id="k-voucher-container" class="k-store-buttongroups"><div class="k-buttongroup">${html}</div></div>`;
+        document.querySelector("#rewards-panel")?.insertAdjacentHTML("beforebegin", wrapped_html);
+
+        document.querySelectorAll(".k-get_voucher_button").forEach(button => {
             button.addEventListener("click", async event => {
                 await purchase_voucher(event);
             }, false);
         });
+
+        // Only ever run one watch loop, generate_voucher_buttons() re-triggers this
+        // function on every re-render, starting a second loop would stack duplicates
+        if (!voucher_watch_started) {
+            voucher_watch_started = true;
+            watch_for_voucher_panel_removal();
+        }
     });
+}
+
+// Kick re-renders the rewards panel independently from the chat panel, so this needs
+// its own watch loop instead of piggybacking on watch_for_panel_removal().
+async function watch_for_voucher_panel_removal() {
+    while (true) {
+        await wait_for_element_to_disappear("#k-voucher-container");
+        await wait_for_element("#rewards-panel");
+
+        if (typeof generate_voucher_buttons === "function")
+            generate_voucher_buttons();
+    }
 }
 
 function generate_voucher_button(voucher, text, options = {}) {
@@ -262,6 +279,11 @@ function make_draggable() {
     const pin_button = document.querySelector("#k-pin-button");
 
     if (container && make_draggable_button && grab_handle && pin_button) {
+        // Save the initial position of the container relative to the viewport, this has to
+        // happen before the "k-draggable" class is applied, since that class switches the
+        // container to fixed positioning and would otherwise already distort the reading
+        const initial_rect = container.getBoundingClientRect();
+
         // Add the "draggable" class
         container.classList.add("k-draggable");
 
@@ -270,16 +292,12 @@ function make_draggable() {
         grab_handle.classList.remove("k-hidden");
         pin_button.classList.remove("k-hidden");
 
-        // Save the initial position of the container relative to the viewport
-        const initial_rect = container.getBoundingClientRect();
-        const left = initial_rect.left;
-        const bottom = initial_rect.bottom;
-
         // Move the container to the body (to ensure it's above other elements)
         document.body.appendChild(container);
 
-        // Set the initial position using transform
-        container.style.transform = `translate(${left}px, ${window.innerHeight - bottom}px)`;
+        // Position it exactly where it was before detaching, using fixed viewport coordinates
+        container.style.left = `${initial_rect.left}px`;
+        container.style.top = `${initial_rect.top}px`;
 
         // Enable dragging only when the k-grab-handle is clicked
         interact(grab_handle).draggable({
@@ -292,7 +310,7 @@ function make_draggable() {
 
                     // Calculate new position based on mouse movement
                     let x = rect.left + event.dx;
-                    let y = rect.bottom - container.offsetHeight + event.dy;
+                    let y = rect.top + event.dy;
 
                     // Round x and y to prevent jitter caused by subpixel values
                     x = Math.round(x);
@@ -300,10 +318,11 @@ function make_draggable() {
 
                     // Constrain the position to keep the container within the window bounds
                     x = Math.max(0, Math.min(x, window_width - rect.width)); // Left and right edges
-                    y = Math.max(50, Math.min(y, window_height - container.offsetHeight)); // Top and bottom edges
+                    y = Math.max(0, Math.min(y, window_height - rect.height)); // Top and bottom edges
 
-                    // Update the container's position using transform
-                    target.style.transform = `translate(${x}px, ${y}px)`;
+                    // Update the container's position
+                    target.style.left = `${x}px`;
+                    target.style.top = `${y}px`;
                 }
             }
         });
@@ -324,9 +343,8 @@ function disable_draggable() {
         interact(grab_handle).draggable(false);
 
         // Reset the container to its original position
-        container.style.transform = "translate(0px, 0px)";
-        container.setAttribute("data-x", 0);
-        container.setAttribute("data-y", 0);
+        container.style.left = "";
+        container.style.top = "";
 
         // Move the container back to the chatroom footer
         document.querySelector("#chatroom-footer")?.insertAdjacentElement("afterbegin", container);
@@ -425,7 +443,8 @@ async function purchase_voucher(trigger) {
 GM_addStyle(`
 .k-actionbutton,
 .k-targetbutton {
-    padding: 10px;
+    box-sizing: border-box;
+    padding: 4px 10px;
     background-color: var(--color-primary-base);
     color: var(--color-primary-onPrimary);
     display: inline-flex;
@@ -439,8 +458,8 @@ GM_addStyle(`
     white-space: nowrap;
     user-select: none;
     font-weight: 600;
-    font-size: 13px;
-    height: 34px;
+    font-size: 12px;
+    height: 25px;
     border-radius: 6px;
 }
 
@@ -459,8 +478,10 @@ GM_addStyle(`
 
 .k-main-container.k-draggable {
     border: 2px solid var(--color-primary-base);
-    position: absolute;
-    z-index: 100;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
  }
 
 .k-store-buttongroups {
@@ -478,6 +499,7 @@ GM_addStyle(`
 }
 
 .k-buttongroup-label {
+    user-select: none;
     font-size: 13px;
 }
 
