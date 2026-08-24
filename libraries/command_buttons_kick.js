@@ -193,11 +193,11 @@ function generate_command(event) {
 let voucher_watch_started = false;
 
 function insert_voucher_buttons(html) {
-    wait_for_element("#rewards-panel").then(async () => {
+    wait_for_element("#chat-input-wrapper").then(async () => {
         document.querySelectorAll("#k-voucher-container").forEach(el => el.remove()); // safety net against duplicates, nuke all matches
 
         const wrapped_html = `<div id="k-voucher-container" class="k-store-buttongroups"><div class="k-buttongroup">${html}</div></div>`;
-        document.querySelector("#rewards-panel")?.insertAdjacentHTML("beforebegin", wrapped_html);
+        document.querySelector("#chat-input-wrapper")?.insertAdjacentHTML("afterend", wrapped_html);
 
         document.querySelectorAll(".k-get_voucher_button").forEach(button => {
             button.addEventListener("click", async event => {
@@ -484,12 +484,10 @@ GM_addStyle(`
     z-index: 1000;
  }
 
-.k-store-buttongroups {
-    padding: 0px 15px 15px;
-}
+.k-store-buttongroups {}
 
 .k-buttongroups {
-    padding: 25px 15px 15px;
+    padding: 10px 15px 0px;
 }
 
 .k-buttongroup {
@@ -499,7 +497,6 @@ GM_addStyle(`
 }
 
 .k-buttongroup-label {
-    user-select: none;
     font-size: 13px;
 }
 
