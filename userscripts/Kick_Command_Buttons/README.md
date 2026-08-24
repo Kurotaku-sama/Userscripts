@@ -1,0 +1,136 @@
+---
+title: "Userscript: Kick Command Buttons"
+description: "Adds a configurable command button panel to supported Kick channels for quickly sending chat commands, with streamer specific buttons."
+permalink: /userscripts/Kick_Command_Buttons/
+---
+
+**If you like my work feel free to support me on:**<br>
+[![PayPal](https://img.shields.io/badge/PayPal-8A2BE2?style=for-the-badge&logo=paypal&labelColor=9370DB)](https://paypal.me/kurotaku1337)
+[![Ko-fi](https://img.shields.io/badge/Kofi-8A2BE2?style=for-the-badge&logo=ko-fi&labelColor=9370DB)](https://ko-fi.com/kurotaku1337)
+
+# Kick command buttons
+
+### This script is available in the following versions, tailored for each specific streamer:
+
+| Streamer | Install |
+| :--- | :--- |
+| **HitSquadGodFather** | [![][b_ins_ora]][js_kick_hitsquad] |
+
+[b_ins_ora]:        https://img.shields.io/badge/Install-orange?style=flat-square&logo=tampermonkey
+[js_kick_hitsquad]: https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kick_Command_Buttons/script_hitsquad.user.js
+
+## Table of Contents
+
+- [Description](#description)
+- [Core Functions](#core-functions)
+  - [Voucher Buttons](#voucher-buttons)
+  - [Miscellaneous](#miscellaneous)
+- [Streamer Specific Buttons](#streamer-specific-buttons)
+  - [HitSquadGodFather](#hitsquadgodfather)
+    - [Loot & Chest Buttons (Quick Access)](#loot--chest-buttons-quick-access)
+    - [Loot & Chest Buttons (Full List)](#loot--chest-buttons-full-list)
+    - [Trivia Buttons](#trivia-buttons)
+    - [Showdown Class Selection](#showdown-class-selection)
+- [Known Issues](#known-issues)
+- [Libraries Used](#libraries-used)
+
+---
+
+## Description
+
+This userscript adds a compact interface to supported Kick channels that allows you to send chat commands without having to type them manually.
+
+It works directly in the chat view and is tailored for each streamer, offering quick access to commonly used commands.
+
+You can fully configure the script through the built-in settings panel. This includes enabling or disabling individual features and button groups, so you only see what you actually use.
+
+The interface can also be moved freely on the page, allowing you to place it wherever it fits your setup best.
+
+---
+
+## Core Functions
+
+These settings are shared across all versions of the script (with some minor differences depending on the streamer). You can configure them via the built-in settings panel.
+
+### Voucher Buttons
+
+Adds a set of buttons to quickly redeem available channel point rewards (e.g., tier bonuses or daily check-ins).
+
+- You can enable/disable the entire voucher button group.
+
+### Miscellaneous
+
+Additional options to improve usability and automation:
+
+- **Desktop notification if message contains your name**
+  Sends a desktop notification when someone in chat mentions your name.
+
+- **Prevent Shadowban**
+  Randomizes the casing of your commands (e.g., `!PoInTs`) to reduce the risk of Kick auto-filtering your messages.
+
+- **Custom CSS Styles**
+  Add your own CSS to change the appearance of Kick or the command button panel. Ideal for advanced users who want visual customization without touching the script itself.
+
+---
+
+## Streamer Specific Buttons
+
+Some button types *(like **Loot**, **Chest**)* support "Target Buttons" — these open a temporary panel where you simply click a number to choose a target.
+This helps keep the interface clean and compact.
+
+### HitSquadGodFather
+
+**General Buttons:**
+- `!hitsquad`
+- `!strikes`
+
+#### Loot & Chest Buttons (Quick Access)
+
+These buttons are always visible when enabled without overwhelming the interface:
+
+- **RNG Loot** – Use a random number for `!loot`
+- **Loot (Target)** – Use target panel to pick 1–8
+- **RNG Chest** – Use a random number for `!chest`
+- **Chest (Target)** – Use target panel to pick 1–8
+
+#### Loot & Chest Buttons (Full List)
+
+This section shows all individual `!loot1–8` and `!chest1–8` buttons.
+
+> Disabled by default. The **Target Buttons** above are recommended, as showing all 16 buttons takes up a lot of space.
+
+#### Trivia Buttons
+- `!answer1`, `!answer2`, `!answer3`, `!answer4`
+- `!triviapoints`
+
+#### Showdown Class Selection
+Choose your class to open the correct set of buttons for your match:
+- **Wizard**
+- **Knight**
+- **Cleric**
+- **Experience**
+
+---
+
+## Known Issues
+
+Due to how Kick dynamically loads content, userscripts like this one do **not automatically initialize** when navigating between pages inside Kick.
+
+- The script will only run if the stream is **opened directly**, for example by **reloading the page** or **opening it without using Kick's internal navigation** (e.g. from a bookmark).
+- If you switch to another streamer without reloading, the script may continue running in the background, which can **lead to unexpected behavior**.
+
+**Recommended usage:**
+Always open a stream directly or reload the page after switching to a different channel to ensure the script initializes (or unloads) properly.
+
+---
+
+## Libraries Used
+
+Most of my userscripts share the same core libraries when needed:
+
+- **[Interact.js](https://interactjs.io/)**
+  Used to enable drag-and-drop for the command button panel.
+- **Command Button Library**
+  A custom library I've built specifically for this type of Kick command scripts.
+  It handles all the logic for rendering, targeting, styling, and interaction of the command buttons –
+  allowing each streamer version to stay lightweight and making it easy to extend the script for new channels with similar mechanics.
