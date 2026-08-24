@@ -125,7 +125,7 @@ async function init_gm_config() {
             },
             prevent_shadowban: {
                 type: 'checkbox',
-                default: true,
+                default: false,
                 label: 'Prevent Shadowban. Commands become random case.<br>Shadowban means your messages temporarily don\'t appear.',
             },
             custom_css_styles: {
