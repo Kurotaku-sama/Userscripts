@@ -1052,6 +1052,7 @@ GM_addStyle(`
 }
 
 .k-buttongroup-label {
+    user-select: none;
     font-size: 13px;
 }
 
