@@ -544,11 +544,20 @@ async function start_chat_message_observer() {
                 return;
             notified_indices.add(message_id);
 
-            let msg = node.innerText?.trim();
+            // Isolate just the actual message text via the ":&nbsp;" separator span, not
+            // node.innerText, since reply messages nest a whole "Antwort an X: ..." preview
+            // block inside the same node and innerText would grab that too
+            const separator_span = node.querySelector('span[aria-hidden="true"]');
+            let msg = separator_span?.nextElementSibling?.textContent?.trim() ?? node.innerText?.trim();
             let author = node.querySelector('button[data-prevent-expand="true"]')?.textContent;
 
+            // A reply's preview button is the only button without data-prevent-expand, the
+            // real author button always has it, this works regardless of Kick's UI language
+            const is_reply = !!node.querySelector("button:not([data-prevent-expand])");
+            const action_text = is_reply ? "replied to you" : "mentioned you";
+
             GM_notification({
-                title: `Channel: ${kick_channel} - ${author} mentioned you!`,
+                title: `Channel: ${kick_channel} - ${author} ${action_text}!`,
                 text: `${msg}`,
                 timeout: 15000,
                 silent: false

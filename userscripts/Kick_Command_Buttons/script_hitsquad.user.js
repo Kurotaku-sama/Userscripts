@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Kick hitsquadgodfather command buttons
 // @namespace       https://kurotaku.dev
-// @version         1.0.1
+// @version         1.0.2
 // @description     Adds buttons to send commands in the Kick chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -11,7 +11,7 @@
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kick_Command_Buttons/script_hitsquad.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/command_buttons_kick.js
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/command_buttons_kick.js?v=1.0.2
 // @require         https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
@@ -125,7 +125,7 @@ async function init_gm_config() {
             },
             prevent_shadowban: {
                 type: 'checkbox',
-                default: true,
+                default: false,
                 label: 'Prevent Shadowban. Commands become random case.<br>Shadowban means your messages temporarily don\'t appear.',
             },
             custom_css_styles: {
