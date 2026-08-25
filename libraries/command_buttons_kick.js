@@ -6,19 +6,16 @@ async function main() {
         GM_addStyle(custom_css);
 
     wait_for_element("#chatroom-footer").then(async () => {
-        if (GM_config.fields["notifications"] && GM_config.get("notifications"))
-            observe_chat_for_username_mentions();
-
         insert_command_buttons();
         watch_for_panel_removal();
+        start_chat_message_observer();
 
-        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof generate_voucher_buttons === "function")
-            generate_voucher_buttons();
+        if (GM_config.fields["voucher_buttons"] && GM_config.get("voucher_buttons") && typeof setup_voucher_buttons === "function")
+            setup_voucher_buttons();
     });
 }
 
-// Kick occasionally re-renders the whole chat, which wipes out the injected panel along
-// with it. This keeps watching for the panel to disappear and re-inserts it every time.
+// Re-insert the panel whenever Kick re-renders the chat and wipes it out
 async function watch_for_panel_removal() {
     while (true) {
         await wait_for_element_to_disappear("#k-main-container");
@@ -32,9 +29,6 @@ async function watch_for_panel_removal() {
 // Kick Chat Interaction
 // ========================
 
-// Kick's chat input is a Lexical editor. Typing text via innerText or value assignment
-// does not update Lexical's internal state, so the text has to be inserted through
-// document.execCommand("insertText", ...) instead, which Lexical picks up as a real input event.
 function send_message_with_event(message) {
     const input = document.querySelector('div[data-testid="chat-input"][data-lexical-editor="true"]');
     if (!input) {
@@ -48,10 +42,10 @@ function send_message_with_event(message) {
     document.execCommand("selectAll", false, null);
     document.execCommand("delete", false, null);
 
-    // Insert the command text so Lexical registers it as a real input
+    // Insert the text via execCommand, Kick's Lexical editor doesn't pick up plain value assignment
     document.execCommand("insertText", false, message);
 
-    // Give Lexical a moment to process the input before triggering the send button
+    // Give Lexical a moment to process the input before sending
     setTimeout(() => {
         const send_button = document.querySelector("#send-message-button");
         send_button?.click();
@@ -63,7 +57,7 @@ function send_message_with_event(message) {
 // ========================
 
 function insert_command_buttons() {
-    document.querySelectorAll("#k-main-container").forEach(el => el.remove()); // safety net in case this runs while the panel is already present
+    document.querySelectorAll("#k-main-container").forEach(el => el.remove());
 
     let buttongroups = "";
     if (typeof generate_button_groups === "function")
@@ -175,11 +169,46 @@ function generate_command(event) {
 
 let voucher_watch_started = false;
 
-function insert_voucher_buttons(html) {
-    wait_for_element("#chat-input-wrapper").then(async () => {
-        document.querySelectorAll("#k-voucher-container").forEach(el => el.remove()); // safety net against duplicates, nuke all matches
+// Static html around the generate-button placeholder, split out once and reused on every render
+let voucher_before_html = "";
+let voucher_after_html = "";
+let voucher_template_captured = false;
 
-        const wrapped_html = `<div id="k-voucher-container" class="k-store-buttongroups"><div class="k-buttongroup">${html}</div></div>`;
+function capture_voucher_template(html) {
+    if (voucher_template_captured)
+        return;
+
+    const marker = generate_voucher_buttons();
+    const marker_index = html.indexOf(marker);
+
+    if (marker_index === -1) {
+        voucher_before_html = html;
+        voucher_after_html = "";
+    } else {
+        voucher_before_html = html.slice(0, marker_index);
+        voucher_after_html = html.slice(marker_index + marker.length);
+    }
+
+    voucher_template_captured = true;
+}
+
+function render_voucher_html() {
+    const dynamic_part = cached_voucher_html !== null ? cached_voucher_html : "";
+    return voucher_before_html + dynamic_part + voucher_after_html;
+}
+
+function insert_voucher_buttons(html) {
+    capture_voucher_template(html);
+    render_and_insert_voucher_panel();
+}
+
+function render_and_insert_voucher_panel() {
+    const rendered_html = render_voucher_html();
+
+    wait_for_element("#chat-input-wrapper").then(async () => {
+        document.querySelectorAll("#k-voucher-container").forEach(el => el.remove());
+
+        const wrapped_html = `<div id="k-voucher-container" class="k-store-buttongroups"><div class="k-buttongroup">${rendered_html}</div></div>`;
         document.querySelector("#chat-input-wrapper")?.insertAdjacentHTML("afterend", wrapped_html);
 
         document.querySelectorAll(".k-get_voucher_button").forEach(button => {
@@ -188,8 +217,6 @@ function insert_voucher_buttons(html) {
             }, false);
         });
 
-        // Only ever run one watch loop, generate_voucher_buttons() re-triggers this
-        // function on every re-render, starting a second loop would stack duplicates
         if (!voucher_watch_started) {
             voucher_watch_started = true;
             watch_for_voucher_panel_removal();
@@ -197,16 +224,148 @@ function insert_voucher_buttons(html) {
     });
 }
 
-// Kick re-renders the chat input area independently from the rest of the chat, so this
-// needs its own watch loop instead of piggybacking on watch_for_panel_removal().
+// #chat-input-wrapper re-renders separately from the rest of the chat
 async function watch_for_voucher_panel_removal() {
     while (true) {
         await wait_for_element_to_disappear("#k-voucher-container");
         await wait_for_element("#chat-input-wrapper");
 
-        if (typeof generate_voucher_buttons === "function")
-            generate_voucher_buttons();
+        if (typeof setup_voucher_buttons === "function")
+            setup_voucher_buttons();
     }
+}
+
+// ========================
+// Auto-generated Voucher Buttons
+// ========================
+
+let cached_voucher_html = null;
+let auto_generate_attempted = false;
+
+// Position marker for insert_voucher_buttons(), also kicks off the background scrape once
+function generate_voucher_buttons() {
+    if (!auto_generate_attempted) {
+        auto_generate_attempted = true;
+
+        (async () => {
+            await wait_for_element('[data-testid="channel-points-button"]');
+            await generate_and_cache_voucher_buttons();
+
+            // First attempt sometimes runs before the rewards grid finished loading, retry once
+            if (cached_voucher_html === null) {
+                await sleep_s(2);
+                await generate_and_cache_voucher_buttons();
+            }
+        })();
+    }
+
+    return `<div class="k-voucher-placeholder"></div>`;
+}
+
+function extract_number_from_title(title) {
+    const match = title.match(/\d[\d.,]*/);
+    return match ? match[0] : null;
+}
+
+// "5,000" -> "5k", "5,000,000" -> "5kk", "120.000" -> "120k"
+function format_thousands(raw_number) {
+    let digits = raw_number.replace(/[.,]/g, "");
+    let k_count = 0;
+
+    while (digits.length > 3 && digits.endsWith("000")) {
+        digits = digits.slice(0, -3);
+        k_count++;
+    }
+
+    return digits + "k".repeat(k_count);
+}
+
+function build_voucher_button_text(title, pattern_config) {
+    const raw_number = extract_number_from_title(title);
+    if (!raw_number)
+        return null;
+
+    const formatted_number = pattern_config.convert_thousands ? format_thousands(raw_number) : raw_number.replace(/[.,]/g, "");
+    return pattern_config.pattern.replace("<Number>", formatted_number);
+}
+
+function is_rewards_panel_visible() {
+    const panel = document.querySelector("#rewards-panel");
+    return !!panel && panel.getBoundingClientRect().height > 10;
+}
+
+// Stylesheet rule instead of an inline style, survives Kick re-rendering #rewards-panel
+function set_rewards_panel_hidden(hidden) {
+    const existing_style = document.getElementById("k-hide-rewards-panel-style");
+
+    if (hidden) {
+        if (!existing_style) {
+            const html = `<style id="k-hide-rewards-panel-style">#rewards-panel { visibility: hidden !important; }</style>`;
+            document.head.insertAdjacentHTML("beforeend", html);
+        }
+        document.querySelector("#rewards-panel")?.style.setProperty("visibility", "hidden", "important");
+    } else {
+        existing_style?.remove();
+        document.querySelector("#rewards-panel")?.style.removeProperty("visibility");
+    }
+}
+
+async function scrape_reward_titles() {
+    const points_button = document.querySelector('[data-testid="channel-points-button"]');
+    if (!points_button)
+        return [];
+
+    // Only open/close it ourselves if it wasn't already open
+    const was_already_open = is_rewards_panel_visible();
+
+    if (!was_already_open) {
+        set_rewards_panel_hidden(true);
+        points_button.click();
+        await sleep_s(0.5); // let the open transition settle
+    }
+
+    await wait_for_element("#rewards-panel .grid.grid-cols-3");
+    const rewards_container = document.querySelector("#rewards-panel .grid.grid-cols-3");
+    const titles = Array.from(rewards_container.querySelectorAll("p[title]")).map(p => p.getAttribute("title"));
+
+    if (!was_already_open) {
+        points_button.click();
+        await sleep_s(1); // let the close transition finish before revealing it again
+        set_rewards_panel_hidden(false);
+    }
+
+    return titles;
+}
+
+let voucher_generation_in_progress = false;
+
+async function generate_and_cache_voucher_buttons() {
+    if (typeof voucher_patterns === "undefined" || !Array.isArray(voucher_patterns))
+        return;
+
+    if (voucher_generation_in_progress)
+        return;
+    voucher_generation_in_progress = true;
+
+    const titles = await scrape_reward_titles();
+    let buttons_html = "";
+
+    titles.forEach(title => {
+        const matching_pattern = voucher_patterns.find(pattern_config => pattern_config.match.test(title));
+        if (!matching_pattern)
+            return;
+
+        const button_text = build_voucher_button_text(title, matching_pattern);
+        if (!button_text)
+            return;
+
+        buttons_html += generate_voucher_button(title, button_text, { classes: "k-auto-generated-voucher-button" });
+    });
+
+    cached_voucher_html = buttons_html || null; // keep null (not "") so a later retry still has a chance
+    render_and_insert_voucher_panel();
+
+    voucher_generation_in_progress = false;
 }
 
 function generate_voucher_button(voucher, text, options = {}) {
@@ -262,9 +421,7 @@ function make_draggable() {
     const pin_button = document.querySelector("#k-pin-button");
 
     if (container && make_draggable_button && grab_handle && pin_button) {
-        // Save the initial position of the container relative to the viewport, this has to
-        // happen before the "k-draggable" class is applied, since that class switches the
-        // container to fixed positioning and would otherwise already distort the reading
+        // Save the initial position of the container relative to the viewport
         const initial_rect = container.getBoundingClientRect();
 
         // Add the "draggable" class
@@ -278,7 +435,7 @@ function make_draggable() {
         // Move the container to the body (to ensure it's above other elements)
         document.body.appendChild(container);
 
-        // Position it exactly where it was before detaching, using fixed viewport coordinates
+        // Set the initial position
         container.style.left = `${initial_rect.left}px`;
         container.style.top = `${initial_rect.top}px`;
 
@@ -300,8 +457,8 @@ function make_draggable() {
                     y = Math.round(y);
 
                     // Constrain the position to keep the container within the window bounds
-                    x = Math.max(0, Math.min(x, window_width - rect.width)); // Left and right edges
-                    y = Math.max(0, Math.min(y, window_height - rect.height)); // Top and bottom edges
+                    x = Math.max(0, Math.min(x, window_width - rect.width));
+                    y = Math.max(0, Math.min(y, window_height - rect.height));
 
                     // Update the container's position
                     target.style.left = `${x}px`;
@@ -343,28 +500,17 @@ function disable_draggable() {
 // Notifications
 // ========================
 
-// Kick occasionally replaces #chatroom-messages entirely during a re-render, which leaves
-// a previously attached MutationObserver watching a detached, dead node that never fires
-// again. This keeps re-attaching to a fresh container every time that happens.
-// Kick occasionally swaps #chatroom-messages out for a brand new node during a re-render
-// (old one removed, new one added in the same tick), so watching that specific node
-// directly is unreliable: by the time a check runs, some selector always matches something,
-// just not necessarily the same element the observer is attached to. Observing a stable
-// ancestor that never gets replaced, and re-querying #chatroom-messages fresh on every
-// mutation instead of holding onto a reference, sidesteps that entirely.
-async function observe_chat_for_username_mentions() {
-    // Kick's chat list is virtualized: scrolling removes and recreates the DOM nodes for
-    // messages that are already off-screen, even ones already seen. A WeakSet keyed on the
-    // node itself would treat every recreated node as brand new and re-notify for it, so
-    // this tracks the message's own "data-index" value instead, that one is stable and
-    // keeps counting up, it's never reused for a different message.
+// Kick highlights any message that mentions the logged-in user (or replies to one of
+// their messages) with a "border-green-500" class, that's more reliable than matching the
+// username against the raw text ourselves
+async function start_chat_message_observer() {
+    if (!GM_config.fields["notifications"] || !GM_config.get("notifications"))
+        return;
+
+    // Dedupe by data-index, Kick recreates message nodes while scrolling
     const notified_indices = new Set();
 
-    // Kick's own chat history sometimes keeps streaming in for a few seconds after the chat
-    // container (re)appears (backfilling older messages, not just brand new ones), so
-    // notifications stay suppressed during that window and only turn on once things have
-    // settled down. This restarts every time the container goes away and comes back, not
-    // just once at script start, since a fresh backfill can happen again at that point too.
+    // Chat history keeps streaming in for a few seconds after (re)appearing, hold off notifying until that settles
     let warm_up_done = false;
     let chat_was_present = false;
 
@@ -374,12 +520,7 @@ async function observe_chat_for_username_mentions() {
         warm_up_done = true;
     };
 
-    // Kick already highlights every message that mentions the logged-in user (or replies
-    // to one of their messages) with a "border-green-500" class on the message wrapper,
-    // even when the message text itself contains no @mention (plain replies included).
-    // Using that class as the trigger is far more reliable than matching the username
-    // against the raw text ourselves, and it needs no username lookup at all.
-    const check_for_mentions = () => {
+    const process_messages = () => {
         const chat_container = document.querySelector("#chatroom-messages");
 
         if (!chat_container) {
@@ -389,8 +530,11 @@ async function observe_chat_for_username_mentions() {
 
         if (!chat_was_present) {
             chat_was_present = true;
-            start_warm_up(); // chat just (re)appeared, wait a bit before notifying again
+            start_warm_up();
         }
+
+        if (!warm_up_done)
+            return;
 
         chat_container.querySelectorAll(".border-green-500").forEach(node => {
             const message_wrapper = node.closest("[data-index]");
@@ -398,11 +542,7 @@ async function observe_chat_for_username_mentions() {
 
             if (!message_id || notified_indices.has(message_id))
                 return;
-
             notified_indices.add(message_id);
-
-            if (!warm_up_done)
-                return;
 
             let msg = node.innerText?.trim();
             let author = node.querySelector('button[data-prevent-expand="true"]')?.textContent;
@@ -416,25 +556,16 @@ async function observe_chat_for_username_mentions() {
         });
     };
 
-    // Debounce the callback instead of narrowing the observed target: document.body is
-    // guaranteed to never get swapped out itself (unlike every element nested inside it,
-    // several of which we've already seen Kick replace during re-renders), so it stays the
-    // safe choice here, this just keeps the expensive re-scan from running on every single
-    // one of the many small mutations a busy page fires off in quick succession.
-    let debounce_timer = null;
-    const observer = new MutationObserver(() => {
-        clearTimeout(debounce_timer);
-        debounce_timer = setTimeout(check_for_mentions, 200);
-    });
-
+    // document.body never gets replaced during re-renders, unlike #chatroom-messages
+    const observer = new MutationObserver(() => process_messages());
     observer.observe(document.body, {
-        childList: true, // Watch for added or removed child nodes
-        subtree: true, // Watch all descendants of the container
-        attributes: true, // Watch for the highlight class being added
+        childList: true,
+        subtree: true,
+        attributes: true,
         attributeFilter: ["class"],
     });
 
-    check_for_mentions(); // starts the initial warm-up too
+    process_messages();
 }
 
 // ========================
@@ -517,6 +648,7 @@ GM_addStyle(`
     position: relative;
     background: inherit;
     border-top: 2px solid var(--color-primary-base);
+    padding: 10px 15px;
 }
 
 .k-main-container.k-draggable {
@@ -530,7 +662,7 @@ GM_addStyle(`
 .k-store-buttongroups {}
 
 .k-buttongroups {
-    padding: 10px 15px 0px;
+    padding: 0;
 }
 
 .k-buttongroup {

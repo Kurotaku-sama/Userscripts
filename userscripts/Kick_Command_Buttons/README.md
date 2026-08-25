@@ -40,11 +40,19 @@ permalink: /userscripts/Kick_Command_Buttons/
 
 This userscript adds a compact interface to supported Kick channels that allows you to send chat commands without having to type them manually.
 
+It's a port of the [Twitch version of this script](/Userscripts/userscripts/Twitch_Command_Buttons/), adapted to work with Kick's chat and channel points system.
+
 It works directly in the chat view and is tailored for each streamer, offering quick access to commonly used commands.
 
 You can fully configure the script through the built-in settings panel. This includes enabling or disabling individual features and button groups, so you only see what you actually use.
 
 The interface can also be moved freely on the page, allowing you to place it wherever it fits your setup best.
+
+![HitSquadGodFather](hitsquadgodfather.png)
+
+![HitSquadGodFather Popout](hitsquadgodfather_popout.png)<br>
+*You can drag it with the hand once its popped out*<br>
+*You can pin it again with the needle to the chat prompt*
 
 ---
 
@@ -54,8 +62,10 @@ These settings are shared across all versions of the script (with some minor dif
 
 ### Voucher Buttons
 
-Adds a set of buttons to quickly redeem available channel point rewards (e.g., tier bonuses or daily check-ins).
+Automatically scans the channel's point rewards shortly after the page loads and generates a button for every reward that matches one of the script's configured patterns (e.g., Itzagud Clams/Points), no manual setup per reward needed.
 
+- Button labels are generated from the reward's title (e.g., a `5,000` reward becomes `+5k Clams`).
+- Only rewards matching a known pattern get a button, unrelated rewards in the panel are ignored.
 - You can enable/disable the entire voucher button group.
 
 ### Miscellaneous

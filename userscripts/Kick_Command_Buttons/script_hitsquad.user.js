@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Kick hitsquadgodfather command buttons
 // @namespace       https://kurotaku.dev
-// @version         1.0
+// @version         1.0.1
 // @description     Adds buttons to send commands in the Kick chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -125,7 +125,7 @@ async function init_gm_config() {
             },
             prevent_shadowban: {
                 type: 'checkbox',
-                default: false,
+                default: true,
                 label: 'Prevent Shadowban. Commands become random case.<br>Shadowban means your messages temporarily don\'t appear.',
             },
             custom_css_styles: {
@@ -246,9 +246,41 @@ function generate_button_groups() {
     return(buttongroups);
 }
 
-async function generate_voucher_buttons() {
-    insert_voucher_buttons(
-        (GM_config.get("voucher_buttons") ?
-         generate_voucher_button("1000 Clams Voucher", "1k Clams Voucher") : "")
-    );
+// Every reward whose title matches "match" gets a button generated for it, "<Number>" in
+// "pattern" gets replaced by the number found in the title (converted to "5k"/"5kk" style
+// if convert_thousands is true). Add or remove entries here for other stores/streamers.
+// Order matters here, the first matching entry wins, so more specific patterns (e.g. one
+// particular reward type from a store) should come before more general ones from the same
+// store, otherwise a broad match could label an unrelated reward with the wrong text.
+const voucher_patterns = [
+    { match: /itzagud.*clams/i, pattern: "+<Number> Clams", convert_thousands: true },
+    { match: /itzagud.*points/i, pattern: "+<Number> Points", convert_thousands: true },
+];
+
+async function setup_voucher_buttons() {
+    if (!GM_config.get("voucher_buttons"))
+        return;
+
+    // generate_voucher_buttons() here is a placeholder marker, not a real button: whatever
+    // gets auto-generated (or nothing, while it's still loading) gets injected exactly
+    // where this call sits, so any static buttons placed before or after it keep their
+    // position relative to the generated ones.
+    insert_voucher_buttons(generate_voucher_buttons());
+
+    // Combine with static, manually defined buttons the same way, before or after the
+    // placeholder determines where the generated ones end up relative to them:
+    // insert_voucher_buttons(
+    //     generate_voucher_button("Irgend ein Giveaway", "Join") +
+    //     generate_voucher_buttons()
+    // );
+    // insert_voucher_buttons(
+    //     generate_voucher_buttons() +
+    //     generate_voucher_button("Irgend ein Giveaway", "Join")
+    // );
+
+    // Hardcoded example of a single manually defined voucher button, kept here for reference:
+    // insert_voucher_buttons(
+    //     (GM_config.get("voucher_buttons") ?
+    //      generate_voucher_button("1000 Clams Voucher", "1k Clams Voucher") : "")
+    // );
 }
