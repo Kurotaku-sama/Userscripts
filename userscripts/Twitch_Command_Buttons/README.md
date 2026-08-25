@@ -64,7 +64,7 @@ The interface can also be moved freely on the page, allowing you to place it whe
 For advanced usage, the script can optionally send messages through IRC instead of the chat input field, which helps avoid issues like shadowbans.
 
 
-![HitSquadGodFather](hitsquadgodfather.png) ![Staggerilla](staggerilla.png)
+![HitSquadGodFather](hitsquadgodfather.png)
 
 ![HitSquadGodFather Popout](hitsquadgodfather_popout.png)<br>
 *You can drag it with the hand once its popped out*<br>
