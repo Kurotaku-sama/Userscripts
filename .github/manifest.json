@@ -1,7 +1,7 @@
 {
   "Podcast.de Autodownload": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Podcast.de_Autodownload/script.user.js" },
   "Kleinanzeigen improvements": { "version": "2.7.5", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kleinanzeigen_Verbesserungen/script.user.js" },
-  "Kick hitsquadgodfather command buttons": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kick_Command_Buttons/script_hitsquad.user.js" },
+  "Kick hitsquadgodfather command buttons": { "version": "1.0.3", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kick_Command_Buttons/script_hitsquad.user.js" },
   "givee.club & giveaway.su improvements": { "version": "1.1.1", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/givee.club_&_giveaway.su_improvements/script.user.js" },
   "Autoreload Streams": { "version": "1.0.2", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Autoreload_Streams/script.user.js" },
   "Synchronkartei Tabellenübersicht": { "version": "1.0", "url": "https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js" },
