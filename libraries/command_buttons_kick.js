@@ -509,32 +509,34 @@ async function start_chat_message_observer() {
 
     // Dedupe by data-index, Kick recreates message nodes while scrolling
     const notified_indices = new Set();
+    let ready = false;
 
-    // Chat history keeps streaming in for a few seconds after (re)appearing, hold off notifying until that settles
-    let warm_up_done = false;
-    let chat_was_present = false;
+    // Wait for the initial batch of messages to finish loading, then mark whatever's
+    // already there as seen, so history doesn't trigger a notification
+    const seed_and_enable = async () => {
+        ready = false;
+        await wait_for_element("#chatroom-messages");
+        await sleep_s(3);
 
-    const start_warm_up = async () => {
-        warm_up_done = false;
-        await sleep_s(5);
-        warm_up_done = true;
+        document.querySelectorAll("#chatroom-messages .border-green-500").forEach(node => {
+            const message_wrapper = node.closest("[data-index]");
+            const message_id = message_wrapper?.getAttribute("data-index");
+            if (message_id)
+                notified_indices.add(message_id);
+        });
+
+        ready = true;
     };
 
     const process_messages = () => {
+        if (!ready)
+            return;
+
         const chat_container = document.querySelector("#chatroom-messages");
-
         if (!chat_container) {
-            chat_was_present = false;
+            seed_and_enable(); // re-seed once the chat comes back (e.g. channel switch)
             return;
         }
-
-        if (!chat_was_present) {
-            chat_was_present = true;
-            start_warm_up();
-        }
-
-        if (!warm_up_done)
-            return;
 
         chat_container.querySelectorAll(".border-green-500").forEach(node => {
             const message_wrapper = node.closest("[data-index]");
@@ -574,7 +576,7 @@ async function start_chat_message_observer() {
         attributeFilter: ["class"],
     });
 
-    process_messages();
+    await seed_and_enable();
 }
 
 // ========================
