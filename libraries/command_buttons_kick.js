@@ -507,9 +507,17 @@ async function start_chat_message_observer() {
     if (!GM_config.fields["notifications"] || !GM_config.get("notifications"))
         return;
 
-    // Dedupe by data-index, Kick recreates message nodes while scrolling
-    const notified_indices = new Set();
+    // Dedupe by a content fingerprint (timestamp + author + text), not the node or its index
+    const notified_fingerprints = new Set();
     let ready = false;
+
+    const get_fingerprint = node => {
+        const timestamp = node.querySelector(".text-neutral.pr-1.font-semibold")?.textContent?.trim() ?? "";
+        const author = node.querySelector('button[data-prevent-expand="true"]')?.textContent?.trim() ?? "";
+        const separator_span = node.querySelector('span[aria-hidden="true"]');
+        const msg = separator_span?.nextElementSibling?.textContent?.trim() ?? node.innerText?.trim();
+        return `${timestamp}|${author}|${msg}`;
+    };
 
     // Wait for the initial batch of messages to finish loading, then mark whatever's
     // already there as seen, so history doesn't trigger a notification
@@ -519,10 +527,7 @@ async function start_chat_message_observer() {
         await sleep_s(3);
 
         document.querySelectorAll("#chatroom-messages .border-green-500").forEach(node => {
-            const message_wrapper = node.closest("[data-index]");
-            const message_id = message_wrapper?.getAttribute("data-index");
-            if (message_id)
-                notified_indices.add(message_id);
+            notified_fingerprints.add(get_fingerprint(node));
         });
 
         ready = true;
@@ -539,22 +544,18 @@ async function start_chat_message_observer() {
         }
 
         chat_container.querySelectorAll(".border-green-500").forEach(node => {
-            const message_wrapper = node.closest("[data-index]");
-            const message_id = message_wrapper?.getAttribute("data-index");
+            const fingerprint = get_fingerprint(node);
 
-            if (!message_id || notified_indices.has(message_id))
+            if (notified_fingerprints.has(fingerprint))
                 return;
-            notified_indices.add(message_id);
+            notified_fingerprints.add(fingerprint);
 
-            // Isolate just the actual message text via the ":&nbsp;" separator span, not
-            // node.innerText, since reply messages nest a whole "Antwort an X: ..." preview
-            // block inside the same node and innerText would grab that too
+            // Skip node.innerText here, reply messages nest a full preview block too
             const separator_span = node.querySelector('span[aria-hidden="true"]');
             let msg = separator_span?.nextElementSibling?.textContent?.trim() ?? node.innerText?.trim();
             let author = node.querySelector('button[data-prevent-expand="true"]')?.textContent;
 
-            // A reply's preview button is the only button without data-prevent-expand, the
-            // real author button always has it, this works regardless of Kick's UI language
+            // Reply preview button has no data-prevent-expand, the real author button does
             const is_reply = !!node.querySelector("button:not([data-prevent-expand])");
             const action_text = is_reply ? "replied to you" : "mentioned you";
 
