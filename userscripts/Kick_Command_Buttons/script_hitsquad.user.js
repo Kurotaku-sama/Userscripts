@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Kick hitsquadgodfather command buttons
 // @namespace       https://kurotaku.dev
-// @version         1.0.3
+// @version         1.0.4
 // @description     Adds buttons to send commands in the Kick chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -91,10 +91,10 @@ async function init_gm_config() {
                 default: true,
                 label: 'Showdown buttons',
             },
-            showdown_wizard: {
+            showdown_mage: {
                 type: 'checkbox',
                 default: true,
-                label: 'Showdown Wizard button',
+                label: 'Showdown Mage button',
             },
             showdown_knight: {
                 type: 'checkbox',
@@ -196,24 +196,24 @@ function generate_button_groups() {
                 ${btngrp_button("triviapoints", "Points")}
                 </div>`;
 
-    if(GM_config.get("showdown_buttons") && (GM_config.get("showdown_wizard") || GM_config.get("showdown_knight") || GM_config.get("showdown_cleric"))) {
+    if(GM_config.get("showdown_buttons") && (GM_config.get("showdown_mage") || GM_config.get("showdown_knight") || GM_config.get("showdown_cleric"))) {
         // Selection
         buttongroups += `${btngrp_label("Showdown")}
                 <div class="k-buttongroup">
-                ${GM_config.get("showdown_wizard") ? btngrp_button("wizard", "Wizard") : ""}
+                ${GM_config.get("showdown_mage") ? btngrp_button("mage", "Mage") : ""}
                 ${GM_config.get("showdown_knight") ? btngrp_button("knight", "Knight") : ""}
                 ${GM_config.get("showdown_cleric") ? btngrp_button("cleric", "Cleric") : ""}
                 ${GM_config.get("showdown_experience") ? btngrp_button("experience", "Experience") : ""}
                 </div>`;
         // Labels to show roles
         buttongroups += `<div class="k-labelgroup">
-                ${GM_config.get("showdown_wizard") ? lblgrp_label("wizard", "Wizard") : ""}
+                ${GM_config.get("showdown_mage") ? lblgrp_label("mage", "Mage") : ""}
                 ${GM_config.get("showdown_knight") ? lblgrp_label("knight", "Knight") : ""}
                 ${GM_config.get("showdown_cleric") ? lblgrp_label("cleric", "Cleric") : ""}
                 ${lblgrp_label("close", "Close", "k-hidden")}
                 </div>`;
-        // Wizard
-        buttongroups += `<div class="k-buttongroup k-btn-menu k-hidden" data-btn-menu="wizard">
+        // mage
+        buttongroups += `<div class="k-buttongroup k-btn-menu k-hidden" data-btn-menu="mage">
                 ${btngrp_button("attack", "Attack", { targets: 5 })}
                 ${btngrp_button("flames", "Flames")}
                 ${btngrp_button("shield", "Shield")}
