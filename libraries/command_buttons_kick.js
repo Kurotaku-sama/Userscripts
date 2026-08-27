@@ -178,15 +178,17 @@ function capture_voucher_template(html) {
     if (voucher_template_captured)
         return;
 
-    const marker = generate_voucher_buttons();
-    const marker_index = html.indexOf(marker);
+    // Match against the fixed placeholder constant directly, calling generate_voucher_buttons()
+    // again here would overwrite active_voucher_patterns with whatever default it was called
+    // with, that's not what we want, we're only after the static marker string.
+    const marker_index = html.indexOf(voucher_placeholder_marker);
 
     if (marker_index === -1) {
         voucher_before_html = html;
         voucher_after_html = "";
     } else {
         voucher_before_html = html.slice(0, marker_index);
-        voucher_after_html = html.slice(marker_index + marker.length);
+        voucher_after_html = html.slice(marker_index + voucher_placeholder_marker.length);
     }
 
     voucher_template_captured = true;
@@ -242,8 +244,23 @@ async function watch_for_voucher_panel_removal() {
 let cached_voucher_html = null;
 let auto_generate_attempted = false;
 
-// Position marker for insert_voucher_buttons(), also kicks off the background scrape once
-function generate_voucher_buttons() {
+// Patterns handed in via generate_voucher_buttons(), stored here so the background scrape
+// closure and generate_and_cache_voucher_buttons() below can both reach it. null (the
+// default, when nothing is passed in) is treated exactly like an empty array, no patterns
+// configured means no buttons get generated, not a crash.
+let active_voucher_patterns = null;
+
+// Fixed placeholder markup, kept as its own constant so capture_voucher_template() can
+// match against it without calling generate_voucher_buttons() again, that call has side
+// effects (storing the passed-in patterns, kicking off the background scrape once).
+const voucher_placeholder_marker = `<div class="k-voucher-placeholder"></div>`;
+
+// Position marker for insert_voucher_buttons(), also kicks off the background scrape once.
+// voucher_patterns is the caller's list of { match, pattern, convert_thousands } entries,
+// see setup_voucher_buttons() in the userscript for how that list gets built.
+function generate_voucher_buttons(voucher_patterns = null) {
+    active_voucher_patterns = voucher_patterns;
+
     if (!auto_generate_attempted) {
         auto_generate_attempted = true;
 
@@ -259,7 +276,7 @@ function generate_voucher_buttons() {
         })();
     }
 
-    return `<div class="k-voucher-placeholder"></div>`;
+    return voucher_placeholder_marker;
 }
 
 function extract_number_from_title(title) {
@@ -310,6 +327,21 @@ function set_rewards_panel_hidden(hidden) {
     }
 }
 
+// Retries the close click if the panel is still visible afterwards, a throttled or
+// occluded tab (e.g. after a virtual desktop switch) can delay or drop the click's
+// effect, so a single click isn't reliable enough on its own.
+async function close_rewards_panel_reliably(points_button, max_attempts = 5) {
+    for (let attempt = 0; attempt < max_attempts; attempt++) {
+        if (!is_rewards_panel_visible())
+            return true;
+
+        points_button.click();
+        await sleep_s(1);
+    }
+
+    return !is_rewards_panel_visible();
+}
+
 async function scrape_reward_titles() {
     const points_button = document.querySelector('[data-testid="channel-points-button"]');
     if (!points_button)
@@ -329,8 +361,10 @@ async function scrape_reward_titles() {
     const titles = Array.from(rewards_container.querySelectorAll("p[title]")).map(p => p.getAttribute("title"));
 
     if (!was_already_open) {
-        points_button.click();
-        await sleep_s(1); // let the close transition finish before revealing it again
+        const closed = await close_rewards_panel_reliably(points_button);
+        if (!closed)
+            console.warn("Rewards panel did not close after multiple attempts, leaving it visible.");
+
         set_rewards_panel_hidden(false);
     }
 
@@ -340,7 +374,9 @@ async function scrape_reward_titles() {
 let voucher_generation_in_progress = false;
 
 async function generate_and_cache_voucher_buttons() {
-    if (typeof voucher_patterns === "undefined" || !Array.isArray(voucher_patterns))
+    // No patterns configured (null default, or an explicitly empty array) is treated as
+    // "nothing to generate", cached_voucher_html simply stays null and no buttons appear.
+    if (!Array.isArray(active_voucher_patterns) || active_voucher_patterns.length === 0)
         return;
 
     if (voucher_generation_in_progress)
@@ -351,7 +387,7 @@ async function generate_and_cache_voucher_buttons() {
     let buttons_html = "";
 
     titles.forEach(title => {
-        const matching_pattern = voucher_patterns.find(pattern_config => pattern_config.match.test(title));
+        const matching_pattern = active_voucher_patterns.find(pattern_config => pattern_config.match.test(title));
         if (!matching_pattern)
             return;
 
