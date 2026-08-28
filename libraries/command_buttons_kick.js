@@ -298,6 +298,9 @@ function format_thousands(raw_number) {
 }
 
 function build_voucher_button_text(title, pattern_config) {
+    if (!pattern_config.pattern.includes("<Number>"))
+        return pattern_config.pattern;
+
     const raw_number = extract_number_from_title(title);
     if (!raw_number)
         return null;

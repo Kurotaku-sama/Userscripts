@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Kick hitsquadgodfather command buttons
 // @namespace       https://kurotaku.dev
-// @version         1.0.5
+// @version         1.0.6
 // @description     Adds buttons to send commands in the Kick chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -11,7 +11,7 @@
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kick_Command_Buttons/script_hitsquad.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/command_buttons_kick.js?v=1.0.5
+// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/command_buttons_kick.js?v=1.0.6
 // @require         https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
@@ -126,6 +126,11 @@ async function init_gm_config() {
                 type: 'checkbox',
                 default: true,
                 label: 'Points Vouchers',
+            },
+            voucher_daily_pool: {
+                type: 'checkbox',
+                default: true,
+                label: 'Daily Community Prize Pool Voucher',
             },
             notifications: {
                 section: ['Miscellaneous'],
@@ -271,6 +276,9 @@ async function setup_voucher_buttons() {
 
     if (GM_config.get("voucher_points"))
         voucher_patterns.push({ match: /itzagud.*points/i, pattern: "+<Number> Points", convert_thousands: true });
+
+    if (GM_config.get("voucher_daily_pool"))
+        voucher_patterns.push({ match: /itzagud.*daily.*community.*prize.*pool/i, pattern: "Enter Daily Pool" });
 
     // Alternative: if per-type toggles aren't wanted and every pattern should just always
     // be active, skip the config checks above entirely and hardcode the full list instead:
