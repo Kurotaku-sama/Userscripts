@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Kick hitsquadgodfather command buttons
 // @namespace       https://kurotaku.dev
-// @version         1.0.6
+// @version         1.0.7
 // @description     Adds buttons to send commands in the Kick chat
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
@@ -162,6 +162,7 @@ function generate_button_groups() {
         buttongroups += `${btngrp_label("General")}
                 <div class="k-buttongroup">
                 ${btngrp_button("hitsquad", "Hitsquad")}
+                ${btngrp_button("enter", "Enter")}
                 ${btngrp_button("strikes", "Strikes")}
                 </div>`;
 
