@@ -2,7 +2,7 @@
 // @name            givee.club & giveaway.su improvements
 // @name:de         givee.club & giveaway.su Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         1.1.1
+// @version         1.1.2
 // @description     A script for some improvements for givee.club & giveaway.su
 // @description:de  Ein Skript für einige Verbesserungen für givee.club & giveaway.su
 // @author          Kurotaku
@@ -396,7 +396,7 @@ function insert_giveaway_draw_time() {
 
 function format_date_time(time) {
     let date = time.getDate() >= 10 ? time.getDate() : "0"+time.getDate();
-    let month = time.getMonth() >= 10 ? time.getMonth() : "0"+time.getMonth();
+    let month = time.getMonth() + 1 >= 10 ? `${time.getMonth() + 1}` : `0${time.getMonth() + 1}`;
     let full_year = time.getFullYear();
     let hours = time.getHours() >= 10 ? time.getHours() : "0"+time.getHours();
     let minutes = time.getMinutes() >= 10 ? time.getMinutes() : "0"+time.getMinutes();
