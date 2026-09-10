@@ -670,8 +670,8 @@ GM_addStyle(`
 .k-targetbutton {
     box-sizing: border-box;
     padding: 4px 10px;
-    background-color: var(--color-primary-base);
-    color: var(--color-primary-onPrimary);
+    background-color: var(--edge-color-brand-bg-default);
+    color: var(--edge-color-brand-fg-default);
     display: inline-flex;
     position: relative;
     align-items: center;
@@ -698,12 +698,12 @@ GM_addStyle(`
     min-width: 300px;
     position: relative;
     background: inherit;
-    border-top: 2px solid var(--color-primary-base);
+    border-top: 2px solid var(--edge-color-brand-bg-default);
     padding: 10px 15px;
 }
 
 .k-main-container.k-draggable {
-    border: 2px solid var(--color-primary-base);
+    border: 2px solid var(--edge-color-brand-bg-default);
     position: fixed;
     top: 0;
     left: 0;
