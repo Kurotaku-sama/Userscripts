@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Podcast.de Autodownload
 // @namespace       https://kurotaku.de
-// @version         1.0.2
+// @version         1.0.3
 // @description     Enables automatic downloading of Podcast.de episodes with user-defined file name templates.
 // @description:de  Ermöglicht das automatische Herunterladen von Podcast.de-Episoden mit benutzerdefinierten Dateinamen-Templates
 // @author          Kurotaku
@@ -11,7 +11,6 @@
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Podcast.de_Autodownload/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Podcast.de_Autodownload/script.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
 // @require         https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
@@ -31,16 +30,20 @@
     if (GM_config.get("enable_template_tester"))
         GM_registerMenuCommand("Template Tester", template_tester);
 
-    // Check if the current page is an episode page and if the episode array exists with at least one item
-    // Note: The `episode` array comes from the site's own JavaScript, not defined in this userscript
-    if (window.location.pathname.includes("/episode/") && episode?.length > 0) {
-        // Extract the episode URL (removing any query parameters)
-        let url = episode[0].url.split("?")[0];
+    // Only episode pages are relevant
+    if (!window.location.pathname.includes("/episode/")) {
+        console.error("Not an episode page.");
+        return;
+    }
 
-        // Trigger metadata fetching and download
-        fetch_metadata_and_init_download(url);
-    } else
-        console.error("Episode URL not found or not an episode page.");
+    let url = get_episode_url();
+    if (!url) {
+        console.error("Episode URL not found.");
+        return;
+    }
+
+    // Trigger metadata fetching and download
+    fetch_metadata_and_init_download(url);
 })();
 
 async function init_gm_config() {
@@ -109,9 +112,26 @@ function get_summary_html() {
 </details>`;
 }
 
+// Resolves the direct audio URL from the page, trying several sources in order of reliability.
+function get_episode_url() {
+    let candidates = [
+        document.querySelector("meta[property='og:audio']")?.content,
+        document.querySelector("meta[name='og:audio']")?.content,
+        document.querySelector("meta[name='twitter:player:stream']")?.content,
+        document.querySelector("meta[property='twitter:player:stream']")?.content,
+        document.querySelector("a[title^='Herunterladen']")?.href,
+        document.querySelector("audio source[src], audio[src]")?.getAttribute("src"),
+    ];
+
+    let url = candidates.find(candidate => candidate && candidate.trim() !== "");
+    // Strip query parameters such as "?source=feed"
+    return url ? url.split("?")[0] : null;
+}
+
 function get_episode_name() {
-    let title_element = document.querySelector(".title > h1");
-    return title_element?.innerText.trim();
+    // Fallback to the document title without the trailing " ~ Podcast name" part
+    let title_element = document.querySelector("h1");
+    return title_element?.innerText.trim() || document.title.split(" ~ ")[0].trim();
 }
 
 function sanitize_filename(filename) {
@@ -145,7 +165,7 @@ async function fetch_metadata_and_init_download(url) {
             },
             onError: function(error) {
                 // Use alternate name if metadata reading fails
-                let filename = sanitize_filename(alternate_name + ".mp3");
+                let filename = sanitize_filename(`${alternate_name}.mp3`);
 
                 prompt(blob, filename);
             }
@@ -157,9 +177,9 @@ async function fetch_metadata_and_init_download(url) {
 
 function prompt(blob, filename) {
     if (GM_config.get("auto_download_enabled"))
-        prompt_auto(blob, filename); // normal auto-download
+        prompt_auto(blob, filename); // Normal auto-download
     else
-        prompt_manual(blob, filename); // alternative download function
+        prompt_manual(blob, filename); // Manual download button
 }
 
 // Manual download: just a single button to trigger download
@@ -194,49 +214,54 @@ async function prompt_auto(blob, filename) {
     document.body.insertAdjacentHTML("beforeend", html);
 
     let finished = false;
+    let countdown_span = document.getElementById("countdown_text");
+    let countdown_interval = null;
 
-    // Cancel button → stop countdown and switch to manual download
+    // Cancel button: stop countdown and switch to manual download
     document.getElementById("cancel_download").addEventListener("click", () => {
         finished = true;
         clearInterval(countdown_interval);
         document.getElementById("download_countdown").remove();
-        prompt_manual(blob, filename); // fallback to manual
+        prompt_manual(blob, filename);
     });
 
-    // Download now button → bypass countdown
+    // Download now button: bypass countdown
     document.getElementById("download_now").addEventListener("click", () => {
-        if (!finished) {
-            finished = true;
-            clearInterval(countdown_interval);
-            document.getElementById("download_countdown").remove();
-            start_download(blob, filename);
-        }
+        if (finished) return;
+        finished = true;
+        clearInterval(countdown_interval);
+        document.getElementById("download_countdown").remove();
+        start_download(blob, filename);
     });
 
     // Countdown logic
-    let countdown_span = document.getElementById("countdown_text");
-    let countdown_interval = setInterval(() => {
+    countdown_interval = setInterval(() => {
         if (finished) {
             clearInterval(countdown_interval);
             return;
         }
         delay--;
-        if (delay > 0) {
+        if (delay > 0)
             countdown_span.textContent = `Download startet in ${delay} Sekunden`;
-        } else {
+        else {
             clearInterval(countdown_interval);
             document.getElementById("download_countdown")?.remove();
-            if (!finished) start_download(blob, filename);
+            finished = true;
+            start_download(blob, filename);
         }
     }, 1000);
 }
 
-// Helper to actually trigger download
+// Triggers the actual download through a temporary anchor element
 function start_download(blob, filename) {
-    let html = `<a href="${URL.createObjectURL(blob)}" download="${filename}" id="temp_download_link"></a>`
-    document.body.insertAdjacentHTML("beforeend", html)
-    document.getElementById("temp_download_link").click()
-    document.getElementById("temp_download_link").remove()
+    let object_url = URL.createObjectURL(blob);
+    let html = `<a href="${object_url}" download="${filename}" id="temp_download_link"></a>`;
+    document.body.insertAdjacentHTML("beforeend", html);
+    document.getElementById("temp_download_link").click();
+    document.getElementById("temp_download_link").remove();
+
+    // Release the object URL after the browser has started the download
+    setTimeout(() => URL.revokeObjectURL(object_url), 60000);
 
     if (GM_config.get("enable_download_notification"))
         Swal.fire({
@@ -247,7 +272,6 @@ function start_download(blob, filename) {
             theme: "dark"
         });
 }
-
 
 function template_tester() {
     let test_metadata = {
@@ -268,10 +292,10 @@ function template_tester() {
                     ${Object.keys(test_metadata).map(key => `<li><code>{${key}}</code>: ${test_metadata[key]}</li>`).join("")}
                 </ul>
             </div>
-            <input id="template_input" class="template_input" placeholder="Gib dein Template ein" value="${GM_config.get('file_name_template')}">
+            <input id="template_input" class="template_input" placeholder="Gib dein Template ein" value="${GM_config.get("file_name_template")}">
             <div id="template_result" class="template_result"></div>
         `,
-        showConfirmButton: false, // Confirm-Button entfernt
+        showConfirmButton: false,
         showCancelButton: true,
         cancelButtonText: "Close",
         theme: "dark",
@@ -295,13 +319,13 @@ function build_filename_from_template(template, metadata) {
     // Extract all placeholders from template
     let fields = template.match(/{([^{}]+)}/g)?.map(match => match.slice(1, -1)) || [];
     let result = template;
-    let previous_tag_exists = false; // Tracks if previous tag had value (for separators)
+    let previous_tag_exists = false; // Tracks if previous tag had a value (for separators)
 
     for (let i = 0; i < fields.length; i++) {
         let temp = fields[i];
 
         switch (true) {
-                // Separator if previous tag exists
+            // Separator if previous tag exists
             case temp.startsWith("sep_v:"):
                 if (i !== 0 && previous_tag_exists) {
                     let separator = temp.split(":")[1].slice(1, -1);
@@ -311,7 +335,7 @@ function build_filename_from_template(template, metadata) {
                     result = result.replace(`{${temp}}`, "");
                 break;
 
-                // Separator if any previous tag exists (until start or previous separator)
+            // Separator if any previous tag exists (until start or previous separator)
             case temp.startsWith("sep_mv:"):
                 if (i !== 0) {
                     let has_previous_tag = false;
@@ -332,7 +356,7 @@ function build_filename_from_template(template, metadata) {
                     result = result.replace(`{${temp}}`, "");
                 break;
 
-                // Separator if next tag exists
+            // Separator if next tag exists
             case temp.startsWith("sep_n:"):
                 if (i !== fields.length - 1) {
                     let next_temp = fields[i + 1];
@@ -345,7 +369,7 @@ function build_filename_from_template(template, metadata) {
                     result = result.replace(`{${temp}}`, "");
                 break;
 
-                // Separator if any following tag exists (until end or next separator)
+            // Separator if any following tag exists (until end or next separator)
             case temp.startsWith("sep_mn:"):
                 if (i !== fields.length - 1) {
                     let has_next_tag = false;
@@ -366,7 +390,8 @@ function build_filename_from_template(template, metadata) {
                     result = result.replace(`{${temp}}`, "");
                 break;
 
-            default: // Replace tag with metadata value if available, otherwise remove
+            // Replace tag with metadata value if available, otherwise remove it
+            default:
                 if (metadata[temp] && metadata[temp].trim() !== "") {
                     result = result.replace(`{${temp}}`, metadata[temp]);
                     previous_tag_exists = true;
@@ -380,7 +405,7 @@ function build_filename_from_template(template, metadata) {
 
     // Cleanup: collapse multiple spaces and trim
     result = result.replace(/\s+/g, " ").trim();
-    return sanitize_filename(result) + ".mp3";
+    return `${sanitize_filename(result)}.mp3`;
 }
 
 GM_addStyle(`
