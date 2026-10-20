@@ -540,8 +540,11 @@ function disable_draggable() {
 // ========================
 
 // Kick highlights any message that mentions the logged-in user (or replies to one of
-// their messages) with a "border-green-500" class, that's more reliable than matching the
-// username against the raw text ourselves
+// their messages) with a green border class, that's more reliable than matching the
+// username against the raw text ourselves. Kick has used different class names for this
+// over time, so every known variant is matched.
+const mention_highlight_selector = ".border-kick-voltGreen-150, .border-green-500";
+
 async function start_chat_message_observer() {
     if (!GM_config.fields["notifications"] || !GM_config.get("notifications"))
         return;
@@ -565,7 +568,7 @@ async function start_chat_message_observer() {
         await wait_for_element("#chatroom-messages");
         await sleep_s(3);
 
-        document.querySelectorAll("#chatroom-messages .border-green-500").forEach(node => {
+        document.querySelectorAll(`#chatroom-messages :is(${mention_highlight_selector})`).forEach(node => {
             notified_fingerprints.add(get_fingerprint(node));
         });
 
@@ -582,7 +585,7 @@ async function start_chat_message_observer() {
             return;
         }
 
-        chat_container.querySelectorAll(".border-green-500").forEach(node => {
+        chat_container.querySelectorAll(mention_highlight_selector).forEach(node => {
             const fingerprint = get_fingerprint(node);
 
             if (notified_fingerprints.has(fingerprint))
