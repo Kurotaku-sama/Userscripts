@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name            Steam Inventory Enhancer
 // @namespace       https://kurotaku.de
-// @version         1.2.1
+// @version         1.2.2
 // @description     Adds mass stacking/unstacking tools, a customizable sidebar with favorites, advanced inventory filtering/sorting, and ASF IPC integration for seamless 2FA confirmations.
 // @description:de  Fügt Tools zum Massen-Stapeln/Entstapeln, eine anpassbare Seitenleiste mit Favoriten, erweiterte Filter- und Sortierfunktionen für Inventare sowie eine ASF-IPC-Integration für 2FA-Bestätigungen hinzu.
 // @author          Kurotaku
 // @license         CC BY-NC-SA 4.0
 // @match           https://steamcommunity.com/profiles/*/inventory*
 // @match           https://steamcommunity.com/id/*/inventory*
-// @match           https://steamcommunity.com/market/listings/*
-// @match           https://steamcommunity.com/market/search*
+// @match           https://steamcommunity.com/market
+// @match           https://steamcommunity.com/market/*
 // @icon            https://steamcommunity.com/favicon.ico
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Steam_Inventory_Enhancer/script.user.js
@@ -33,7 +33,7 @@
 
     const current_url = window.location.href;
     const is_inventory = /steamcommunity\.com\/(id|profiles)\/.*\/inventory/.test(current_url);
-    const is_market = current_url.includes('steamcommunity.com/market/listings/') || current_url.includes('steamcommunity.com/market/search');
+    const is_market = /steamcommunity\.com\/market(\/|\?|$)/.test(current_url);
     if (!is_inventory && !is_market) return;
 
     if (is_inventory) {
@@ -154,7 +154,7 @@ async function init_gm_config() {
                 default: true,
                 label: 'Show on Inventory Pages',
             },
-            owend_count_cache: {
+            owned_count_cache: {
                 label: 'Inventory Cache Duration (Minutes):<br><small>Set how long inventory data is stored locally for each inventory before a fresh update from Steam is required. High values improve performance and prevent rate-limiting.</small>',
                 type: 'int',
                 default: 30,
@@ -1330,6 +1330,53 @@ class Itemcounter {
     static app_itemcache = new Map();
     static last_app_id = null;
 
+    // Owned amounts keyed by market hash name (language independent), which is what the old layout and the inventory pages use
+    // The additional map holds the same amounts keyed by the localized item name, which is what the new market layout displays
+    static OwnedInventory = class extends Map {
+        local_counts = new Map();
+    };
+
+    // Matches a trailing parenthesis group such as the wear of a skin, e.g. " (Field-Tested)"
+    static group_suffix_regex = /\s\([^()]+\)$/;
+
+    // Memoized grouped amounts per counts map (base name without suffix mapped to the summed amount)
+    static group_cache = new WeakMap();
+
+    // Version of the persistent cache layout, entries of other versions are discarded
+    static cache_version = 2;
+
+    // Parsed server rendered state of the new market layout and the data derived from it
+    static ssr_data = null;
+    static bucket_names = null;
+    static listing_data = null;
+
+    // Path the embedded page data belongs to, because it is not refreshed when the route changes without a reload
+    static ssr_path = null;
+
+    // Profile path of the logged in user (e.g. "profiles/7656..." or "id/name"), resolved once
+    static profile_path = null;
+
+    // 64 bit id of the logged in user, which the inventory endpoint of the Steam web client needs
+    static steam_id64 = null;
+
+    // Time an expired cache entry is still shown while a fresh copy is loaded in the background
+    static stale_ms = 24 * 60 * 60 * 1000;
+
+    // AppIDs whose cache entry is currently being refreshed in the background
+    static refreshing = new Set();
+
+    // Maps the language code of the page to the language names that Steam uses in its URLs
+    static language_names = {
+        'ar': 'arabic', 'bg': 'bulgarian', 'cs': 'czech', 'da': 'danish', 'de': 'german', 'el': 'greek', 'en': 'english',
+        'es': 'spanish', 'es-419': 'latam', 'fi': 'finnish', 'fr': 'french', 'hu': 'hungarian', 'id': 'indonesian',
+        'it': 'italian', 'ja': 'japanese', 'ko': 'koreana', 'nb': 'norwegian', 'no': 'norwegian', 'nl': 'dutch',
+        'pl': 'polish', 'pt': 'portuguese', 'pt-br': 'brazilian', 'ro': 'romanian', 'ru': 'russian', 'sv': 'swedish',
+        'th': 'thai', 'tr': 'turkish', 'uk': 'ukrainian', 'vi': 'vietnamese', 'zh': 'schinese', 'zh-cn': 'schinese', 'zh-tw': 'tchinese'
+    };
+
+    // Chain that loads the inventories of a search one after the other
+    static inventory_queue = Promise.resolve();
+
     static async init() {
         // Apply the visual styles and perform an initial cleanup of the persistent storage
         this.inject_styles();
@@ -1343,14 +1390,8 @@ class Itemcounter {
             if (GM_config.get('owned_count_show_inventory'))
                 this.init_inventory_page();
         }
-        else if (url.includes('/market/listings/')) {
-            if (GM_config.get('owned_count_show_market_listing'))
-                this.init_single_listing();
-        }
-        else if (url.includes('/market/search')) {
-            if (GM_config.get('owned_count_show_market_search'))
-                this.init_search_results();
-        }
+        else if (window.location.pathname.startsWith('/market'))
+            this.init_market();
     }
 
     static inject_styles() {
@@ -1367,7 +1408,7 @@ class Itemcounter {
                 border-radius: 4px;
                 font-size: 11px;
                 white-space: nowrap;
-                z-index: 1;
+                z-index: 100;
                 user-select: none;
                 -ms-user-select: none;
                 -webkit-user-select: none;
@@ -1379,23 +1420,32 @@ class Itemcounter {
                 bottom: 5px;
                 right: 5px;
             }
+
+            /* Positioning context for badges inside the market layout that uses generated class names */
+            .sie_owned_anchor {
+                position: relative;
+            }
         `);
     }
 
     static async insert_cache_delete_button() {
-        // Locate the 'More' dropdown menu in the inventory and append a custom clear-cache option
-        const dropdown_menu = await wait_for_element("#inventory_more_dropdown .popup_body.popup_menu");
+        // Locate the 'More' dropdown list in the inventory and append a custom clear-cache option
+        const dropdown_menu = await wait_for_element("#inventory_more_droplist");
         const sie_cache_html = `
-            <div class="popup_menu_separator"></div>
-            <a class="popup_menu_item" id="sie_clear_cache_btn" href="javascript:void(0);">
-                <span style="color: #a4d007;">SIE:</span> Delete inventory cache
-            </a>
+            <li>
+                <a role="option" class="inactive_selection" tabindex="99999" id="sie_clear_cache_btn" href="javascript:void(0);" style="white-space: normal;"
+                    onmouseover="this.className = 'highlighted_selection';" onmouseout="this.className = 'inactive_selection';" onclick="DSelectHide('inventory_more');">
+                    <span style="color: #a4d007;">SIE:</span> Delete inventory cache
+                </a>
+            </li>
         `;
 
         // Inject the HTML string and attach an event listener to trigger the clearing process
+        // The inline handlers of the entry only highlight it and close the dropdown like the native entries do
         dropdown_menu.insertAdjacentHTML('beforeend', sie_cache_html);
 
-        document.getElementById('sie_clear_cache_btn')?.addEventListener('click', () => {
+        document.getElementById('sie_clear_cache_btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
             this.clear_cache();
         });
     }
@@ -1421,17 +1471,23 @@ class Itemcounter {
         });
     }
 
+    static get_cache_ms() {
+        // A missing or invalid setting falls back to the default, while 0 explicitly disables the cache
+        const minutes = Number(GM_config.get('owned_count_cache'));
+        return (Number.isNaN(minutes) ? 30 : minutes) * 60 * 1000;
+    }
+
     static clean_expired_cache() {
         try {
-            // Calculate the expiration threshold in milliseconds based on user settings
+            // Entries are kept for a while after they expire, because they are still shown while a fresh copy loads
             const storage = GM_getValue(this.cache_key, {});
-            const cache_ms = (GM_config.get('owend_count_cache') ?? 30) * 60 * 1000;
+            const max_age_ms = this.get_cache_ms() + this.stale_ms;
             const now = Date.now();
             let changed = false;
 
-            // Iterate through all AppIDs in the cache and delete those that have expired
+            // Iterate through all AppIDs in the cache and delete those that are too old or have an outdated layout
             for (const id in storage) {
-                if (now - storage[id].cache_creation >= cache_ms) {
+                if (storage[id].version !== this.cache_version || now - storage[id].cache_creation >= max_age_ms) {
                     delete storage[id];
                     changed = true;
                 }
@@ -1445,9 +1501,98 @@ class Itemcounter {
         }
     }
 
-static async get_inventory(app_id) {
+    static read_ssr_data() {
+        // The new market layout embeds its server rendered state as JSON, which is parsed once it is complete
+        if (this.ssr_data) return this.ssr_data;
+
+        const ssr_el = document.querySelector('#valve-ssr-data');
+        if (!ssr_el) return null;
+
+        try {
+            this.ssr_data = JSON.parse(ssr_el.textContent);
+            this.ssr_path = window.location.pathname;
+        } catch (e) {
+            // The element can still be streaming in, the next call tries again
+            return null;
+        }
+        return this.ssr_data;
+    }
+
+    static async get_profile_path() {
+        if (this.profile_path) return this.profile_path;
+
+        // Inventory pages and the old market layout expose the id as a page global
+        if (typeof g_steamID !== 'undefined' && g_steamID)
+            return this.profile_path = `profiles/${g_steamID}`;
+
+        // The new market layout provides the id in its embedded user config, the value is "0" while logged out
+        // The embedded data is part of the document head, so it is either already available or missing
+        const ssr_id = this.read_ssr_data()?.UserConfig?.steamid;
+        if (ssr_id && ssr_id !== '0')
+            return this.profile_path = `profiles/${ssr_id}`;
+
+        // Without embedded data the redirect of /my reveals the profile of the logged in user (id or custom name)
+        try {
+            const controller = new AbortController();
+            const response = await fetch('https://steamcommunity.com/my/?xml=1', { credentials: 'include', signal: controller.signal });
+            const match = new URL(response.url).pathname.match(/^\/(profiles\/\d+|id\/[^/]+)/);
+
+            // The XML variant of a profile contains the 64 bit id, which is needed for custom profile names
+            // Any other response is aborted so the profile page itself is not downloaded
+            if (/xml/.test(response.headers.get('content-type') || ''))
+                this.steam_id64 = (await response.text()).match(/<steamID64>(\d+)<\/steamID64>/)?.[1] || null;
+            else
+                controller.abort();
+
+            if (match)
+                return this.profile_path = match[1];
+        } catch (e) {
+            console.error("[SIE] Profile lookup failed:", e);
+        }
+
+        return null;
+    }
+
+    static get_steam_id64() {
+        // The id is part of the profile path unless the profile uses a custom name
+        return this.profile_path?.match(/^profiles\/(\d+)$/)?.[1] || this.steam_id64;
+    }
+
+    static async get_language() {
+        // Inventory pages and the old market layout expose the language name as a page global
+        if (typeof g_strLanguage !== 'undefined' && g_strLanguage)
+            return g_strLanguage;
+
+        // The embedded config of the new market layout is the most reliable source, followed by the language cookie
+        // The language code of the page is the last resort
+        const html_language = document.documentElement.lang.toLowerCase();
+
+        return this.read_ssr_data()?.Config?.LANGUAGE
+            || document.cookie.match(/(?:^|;\s*)Steam_Language=([^;]+)/)?.[1]
+            || this.language_names[html_language] || this.language_names[html_language.split('-')[0]]
+            || 'english';
+    }
+
+    static inventory_from_cache(entry) {
+        // Rebuilds the amounts from a persistent cache entry
+        const inventory = new this.OwnedInventory(Object.entries(entry.items));
+        Object.entries(entry.local_items || {}).forEach(([local_name, amount]) => inventory.local_counts.set(local_name, amount));
+        return inventory;
+    }
+
+    static store_inventory(app_id, counts) {
+        const cache_ms = this.get_cache_ms();
+        if (cache_ms <= 0) return;
+
+        // The storage is read again right before writing, so entries that other tabs stored in the meantime are kept
+        const storage = GM_getValue(this.cache_key, {});
+        storage[app_id] = { version: this.cache_version, cache_creation: Date.now(), items: Object.fromEntries(counts), local_items: Object.fromEntries(counts.local_counts) };
+        GM_setValue(this.cache_key, storage);
+    }
+
+    static async get_inventory(app_id, on_refresh = null) {
         // Validate the AppID and check if it is part of the user's defined blacklist
-        if (!app_id) return new Map();
+        if (!app_id) return new this.OwnedInventory();
 
         const blacklist = (GM_config.get('owned_count_blacklist') || '')
         .split(',')
@@ -1455,46 +1600,224 @@ static async get_inventory(app_id) {
         .filter(s => s !== '' && !isNaN(s));
 
         if (blacklist.includes(app_id.toString()))
-            return new Map();
+            return new this.OwnedInventory();
 
-        let storage = GM_getValue(this.cache_key, {});
-        const now = Date.now();
-        // Use nullish coalescing to ensure 0 is respected and not overwritten by fallback
-        const cache_ms = (GM_config.get('owend_count_cache') ?? 30) * 60 * 1000;
+        const cache_ms = this.get_cache_ms();
+        const entry = GM_getValue(this.cache_key, {})[app_id];
+        const age = Date.now() - (entry?.cache_creation ?? 0);
+        const is_usable = cache_ms > 0 && entry?.version === this.cache_version;
 
         // Perform a cache-first lookup to minimize API requests to Steam's servers
-        if (cache_ms > 0 && storage[app_id] && (now - storage[app_id].cache_creation < cache_ms))
-            return new Map(Object.entries(storage[app_id].items));
+        if (is_usable && age < cache_ms)
+            return this.inventory_from_cache(entry);
 
-        const counts = new Map();
-        const contexts = (GM_config.get('owned_count_contexts') || '1, 2, 6').split(',').map(s => s.trim());
+        // An expired entry is shown right away while a fresh copy is loaded in the background
+        if (is_usable && age < cache_ms + this.stale_ms) {
+            if (!this.refreshing.has(app_id)) {
+                this.refreshing.add(app_id);
+                this.queue_inventory(app_id, `cache expired (age: ${Math.round(age / 60000)} min), refreshing in background`)
+                    .then(fresh => fresh && on_refresh?.(fresh))
+                    .finally(() => this.refreshing.delete(app_id));
+            }
+            return this.inventory_from_cache(entry);
+        }
 
+        let miss_reason = 'no cache entry';
+        if (cache_ms <= 0)
+            miss_reason = `cache disabled (duration setting: ${GM_config.get('owned_count_cache')})`;
+        else if (entry)
+            miss_reason = 'cache outdated';
+
+        return await this.queue_inventory(app_id, miss_reason) ?? new this.OwnedInventory();
+    }
+
+    static to_entry(desc, amount) {
+        // Normalizes an item of either inventory endpoint to its names and its amount
+        return {
+            name: desc?.market_hash_name || desc?.name,
+            local_name: desc?.market_name || desc?.name,
+            amount: parseInt(amount || 1, 10)
+        };
+    }
+
+    static async request_json(url) {
+        // Resolves with the HTTP status (0 for network errors) and the parsed body, which is undefined if the request failed
         try {
-            // Concurrent fetching of all specified inventory contexts using the profiles API
-            const results = await Promise.all(contexts.map(ctx =>
-                                                           fetch(`https://steamcommunity.com/profiles/${g_steamID}/inventory/json/${app_id}/${ctx}/?l=german`, { credentials: 'include' })
-                                                           .then(r => r.ok ? r.json() : null).catch(() => null)
-                                                          ));
+            const response = await fetch(url, { credentials: 'include' });
+            const data = response.ok ? await response.json().catch(() => undefined) : undefined;
+            return { status: response.status, data };
+        } catch (e) {
+            return { status: 0, data: undefined };
+        }
+    }
 
-            // Parse the API results and aggregate item amounts by their market hash names
-            results.forEach(data => {
-                if (!data || !data.success) return;
-                Object.values(data.rgInventory || {}).forEach(item => {
-                    const desc = (data.rgDescriptions || {})[`${item.classid}_${item.instanceid}`];
-                    const name = desc?.market_hash_name || desc?.name;
-                    if (name) counts.set(name, (counts.get(name) || 0) + parseInt(item.amount || 1, 10));
-                });
+    static async fetch_context_new(steam_id, app_id, ctx, language) {
+        // Entries of one context from the endpoint of the Steam web client, which delivers the items in pages
+        // A failed page marks the whole context as failed, because partial data would silently hide items
+        const entries = [];
+        let last_assetid = null;
+        let status = 200;
+
+        do {
+            const start = last_assetid ? `&start_assetid=${last_assetid}` : '';
+            const response = await this.request_json(`https://steamcommunity.com/inventory/${steam_id}/${app_id}/${ctx}?l=${language}&count=1000${start}`);
+            status = response.status;
+            if (response.data === undefined) return { status, entries: null };
+
+            // The item names are listed separately and are linked to the assets by class and instance id
+            const descriptions = new Map((response.data?.descriptions || []).map(desc => [`${desc.classid}_${desc.instanceid}`, desc]));
+            (response.data?.assets || []).forEach(asset => entries.push(this.to_entry(descriptions.get(`${asset.classid}_${asset.instanceid}`), asset.amount)));
+
+            last_assetid = response.data?.more_items ? response.data.last_assetid : null;
+            if (last_assetid)
+                await sleep(1000);
+        } while (last_assetid);
+
+        return { status, entries };
+    }
+
+    static async fetch_context_old(profile_path, app_id, ctx, language) {
+        // Entries of one context from the older profile endpoint, which delivers all items at once
+        const { status, data } = await this.request_json(`https://steamcommunity.com/${profile_path}/inventory/json/${app_id}/${ctx}/?l=${language}`);
+        if (data === undefined) return { status, entries: null };
+
+        // A response without the success flag (e.g. a context that does not exist) simply has no items
+        const items = data?.success ? Object.values(data.rgInventory || {}) : [];
+        return { status, entries: items.map(item => this.to_entry((data.rgDescriptions || {})[`${item.classid}_${item.instanceid}`], item.amount)) };
+    }
+
+    static async fetch_all_contexts(app_id, profile_path, language) {
+        const contexts = (GM_config.get('owned_count_contexts') || '1, 2, 6').split(',').map(s => s.trim());
+        const steam_id = this.get_steam_id64();
+        let results = [];
+
+        // The endpoint of the Steam web client is used first, the older profile endpoint is the fallback if it delivers nothing usable
+        if (steam_id)
+            results = await Promise.all(contexts.map(ctx => this.fetch_context_new(steam_id, app_id, ctx, language)));
+
+        if (!results.some(result => result.entries)) {
+            if (steam_id)
+                console.warn(`[SIE] The inventory endpoint of the web client failed for app ${app_id}, using the profile endpoint instead.`);
+            results = await Promise.all(contexts.map(ctx => this.fetch_context_old(profile_path, app_id, ctx, language)));
+        }
+
+        return results;
+    }
+
+    static async load_inventory(app_id, reason) {
+        try {
+            const profile_path = await this.get_profile_path();
+            if (!profile_path) {
+                console.error("[SIE] Steam profile not found, make sure you are logged in.");
+                return null;
+            }
+
+            // The market pages display names in the language selected on Steam, so the inventory is requested in that language too
+            const language = await this.get_language();
+            console.log(`[SIE] Fetching inventory of app ${app_id} (reason: ${reason}, profile: ${profile_path}, language: ${language})`);
+
+            let results = await this.fetch_all_contexts(app_id, profile_path, language);
+
+            // A second attempt is only worth it if Steam is rate limiting or the network failed
+            if (!results.some(result => result.entries) && results.some(result => result.status === 0 || result.status === 429)) {
+                console.warn(`[SIE] All inventory requests of app ${app_id} failed, retrying shortly.`);
+                await sleep(3000);
+                results = await this.fetch_all_contexts(app_id, profile_path, language);
+            }
+
+            if (!results.some(result => result.entries)) {
+                console.warn(`[SIE] The inventory of app ${app_id} could not be loaded (HTTP ${results.map(result => result.status).join(', ')}).`);
+                return null;
+            }
+
+            // Aggregate the item amounts by their market hash names and by their localized names
+            const counts = new this.OwnedInventory();
+            results.flatMap(result => result.entries || []).forEach(entry => {
+                if (entry.name) counts.set(entry.name, (counts.get(entry.name) || 0) + entry.amount);
+                if (entry.local_name) counts.local_counts.set(entry.local_name, (counts.local_counts.get(entry.local_name) || 0) + entry.amount);
             });
 
-            // If data was retrieved, store it in the persistent cache with a current timestamp
-            // Only write to GM storage if cache is not disabled (0 minutes)
-            if (counts.size > 0 && cache_ms > 0) {
-                storage[app_id] = { cache_creation: now, items: Object.fromEntries(counts) };
-                GM_setValue(this.cache_key, storage);
-            }
-        } catch (e) { console.error("[SIE] API Fetch Fehler:", e); }
-        return counts;
+            // Empty inventories are cached as well, because a successful answer without items is a valid result
+            this.store_inventory(app_id, counts);
+            return counts;
+        } catch (e) {
+            console.error("[SIE] API fetch error:", e);
+            return null;
+        }
     }
+
+    static get_owned_count(counts, names) {
+        const name_list = [names].flat().filter(Boolean);
+        if (!counts || name_list.length === 0) return 0;
+
+        // All candidates and both maps describe the same items, so the largest total is used to avoid counting an item twice
+        // This also covers identical hash and localized names (e.g. an English market page)
+        return Math.max(0, ...name_list.flatMap(name => [this.sum_by_name(counts, name), this.sum_by_name(counts.local_counts, name)]));
+    }
+
+    static sum_by_name(counts, name) {
+        if (!counts) return 0;
+
+        // The new market layout groups all variants of an item (e.g. every wear of a skin) into one entry
+        // Build the summed amounts per grouped name once for each counts map
+        let group_counts = this.group_cache.get(counts);
+        if (!group_counts) {
+            group_counts = new Map();
+            counts.forEach((amount, item_name) => {
+                const base_name = item_name.replace(this.group_suffix_regex, '');
+                if (base_name !== item_name)
+                    group_counts.set(base_name, (group_counts.get(base_name) || 0) + amount);
+            });
+            this.group_cache.set(counts, group_counts);
+        }
+
+        // Exact matches cover single variants, grouped matches cover all variants behind a grouped name
+        return (counts.get(name) || 0) + (group_counts.get(name) || 0);
+    }
+
+    static observe_dom(callback) {
+        let is_scheduled = false;
+
+        // Batch bursts of DOM mutations into a single callback run per animation frame
+        const schedule = () => {
+            if (is_scheduled) return;
+            is_scheduled = true;
+            requestAnimationFrame(() => {
+                is_scheduled = false;
+                callback();
+            });
+        };
+
+        // The callback must be idempotent because its own DOM changes trigger the observer again
+        new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, characterData: true });
+        schedule();
+        return schedule;
+    }
+
+    static queue_inventory(app_id, reason) {
+        // Network loads run one after the other with a pause in between to stay clear of rate limits
+        // Cache hits never enter this queue
+        const result = this.inventory_queue.then(() => this.load_inventory(app_id, reason));
+        this.inventory_queue = result.then(() => sleep(500), () => sleep(500));
+        return result;
+    }
+
+    static sync_badge(target, count, prefix) {
+        const badge = target.querySelector(':scope > .sie-owned-badge');
+        const text = `${prefix}${count}`;
+
+        // Nothing owned: remove a stale badge left over from a previous render
+        if (count === 0)
+            return badge?.remove();
+
+        // Badge already shows the correct amount
+        if (badge?.textContent === text)
+            return;
+
+        badge?.remove();
+        target.insertAdjacentHTML('beforeend', `<div class="sie-owned-badge">${text}</div>`);
+    }
+
     static async init_inventory_page() {
         // Define a local helper to detect game changes in the inventory tabs
         const check_app_id = async () => {
@@ -1502,7 +1825,10 @@ static async get_inventory(app_id) {
             const id = active ? active.getAttribute('href').replace('#', '') : window.location.hash.replace('#', '').split('_')[0];
             if (id && id !== this.last_app_id) {
                 this.last_app_id = id;
-                this.app_itemcache = await this.get_inventory(id);
+                this.app_itemcache = await this.get_inventory(id, fresh => {
+                    if (this.last_app_id === id)
+                        this.app_itemcache = fresh;
+                });
                 return true;
             }
             return false;
@@ -1519,7 +1845,7 @@ static async get_inventory(app_id) {
                 this.update_badge(h1);
                 await wait_for_element_to_disappear(h1);
             } catch (e) {
-                console.error("[SIE] Fehler im Loop-Zyklus:", e);
+                console.error("[SIE] Error in monitoring loop:", e);
                 await new Promise(r => setTimeout(r, 500));
             }
         }
@@ -1556,44 +1882,176 @@ static async get_inventory(app_id) {
         }
     }
 
-    static async init_search_results() {
-        // Identify the target game from the search URL and fetch the corresponding inventory
-        const id = new URLSearchParams(window.location.search).get('appid');
-        if (!id) return;
-        const counts = await this.get_inventory(id);
-        const grid = document.getElementById('searchResultsRows');
+    static get_bucket_names() {
+        if (this.bucket_names) return this.bucket_names;
 
-        if (grid) {
-            // Function to process each visible listing row and append ownership data
-            const update = () => {
-                document.querySelectorAll('.market_listing_row').forEach(row => {
-                    if (row.querySelector('.sie-owned-badge')) return;
-                    const c = counts.get(row.getAttribute('data-hash-name'));
-                    if (c)
-                        row.querySelector('.market_listing_item_name_block')?.insertAdjacentHTML('beforeend', `<div class="sie-owned-badge">💼 ${c}</div>`);
-                });
-            };
-            // Use a MutationObserver to automatically handle lazy loading and pagination in the search grid
-            new MutationObserver(update).observe(grid, { childList: true, subtree: true });
-            update();
+        const ssr = this.read_ssr_data();
+        if (!ssr) return new Map();
+
+        const bucket_names = new Map();
+        try {
+            // The results of the first page are part of the dehydrated query state of the page
+            const query_data = JSON.parse(ssr.renderContext.queryData);
+            const results = query_data.queries.flatMap(query => (query.state?.data?.pages || []).flatMap(page => page.results || []));
+
+            // Maps the bucket id used in the result links to language independent names (hash name, its grouped base name and the group name)
+            results.forEach(result => {
+                const desc = result.asset_description;
+                const hash_name = desc?.market_hash_name || result.strHash;
+                if (desc?.market_bucket_group_id && hash_name)
+                    bucket_names.set(desc.market_bucket_group_id, [...new Set([hash_name, hash_name.replace(this.group_suffix_regex, ''), desc.market_bucket_group_name].filter(Boolean))]);
+            });
+        } catch (e) {
+            console.error("[SIE] Failed to read the search results data:", e);
         }
+
+        this.bucket_names = bucket_names;
+        return bucket_names;
     }
 
-    static async init_single_listing() {
-        // Extract AppID and the specific item name from the listing's URL path
-        const p = window.location.pathname.split('/');
-        const appid = p[3];
-        const item_name = decodeURIComponent(p[4]);
-        const counts = await this.get_inventory(appid);
-        const c = counts.get(item_name) || 0;
+    static get_listing_data() {
+        if (this.listing_data) return this.listing_data;
 
-        // If the item is owned, wait for the React-rendered description to load and inject the badge
-        if (c > 0)
-            wait_for_element('.market_listing_iteminfo > .largeiteminfo_react_placeholder > div > div:first-child')
-                .then((target) => {
-                target.style.position = 'relative';
-                target.insertAdjacentHTML('beforeend', `<div class="sie-owned-badge">💼 Owned: ${c}</div>`);
-            });
+        const ssr = this.read_ssr_data();
+        if (!ssr) return {};
+
+        // Each loader entry is a JSON string, the one of the listing route contains the list of buckets
+        // A bucket id is the language independent hash name, the localized name is what the page displays
+        const entries = (ssr.loaderData || []).map(entry => {
+            try {
+                return JSON.parse(entry);
+            } catch (e) {
+                return null;
+            }
+        });
+
+        this.listing_data = entries.find(entry => Array.isArray(entry?.buckets)) || {};
+        return this.listing_data;
+    }
+
+    static find_listing_hero(title_el) {
+        // The hero box is the closest ancestor that reaches far to the left or above the title, which means it also holds the item image
+        const title_rect = title_el.getBoundingClientRect();
+        const is_hero = (el) => {
+            const rect = el.getBoundingClientRect();
+            return rect.left < title_rect.left - 150 || rect.top < title_rect.top - 150;
+        };
+
+        let node = title_el.parentElement;
+        while (node && node !== document.body && !is_hero(node))
+            node = node.parentElement;
+
+        return node && node !== document.body ? node : title_el.parentElement;
+    }
+
+    static init_market() {
+        // The market is a single page app, so the route can change without a page reload
+        // One observer therefore decides on every run which kind of page is currently shown
+        // The inventory of a game is loaded as soon as an item of that game shows up
+        const inventories = new Map();
+
+        const get_counts = (app_id) => {
+            if (!app_id) return null;
+
+            // The placeholder marks the inventory as requested, so it is only loaded once while it is still loading
+            if (!inventories.has(app_id)) {
+                inventories.set(app_id, null);
+                this.get_inventory(app_id, fresh => {
+                    inventories.set(app_id, fresh);
+                    refresh();
+                }).then(counts => {
+                    inventories.set(app_id, counts);
+                    refresh();
+                });
+            }
+            return inventories.get(app_id);
+        };
+
+        // The observer also catches cards that are appended by the endless scrolling
+        const refresh = this.observe_dom(() => {
+            const is_search = window.location.pathname.startsWith('/market/search');
+            const is_listing = window.location.pathname.startsWith('/market/listings/');
+
+            if (is_search && GM_config.get('owned_count_show_market_search'))
+                this.update_search_badges(get_counts);
+            else if (is_listing && GM_config.get('owned_count_show_market_listing'))
+                this.update_listing_badge(get_counts);
+        });
+    }
+
+    static update_search_badges(get_counts) {
+        const url_app_id = new URLSearchParams(window.location.search).get('appid');
+
+        // Old layout: every row carries the market hash name as an attribute
+        document.querySelectorAll('.market_listing_row').forEach(row => {
+            const target = row.querySelector('.market_listing_item_name_block');
+            const counts = get_counts(row.getAttribute('data-appid') || url_app_id);
+            if (target && counts)
+                this.sync_badge(target, this.get_owned_count(counts, row.getAttribute('data-hash-name')), '💼 ');
+        });
+
+        // New layout: every result is a link to a listing whose first child is the card
+        // The class names are generated, so the title is found via its inline style variables instead
+        document.querySelectorAll('a[href*="/market/listings/"]').forEach(link => {
+            const card = link.firstElementChild;
+            const name_el = card?.querySelector('span[style*="--line-clamp"], span[style*="body-title"]');
+            const link_match = link.href.match(/\/market\/listings\/(\d+)\/(G[0-9A-F]+)/i);
+            if (!name_el || !link_match) return;
+
+            const counts = get_counts(link_match[1]);
+            if (!counts) return;
+
+            // The bucket id in the link resolves to language independent names
+            // The displayed name is the fallback for results that are not part of the initial page data
+            const bucket_id = link_match[2];
+            const names = [...(this.get_bucket_names().get(bucket_id) || []), name_el.textContent.trim()];
+
+            card.classList.add('sie_owned_anchor');
+            this.sync_badge(card, this.get_owned_count(counts, names), '💼 ');
+        });
+    }
+
+    static update_listing_badge(get_counts) {
+        // Extract AppID and the identifier from the listing's URL path
+        const path_parts = window.location.pathname.split('/');
+        const url_name = decodeURIComponent(path_parts[4] || '');
+        const counts = get_counts(path_parts[3]);
+        if (!counts) return;
+
+        // Old layout: the item name is part of the URL and the badge goes into the React-rendered description
+        if (!/^G[0-9A-F]+$/i.test(url_name)) {
+            const target = document.querySelector('.market_listing_iteminfo > .largeiteminfo_react_placeholder > div > div:first-child');
+            if (!target) return;
+
+            target.classList.add('sie_owned_anchor');
+            this.sync_badge(target, this.get_owned_count(counts, url_name), '💼 Owned: ');
+            return;
+        }
+
+        // New layout: the URL only contains a bucket id, so the item name is read from the title
+        // The first h2 is the item title
+        const title_el = document.querySelector('h2');
+        if (!title_el?.parentElement) return;
+
+        // Resolve the displayed (localized) title to the language independent bucket id
+        // The bucket selected on page load is only a valid fallback while the route is still the one of the embedded data
+        const title = title_el.textContent.trim();
+        const { buckets = [], initialSelectedBucketID: selected_id } = this.get_listing_data();
+        const is_initial_route = this.ssr_path === window.location.pathname;
+        const bucket = buckets.find(entry => entry.localized_name === title)
+            || (is_initial_route ? buckets.find(entry => entry.bucket_id === selected_id) : null)
+            || (is_initial_route && buckets.length === 1 ? buckets[0] : null);
+        const names = [title, bucket?.bucket_id, bucket?.bucket_id?.replace(this.group_suffix_regex, '')];
+
+        // The badge sits in the top right corner of the hero box, stale badges from other containers are removed
+        const container = this.find_listing_hero(title_el);
+        document.querySelectorAll('.sie-owned-badge').forEach(badge => {
+            if (badge.parentElement !== container)
+                badge.remove();
+        });
+
+        container.classList.add('sie_owned_anchor');
+        this.sync_badge(container, this.get_owned_count(counts, names), '💼 Owned: ');
     }
 }
 
@@ -1607,37 +2065,43 @@ class ASF {
     }
 
     static async insert_asf_buttons() {
-        // Wait for the Steam inventory's popup menu to exist in the DOM before modification
-        const dropdown_menu = await wait_for_element("#inventory_more_dropdown .popup_body.popup_menu");
+        // Wait for the 'More' dropdown list of the Steam inventory to exist in the DOM before modification
+        const dropdown_menu = await wait_for_element("#inventory_more_droplist");
 
         // Retrieve the configured bot name from script settings (defaults to 'ASF')
         const bot = GM_config.get("asf_botname") || 'ASF';
 
         // HTML template for the 2FA confirmation controls
+        // The inline handlers of the entries only highlight them and close the dropdown like the native entries do
         const asf_html = `
-            <div class="popup_menu_separator"></div>
-            <a class="popup_menu_item" id="sie_asf_2faok" href="javascript:void(0);">
-                <span style="color: #67c1f5;">SIE ASF:</span> Accepts all 2FA confirmations (2faok)
-            </a>
-            <a class="popup_menu_item" id="sie_asf_2fano" href="javascript:void(0);">
-                <span style="color: #67c1f5;">SIE ASF:</span> Denies all 2FA confirmations (2fano)
-            </a>
+            <li>
+                <a role="option" class="inactive_selection" tabindex="99999" id="sie_asf_2faok" href="javascript:void(0);" style="white-space: normal;"
+                    onmouseover="this.className = 'highlighted_selection';" onmouseout="this.className = 'inactive_selection';" onclick="DSelectHide('inventory_more');">
+                    <span style="color: #67c1f5;">SIE ASF:</span> Accepts all 2FA confirmations (2faok)
+                </a>
+            </li>
+            <li>
+                <a role="option" class="inactive_selection" tabindex="99999" id="sie_asf_2fano" href="javascript:void(0);" style="white-space: normal;"
+                    onmouseover="this.className = 'highlighted_selection';" onmouseout="this.className = 'inactive_selection';" onclick="DSelectHide('inventory_more');">
+                    <span style="color: #67c1f5;">SIE ASF:</span> Denies all 2FA confirmations (2fano)
+                </a>
+            </li>
         `;
 
         // Insert the new menu items at the end of the existing dropdown list
         dropdown_menu.insertAdjacentHTML('beforeend', asf_html);
 
         // Click handler for accepting all pending 2FA mobile confirmations
-        document.getElementById("sie_asf_2faok").onclick = (e) => {
+        document.getElementById("sie_asf_2faok").addEventListener('click', (e) => {
             e.preventDefault();
             this.send_command(`2faok ${bot}`, "Confirmations accepted!");
-        };
+        });
 
         // Click handler for denying/cancelling all pending 2FA mobile confirmations
-        document.getElementById("sie_asf_2fano").onclick = (e) => {
+        document.getElementById("sie_asf_2fano").addEventListener('click', (e) => {
             e.preventDefault();
             this.send_command(`2fano ${bot}`, "Confirmations denied.", "warning");
-        };
+        });
     }
 
     // Communicates with the ASF IPC (Inter-Process Communication) interface via HTTP POST
@@ -1668,10 +2132,21 @@ class ASF {
             onload: (res) => {
                 // Success: ASF received and processed the command
                 if (res.status === 200) {
-                    const data = JSON.parse(res.responseText);
+                    let result_text = null;
+                    try {
+                        result_text = JSON.parse(res.responseText).Result;
+                    } catch (e) {
+                        Swal.fire({
+                            title: "Error: Invalid response from ASF",
+                            icon: "error",
+                            theme: "dark"
+                        });
+                        return;
+                    }
+
                     Swal.fire({
                         title: "ASF Result",
-                        text: data.Result || success_msg, // Display the actual response text from ASF
+                        text: result_text || success_msg, // Display the actual response text from ASF
                         icon: icon,
                         toast: true,
                         position: 'top-end',
