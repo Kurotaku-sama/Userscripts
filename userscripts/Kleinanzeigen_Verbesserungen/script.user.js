@@ -2,7 +2,7 @@
 // @name            Kleinanzeigen improvements
 // @name:de         Kleinanzeigen Verbesserungen
 // @namespace       https://kurotaku.de
-// @version         2.8
+// @version         2.9
 // @description     Some improvements for kleinanzeigen.de
 // @description:de  Einige Verbesserungen für kleinanzeigen.de
 // @author          Kurotaku
@@ -12,7 +12,6 @@
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kleinanzeigen_Verbesserungen/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Kleinanzeigen_Verbesserungen/script.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @require         https://openuserjs.org/src/libs/sizzle/GM_config.js
@@ -28,11 +27,11 @@
 
 (async function () {
     await init_gm_config();
-    main();
-})();
 
-async function main() {
     let loc = window.location.href;
+    // Search result pages live under /s-..., single ad pages under /s-anzeige/ and are excluded
+    let is_search_page = window.location.pathname.startsWith("/s-") && !window.location.pathname.startsWith("/s-anzeige/");
+    let is_article_page = window.location.pathname.startsWith("/s-anzeige/");
 
     if (GM_config.get("remove_ads"))
         adblock();
@@ -52,15 +51,19 @@ async function main() {
     if (GM_config.get("hide_ai_suggestion"))
         hide_ai_suggestion();
 
+    if (is_article_page && GM_config.get("hide_ai_article"))
+        hide_ai_article();
+
     if (loc.includes("p-anzeige-aufgeben"))
         anzeige_aufgeben_seite();
 
     if (GM_config.get("meins_to_nachrichten"))
         meins_to_nachrichten();
 
-    if (GM_config.get("filter_active") && loc.includes("s-"))
-        filter_search_containing_words();
-}
+    // The PRO filter works on its own, the word filter is only one of the two triggers
+    if (is_search_page && (GM_config.get("filter_active") || GM_config.get("hide_pro_offers")))
+        filter_search_results();
+})();
 
 async function init_gm_config() {
     const config_id = "configuration_klever";
@@ -75,6 +78,11 @@ async function init_gm_config() {
                 type: 'checkbox',
                 default: true,
                 label: 'Werbungen verbergen<br>Ersetzt keinen richtigen Adblocker! Benutze zusätzlich: uBlock Origin',
+            },
+            hide_pro_offers: {
+                type: 'checkbox',
+                default: false,
+                label: 'PRO Angebote ausblenden',
             },
             enlarge_images: {
                 type: 'checkbox',
@@ -102,9 +110,15 @@ async function init_gm_config() {
                 label: 'Verberge die Newsletter anmeldung über dem "Anzeige aufgeben" Button',
             },
             hide_ai_suggestion: {
+                section: [`Künstliche Intelligenz<br><span style="font-size: 0.8em;">Achtung: Kleinanzeigen hat bei den KI-Tools automatisch "KI-Analyse von deinen Nachrichten" aktiviert. Es wird empfohlen, dies in den <a href="https://www.kleinanzeigen.de/m-einstellungen.html" target="_blank" rel="noopener noreferrer">Kleinanzeigen Einstellungen</a> auszuschalten.</span>`],
                 type: 'checkbox',
                 default: false,
                 label: 'Verberge den KI Banner "Mach deine Anzeige schnell mit KI" beim Inserieren',
+            },
+            hide_ai_article: {
+                type: 'checkbox',
+                default: false,
+                label: 'Verberge KI Zusammenfassung, KI Fragebox und KI Chat Button auf Artikelseiten',
             },
             disable_buy_now: {
                 section: ['"Anzeige aufgeben" Standardwerte<br><span style="font-size: 0.8em;">Warnung: Wird hier irgendein Standardwert durch das Script ausgefüllt, wird das KI-Vorschlagsbanner von der Seite automatisch mit entfernt.</span>'],
@@ -144,7 +158,7 @@ async function init_gm_config() {
         },
         events: {
             init: () => {GM_config.set("filter_search_containing_words", GM_config.get("filter_search_containing_words").replace(/^\s*$(?:\r\n?|\n)/gm, ""))}, // To prevent blank lines
-            save: () => { location.reload() },
+            save: () => { location.reload(); },
         },
         frame: create_configuration_container(),
     });
@@ -174,44 +188,27 @@ function remove_array_elements(selector) {
 }
 
 function image_enlarge_preview() {
-    // Covers the card layout of the search results (data-image-container) as well as the list and tile layouts
-    let imageboxes = document.querySelectorAll(`
-        li[data-clickable="card"] [data-image-container] img,
-        .ad-listitem .srpimagebox img,
-        .itemtile-fullpic .itemtile-header img
-    `);
+    // Every image inside the image container of a result card
+    let imageboxes = document.querySelectorAll(`li[data-clickable="card"] [data-image-container] img`);
     GM_addStyle(`
     /* The enlarged image is hidden via scale instead of display so that the grow animation can be transitioned. Visibility is switched after the transition ends so the hidden image never blocks clicks. */
     .enlarged-image
-    {visibility: hidden; pointer-events: none; transform: scale(0.5); transform-origin: top left; transition: transform 0.5s ease, visibility 0s linear 0.5s; height: unset !important; position: absolute; top:0; left:0; z-index: 100 !important; min-width:200px; max-width: 400px !important; max-height: 400px !important; width: fit-content !important; border-radius: 8px;}
-
-    .itemtile-header:hover .enlarged-image
-    {max-width:300px !important; max-height:300px !important}
+    {visibility: hidden; pointer-events: none; transform: scale(0.5); transform-origin: top left; transition: transform 0.2s ease, visibility 0s linear 0.2s; height: unset !important; position: absolute; top:0; left:0; z-index: 100 !important; min-width:200px; max-width: 400px !important; max-height: 400px !important; width: fit-content !important; border-radius: 8px;}
 
     /* Pointer events are enabled while hovered so the pointer stays inside the hover area when it moves over the enlarged part of the image */
-    .aditem-image:hover .enlarged-image,
-    .itemtile-header:hover .enlarged-image,
-    [data-image-container]:hover .enlarged-image
-    {visibility: visible; pointer-events: auto; transform: scale(1); transition: transform 0.5s ease, visibility 0s;}
+    li[data-clickable="card"] [data-image-container]:hover .enlarged-image
+    {visibility: visible; pointer-events: auto; transform: scale(1); transition: transform 0.2s ease, visibility 0s;}
 
-    .ad-listitem .aditem-image
-    {z-index: unset;}
-
-    .ad-listitem .aditem-image .imagebox.srpimagebox,
-    .itemtile-fullpic .itemtile-header,
+    /* The container must not clip the enlarged image */
     li[data-clickable="card"] [data-image-container]
     {overflow: unset !important}
 
-    .ad-listitem .aditem-image .imagebox.srpimagebox img,
-    .itemtile-fullpic .itemtile-header img
-    {z-index:2}
-
     /* Resting state: z-index is a numeric value so it can be interpolated. After the hover ends it falls linearly from the hover level to the resting level over the shrink duration. The card that is left therefore always stays below a card that is hovered next, while still being above all resting cards until its image has fully shrunk. */
     li[data-clickable="card"]
-    {position: relative; z-index: 0; transition: z-index 0.5s linear;}
+    {position: relative; z-index: 0; transition: z-index 0.2s linear;}
 
     li[data-clickable="card"] article > div:has([data-image-container])
-    {z-index: 1; transition: z-index 0.5s linear;}
+    {z-index: 1; transition: z-index 0.2s linear;}
 
     /* The image column and the text column of a card are sibling stacking contexts, so the later text column would paint over the enlarged image. The hovered image column is lifted above it instantly. */
     li[data-clickable="card"] article > div:has([data-image-container]:hover)
@@ -271,6 +268,15 @@ function hide_newletter_checkbox() {
 function hide_ai_suggestion() {
     // The banner is the only block in the first span of the posting form island and is identified by its sparkle icon
     GM_addStyle(`astro-island > span > div:has(> div > svg[data-title="aiSparkleOutline"]) {display : none !important;}`);
+}
+
+function hide_ai_article() {
+    // The summary box, the question box and the floating chat button are all rendered by one island (REChatBot). The sparkle icon of the summary heading is the fallback in case the component gets renamed.
+    GM_addStyle(`
+        astro-island[component-export="REChatBot"],
+        astro-island:has(> div > h2 > svg[data-title="aiSparkleOutline"])
+        {display: none !important;}
+    `);
 }
 
 // Elements that already received their default value, so a re-render or a manual change by the user is never overwritten again
@@ -436,23 +442,33 @@ async function meins_to_nachrichten() {
     }
 }
 
-function filter_search_containing_words() {
-    let items = document.querySelectorAll(".ad-listitem"); // Get all items from page
-    let words = GM_config.get("filter_search_containing_words").split("\n"); // Get filter words as array
+async function filter_search_results() {
+    // The sentinel element sits behind the result list, so once it exists all result cards are parsed
+    await wait_for_element("#srp-content-bottom-sentinel");
+
+    // Lowercased filter words without blank entries, empty when the word filter is disabled
+    const filter_words = GM_config.get("filter_active")
+        ? GM_config.get("filter_search_containing_words").split("\n").map((word) => word.toLowerCase().trim()).filter((word) => word !== "")
+        : [];
+    const hide_pro = GM_config.get("hide_pro_offers");
     let removed_counter = 0;
-    if(words && words.length > 0 && words[0].trim() != "") {
-        items.forEach(item => {
-            let title = item.querySelector(".text-module-begin a")?.textContent.toLowerCase().trim(); // Prepare the title for check
-            for(let i = 0; i < words.length; i++) {
-                if(title?.includes(words[i].toLowerCase().trim())) { // Check if title contains a word from filter list
-                    item.remove();
-                    removed_counter++;
-                    break;
-                }
-            }
-        });
-        let breadcrumb = document.querySelector(".breadcrump-summary");
-        if(breadcrumb)
-            breadcrumb.textContent += ` | ${removed_counter} rausgefiltert`;
-    }
+
+    // Only real result cards are checked, the advertising slots between them are left to the ad removal
+    document.querySelectorAll('#srchrslt-adtable li[data-clickable="card"]').forEach((card) => {
+        const title = card.querySelector("h3 a")?.textContent.toLowerCase().trim() ?? "";
+        // A PRO ad contains a shop link whose only content is the PRO badge, other shop links (e.g. the shop name) do not count
+        const is_pro = hide_pro && Array.from(card.querySelectorAll('a[href^="/pro/"]')).some((link) => link.textContent.trim() === "PRO");
+        const has_filter_word = filter_words.some((word) => title.includes(word));
+
+        if (!is_pro && !has_filter_word)
+            return;
+
+        card.remove();
+        removed_counter++;
+    });
+
+    // Append the number of removed results to the result summary, e.g. "26 - 50 von 55 Immobilien in 92681 Erbendorf | 12 rausgefiltert"
+    const summary = document.querySelector("#srp-breadcrumb-summary");
+    if (summary)
+        summary.textContent += ` | ${removed_counter} rausgefiltert`;
 }
