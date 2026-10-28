@@ -26,6 +26,8 @@ Dieses Script erweitert **kleinanzeigen.de** um nützliche Features und Verbesse
 - **Screenshot-Modus in der Nachrichtenansicht**
 - **Bezahlbare Zusatzoptionen verbergen**
 - **Newsletter-Checkbox automatisch verbergen**
+- **KI-Elemente ausblenden** (Inserieren und Artikelseiten)
+- **PRO-Angebote in der Suche ausblenden**
 
 ![Einstellungen](settings.png)
 
@@ -35,9 +37,9 @@ Dieses Script erweitert **kleinanzeigen.de** um nützliche Features und Verbesse
 
 In der „Anzeige aufgeben“-Maske lassen sich über das Script bestimmte Felder vorausfüllen oder deaktivieren:
 
-- Automatische Kategorievorschläge deaktivieren
+- KI-Vorschlagsbanner („Mach deine Anzeige schnell mit KI“) wird ausgeblendet, sobald ein Standardwert gesetzt ist
 - „Direkt kaufen“-Option standardmäßig ausschalten
-- Standartwerte für: Preis, Preistyp, Beschreibung und Abholung
+- Standardwerte für: Preis, Preistyp, Beschreibung und Abholung
 
 Empfehlenswert, wenn vieles auf einmal eingestellt wird und man ständig alles neu ausfüllen muss.
 
@@ -57,6 +59,24 @@ Ideal, um direkt die Leute auszublenden, die die „Zu verschenken“-Kategorie 
 
 ![Filter Beispiel](filter.png)
 
+### PRO-Angebote ausblenden
+
+- Entfernt alle Anzeigen mit PRO-Abzeichen aus der Ergebnisliste
+- Funktioniert unabhängig vom Wortfilter, beide lassen sich einzeln oder zusammen nutzen
+- Die Anzahl der entfernten Einträge wird ebenfalls oben in der Übersicht angezeigt
+
+---
+
+## Künstliche Intelligenz
+
+Alle KI-Elemente von Kleinanzeigen lassen sich einzeln ausblenden, standardmäßig sind sie sichtbar:
+
+- **Inserieren:** Der KI-Banner „Mach deine Anzeige schnell mit KI“ wird ausgeblendet
+- **Artikelseiten:** Die KI-Zusammenfassung, die KI-Fragebox mit den Vorschlägen und der schwebende KI-Chat-Button werden ausgeblendet
+
+> **Achtung:** Kleinanzeigen hat bei den KI-Tools automatisch die „KI-Analyse von deinen Nachrichten“ aktiviert. Es wird empfohlen, diese in den [Kleinanzeigen Einstellungen](https://www.kleinanzeigen.de/m-einstellungen.html) auszuschalten. Das Script weist im eigenen Einstellungsmenü ebenfalls darauf hin.
+
+---
 
 ## Bildvorschau
 
