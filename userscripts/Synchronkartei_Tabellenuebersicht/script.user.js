@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Synchronkartei Tabellenübersicht
 // @namespace       https://kurotaku.de
-// @version         1.0
+// @version         1.0.1
 // @description     Konvertiert Listen in übersichtliche, sortierbare Tabellen mit konfigurierbarer Spaltenreihenfolge & Suchfunktion.
 // @author          Kurotaku
 // @match           https://www.synchronkartei.de/*
@@ -9,7 +9,6 @@
 // @updateURL       https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js
 // @downloadURL     https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/userscripts/Synchronkartei_Tabellenuebersicht/script.user.js
 // @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/kuros_library.js
-// @require         https://raw.githubusercontent.com/Kurotaku-sama/Userscripts/main/libraries/about.js
 // @require         https://cdn.jsdelivr.net/npm/sweetalert2
 // @grant           GM_getValue
 // @grant           GM_setValue
@@ -321,9 +320,7 @@ function convert_all_lists() {
         });
 
         node_new_table.querySelector('thead').addEventListener('click', (e) => {
-            if (e.target.tagName === 'TH' && e.target.hasAttribute('data-col')) {
-                sort_table(node_new_table, parseInt(e.target.getAttribute('data-col')));
-            }
+            if (e.target.tagName === 'TH' && e.target.hasAttribute('data-col')) sort_table(node_new_table, parseInt(e.target.getAttribute('data-col')));
         });
 
         apply_default_sort(node_new_table, array_table_order);
@@ -367,13 +364,21 @@ function build_header_html(array_order) {
 // Dialogbuch and dialogregie pages list entries without an actor or a
 // character at all, only a project, a year, and an optional note, so their
 // list items need a slightly different parsing strategy than actor pages
-function url_is_dialog_page() {
+function is_dialog_page() {
     return /dialogbuch|dialogregie/i.test(window.location.pathname);
+}
+
+// A link counts as a person link either through the highlight class used on
+// regular role lists or through its /person/ target, which is the only
+// marker the actor link carries inside the Hörproben section
+function is_person_link(node_a) {
+    const str_href = node_a.getAttribute('href') || "";
+    return node_a.classList.contains('person-highlight') || str_href.startsWith('/person/');
 }
 
 function parse_li_element(node_li) {
     try {
-        const bool_is_dialog_page = url_is_dialog_page();
+        const bool_is_dialog_page = is_dialog_page();
         const node_em = node_li.querySelector('em');
         const list_links = Array.from(node_li.querySelectorAll('a'));
         const text_tooltip = get_clean_tooltip(node_li);
@@ -391,20 +396,24 @@ function parse_li_element(node_li) {
         // dialogbuch and dialogregie entries never have an actor, the plain
         // text fallback below would otherwise swallow the whole entry
         if (!bool_is_dialog_page) {
-            const node_actor_link = node_li.querySelector('a.person-highlight');
+            const node_actor_link = node_li.querySelector('a.person-highlight') || list_links.find(node_a => is_person_link(node_a));
             if (node_actor_link) html_actor = node_actor_link.outerHTML;
             else html_actor = text_full.split(' (als')[0].split(' in ')[0].trim();
         }
 
         for (const node_a of list_links) {
             const text_a = node_a.textContent.trim();
+            const str_href = node_a.getAttribute('href') || "";
             // only a full match like "1 Episode" or "3 Episoden" counts, a
             // project title that merely starts with a number must not match
             const is_episode = /^\d+\s*episoden?$/i.test(text_a);
-            const is_person = node_a.classList.contains('person-highlight');
-            const is_audio_link = node_a.href.includes('.mp3') || node_a.classList.contains('sr-only');
+            const is_person = is_person_link(node_a);
+            const is_hint_link = str_href.startsWith('/hinweis/');
+            const is_audio_link = str_href.includes('.mp3') || node_a.classList.contains('sr-only');
 
-            if (!is_episode && !is_person && !is_audio_link && !node_a.querySelector('img')) {
+            // the first link that is none of the above is the project link,
+            // links nested inside the audio player are skipped as well
+            if (!is_episode && !is_person && !is_hint_link && !is_audio_link && !node_a.querySelector('img') && !node_a.closest('.seiyuu-player, noscript')) {
                 html_project = node_a.outerHTML;
                 break;
             }
@@ -445,12 +454,6 @@ function parse_li_element(node_li) {
         console.error("[SK-Table] Parse Error:", e);
         return null;
     }
-}
-
-// dialogbuch and dialogregie subpages never list a character or an actor,
-// their entries are just project, year, and optional extra info
-function is_dialog_page() {
-    return /dialogbuch|dialogregie/i.test(window.location.pathname);
 }
 
 function get_clean_tooltip(node_li) {
@@ -559,6 +562,7 @@ function filter_all_tables(str_query) {
 
     document.querySelectorAll('.sk-custom-table').forEach(node_table => {
         const array_table_order = node_table.dataset.columns.split(',');
+        // map every searchable key to its column index in this table, dropping keys the table does not show
         const array_target_indexes = array_search_target_keys.map(str_key => array_table_order.indexOf(str_key)).filter(int_index => int_index !== -1);
 
         Array.from(node_table.tBodies[0].rows).forEach(node_row => {
@@ -667,9 +671,7 @@ GM_addStyle(`
         text-decoration: underline;
     }
 
-    .sk-center {
-        text-align: center !important;
-    }
+    .sk-center { text-align: center !important; }
 
     .sk-info-icon {
         cursor: help;
@@ -697,7 +699,5 @@ GM_addStyle(`
         opacity: 0.7;
     }
 
-    .sk-sort-arrow {
-        opacity: 0.7;
-    }
+    .sk-sort-arrow { opacity: 0.7; }
 `);
